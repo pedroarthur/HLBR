@@ -1,0 +1,48 @@
+# Bloqueio de metodos HTTP
+# Vide RFCs 1945 e 2616
+
+<rule>
+ip dst(www)
+tcp dst(80,443)
+tcp content(SEARCH)
+message=Possivel tentativa de buffer overflow (Buffer overflow attempt)
+action=acao1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80,443)
+tcp content(CONNECT)
+message=Tentativa de utilizacao de open proxy (Open proxy usage attempt)
+action=acao1
+</rule>
+
+# Descomente a regra a seguir se quiser bloquear POST
+
+#<rule>
+#ip dst(www)
+#tcp dst(80,443)
+#tcp content(POST)
+#message=Tentativa de POST (POST attempt)
+#action=acao1
+#</rule>
+
+# Descomente a regra a seguir se quiser bloquear PUT
+
+#<rule>
+#ip dst(www)
+#tcp dst(80,443)
+#tcp content(PUT)
+#message=Tentativa de PUT (PUT attempt)
+#action=acao1
+#</rule>
+
+# Descomente a regra a seguir se quiser bloquear OPTIONS
+
+#<rule>
+#ip dst(www)
+#tcp dst(80,443)
+#tcp content(OPTIONS)
+#message=Tentativa de OPTIONS (OPTIONS attempt)
+#action=acao1
+#</rule>

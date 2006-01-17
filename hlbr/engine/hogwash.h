@@ -12,7 +12,7 @@
 #include "num_list.h"
 #include "session.h"
 
-#define MAJOR_VERSION	2
+#define MAJOR_VERSION	0
 #define MINOR_VERSION	1
 
 #define MAX_PACKET_SIZE			65536+14+1

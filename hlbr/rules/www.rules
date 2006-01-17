@@ -1,0 +1,19 @@
+# Bloqueio de acessos www indevidos
+
+# Descomente a regra a seguir se nao possuir paginas ASP
+#<rule>
+#ip dst(www)
+#tcp dst(80,443)
+#tcp content(.asp)
+#message=Tentativa de .asp (.asp attempt)
+#action=acao1
+#</rule>
+
+# Descomente a regra a seguir se nao possuir paginas PHP
+#<rule>
+#ip dst(www)
+#tcp dst(80,443)
+#tcp content(.asp)
+#message=Tentativa de .php (.php attempt)
+#action=acao1
+#</rule>

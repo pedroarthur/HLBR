@@ -1,0 +1,170 @@
+Hogwash Light BR
+
+INSTALACAO
+----------
+
+Para instalar o HLBR, siga os seguintes procedimentos:
+
+1. Apos descompactar o tarball, execute o comando #./configure.
+2. Execute o comando #make (eh necessario ter o compilador C instalado).
+3. Copie o binario hlbr para /sbin.
+4. Crie o diretorio /etc/hlbr.
+5. Copie os arquivos hlbr.config e empty.rules para /etc/hlbr.
+6. Copie todos os arquivos existentes dentro do diretorio rules para 
+   /etc/hlbr.
+7. Ajuste o arquivo /etc/hlbr.config, se for o caso.
+8. Compile o kernel para retirar toda a parte TCP/IP ou suba as interfaces
+   de rede com enderecos da rede 127.0.0.0 (nao use 127.0.0.1, pois jah
+   pertence ao loopback). Use algo como 127.0.0.2, 127.0.0.3 etc.
+9. Entre no diretório /etc/hlbr e execute:
+
+    # hlbr -c hlbr.config -r empty.rules -l
+
+    O daemon do HLBR devera ir ao ar.
+10. Pare o servico com Ctrl C.
+11. Ajuste/configure os arquivos de regras (*.rules).
+12. Execute:
+
+    # hlbr -c hlbr.config -r empty.rules -l &
+
+13. Para voltar ao estado original (sem compilacao), digite #make clean
+14. Para maiores informações, visite o site http://hlbr.sourceforge.net.
+
+
+
+ARQUIVOS DE REGRAS
+------------------
+
+Os arquivos de regras poderao conter todas as regras e/ou incluir outros,
+utilizado uma entrada include. Exemplo:
+
+<include codered.rules>
+<include nimda.rules>
+
+
+
+REGRAS NO HLBR
+--------------
+
+Um exemplo de regra:
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(cmd.exe)
+message=Tentativa de comando remoto cmd.exe
+action=acao1
+</rule>
+
+Todas as regras iniciam com <rule> e terminam com </rule>.
+
+
+
+EXEMPLOS DE PARAMETROS POSSIVEIS NAS REGRAS
+-------------------------------------------
+
+interface name(eth0, eth1, eth5-eth6, ppp0)
+
+    Permite especificar uma interface, varias interfaces ou ranges de 
+    interfaces.
+
+ethernet src(01:02:03:04:05:06)
+
+    Permite especificar o endereco MAC de origem.
+    
+ethernet dst(01:02:03:04:05:06)
+
+    Permite especificar o endereco MAC de destino.
+    
+ethernet type(IP, ARP, 0804)
+
+    Especifica um ou mais tipos de protocolos, especificados pelo campo
+    type do frame ethernet. O protocolo poderah ser especificado pelo nome
+    ou pelo numero. Vide definicoes da IANA no link 
+    http://www.iana.org/assignments/ethernet-numbers.
+
+ip src(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
+
+    Especifica o IP de origem. Pode ser citado com base em IP Lists,
+    enderecos de hosts, enderecos de rede e ranges.
+    
+ip dst(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
+
+    Especifica o IP de destino.
+
+ip proto(TCP, UDP, ICMP, IGMP, PIM, OSPF, 13-15)
+
+    Especifica o tipo de protocolo IP, pelo nome ou pelo numero. Nos
+    GNU/Linux, hah uma relacao dentro de /etc/protocols.
+
+ip ttl(1-5)
+
+    Aguardando definicao. 
+    
+icmp code(6)
+
+    Especifica o codigo ICMP. Vide RFC 792.
+
+icmp type(4)
+
+    Especifica o tipo ICMP. Vide RFC 792.
+
+tcp src(80, 21-25)
+
+    Especifica a porta TCP de origem. Pode ser utilizado um range ou mais de
+    uma porta.
+    
+tcp dst(80, 21-25)
+
+    Especifica a(s) porta(s) TCP de destino.
+    
+udp src(53)
+
+    Especifica a(s) porta(s) UDP de origem.    
+    
+udp dst(32000-32999, 53)
+    
+    Especifica a(s) porta(s) UDP de destino.
+    
+tcp content(/etc/passwd)
+
+    Especifica um conteudo, dentro de um trafego TCP. O content considera a
+    caixa do caractere (diferencia caracteres maiusculos e minusculos). 
+    Espacos serao considerados como caracteres. Sequencias em hexadecimal
+    poderao ser inseridas entre caracteres "pipe". Neste ultimo caso, nao
+    havera distincao da caixa. Exemplo: (test |00 00 00| attack).
+    
+tcp nocase(default.ida? XXXXXXX)
+
+    Idem a tcp content, com a diferenca de que desconsidera a caixa dos
+    caracteres.
+
+udp content(bind|90 90 90|)
+
+    Idem a tcp content, referindo-se ao trafego UDP.
+    
+udp nocase(|90 90 90 90 90 90 90 90|)
+
+    Idem a tcp nocase, referindo-se ao trafego UDP.    
+    
+tcp flags(Sfr)
+
+    Analise os estados da conexao dos pacotes TCP. As letras S, F, R, P, A,
+    U, E, e C representam, repectivamente, os estados SYN, FIN, RST, PSH,
+    ACK, URG, EGE e CWR. Se a letra for maiuscula, o estado deverah ocorrer.
+    Se for minuscula, o estado nao poderah ocorrer. Vide RFCs 793 e 3168.
+    
+tcp offset(10,Hello World)
+
+    Determina a busca de um determinado conteudo, a partir do decimo byte
+    dentro de cada pacote (ou do payload????)
+
+
+
+GARANTIAS
+---------
+
+Todos os testes foram realizados no GNU/Linux Debian Sarge Stable R0a.
+Isso funciona perfeitamente!
+
+

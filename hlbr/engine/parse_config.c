@@ -2,9 +2,9 @@
 #include "parse_config.h"
 #include "../packets/packet.h"
 #include "../routes/route.h"
-#include "../mangle/mangle.h"
+//#include "../mangle/mangle.h"
 #include "../actions/action.h"
-#include "../modules/module.h"
+//#include "../modules/module.h"
 #include "../engine/message.h"
 #include <stdio.h>
 #include <string.h>
@@ -158,6 +158,7 @@ int ParseList(FILE* fp, char* Name, int ListType){
 /***********************************
 * Make sense out of this module
 ***********************************/
+/*
 int ParseModule(FILE* fp, char* Name){
 	char		LineBuff[10240];
 	int 		ModuleID;
@@ -217,6 +218,7 @@ int ParseModule(FILE* fp, char* Name){
 
 	return FALSE;
 }
+*/
 
 /***********************************
 * Make sense out of this action
@@ -491,7 +493,7 @@ int ParseRouting(FILE* fp){
 /*******************************************
 * make sense of the mangling options
 *******************************************/
-int ParseMangling(FILE* fp){
+/* int ParseMangling(FILE* fp){
 	char			LineBuff[10240];
 	int				MangleID;
 	char*			Pos;
@@ -500,11 +502,11 @@ int ParseMangling(FILE* fp){
 #ifdef DEBUGPATH
 	printf("In ParseMangling\n");
 #endif
-
+*/
 	/*set the defaults*/
 
 	/*loop through the lines*/
-	while(GetLine(fp, LineBuff, 10240)){
+/*	while(GetLine(fp, LineBuff, 10240)){
 		if (strcasecmp(LineBuff, "</mangling>")==0){
 #ifdef DEBUG
 			printf("All Done with mangling options\n");
@@ -538,13 +540,13 @@ int ParseMangling(FILE* fp){
 					return FALSE;
 				}				
 				Globals.Mangles[MangleID].Active=TRUE;
-			}
+			} 
 		}
 	}
 
 	return FALSE;
 }
-
+*/
 
 /*******************************************
 * make sense of the config file
@@ -589,8 +591,8 @@ int ParseConfig(){
 			if (!ParseInterface(fp, Start)) return FALSE;
 		}else if (strncasecmp(LineBuff, "<routing>",11)==0){
 			if (!ParseRouting(fp)) return FALSE;			
-		}else if (strncasecmp(LineBuff, "<mangling>",11)==0){
-			if (!ParseMangling(fp)) return FALSE;
+//		}else if (strncasecmp(LineBuff, "<mangling>",11)==0){
+//			if (!ParseMangling(fp)) return FALSE;
 		}else if(strncasecmp(LineBuff, "<action",7)==0){
 			Start=LineBuff+7;
 			while (*Start==' ') Start++;
@@ -618,7 +620,7 @@ int ParseConfig(){
 				return FALSE;
 			}
 			*End=0x00;		
-			if (!ParseModule(fp, Start)) return FALSE;				
+//			if (!ParseModule(fp, Start)) return FALSE;				
 		}else if(strncasecmp(LineBuff, "<iplist ",8)==0){
 			Start=LineBuff+7;
 			while (*Start==' ') Start++;

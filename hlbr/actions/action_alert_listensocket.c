@@ -124,7 +124,7 @@ void HandleClients(int sockfd, int readfd){
 						}
 						RCons[i].InUse=TRUE;
 					
-						write(RCons[i].FD, "200 Hogwash data server ready\n", strlen("200 Hogwash data server ready\n"));
+						write(RCons[i].FD, "200 HLBR data server ready\n", strlen("200 Hogwash data server ready\n"));
 						break;
 					}						
 				}

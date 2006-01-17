@@ -431,6 +431,7 @@ int ParseRuleMysql(FILE* fp){
 /***********************************
 * Parse through the snort rules
 ***********************************/
+/*
 int ParseSnortSet(FILE* fp){
 	char		LineBuff[10240];
 	int			RuleNum;
@@ -466,6 +467,7 @@ int ParseSnortSet(FILE* fp){
 	
 	return FALSE;
 }
+*/
 
 /***********************************
 * Make sense out of the rules file
@@ -479,6 +481,9 @@ int ParseRules(char* FName){
 	
 	DEBUGPATH;
 	
+#ifdef DEBUG
+	printf("About to parse rule file %s\n", FName);
+#endif
 	fp=fopen(FName, "r");
 	if (!fp){
 		snprintf(Name, 512, "rules/%s", FName);
@@ -507,16 +512,18 @@ int ParseRules(char* FName){
 			}
 			*End=0x00;
 			if (!ParseRules(Start)) return FALSE;
+/*
 		}else if(strncasecmp(LineBuff, "<mysql>",7)==0){
-			/*go load rules from a mysql database*/
+			// go load rules from a mysql database
 #ifdef HAS_MYSQL
 			if (!ParseRuleMysql(fp)) return FALSE;
 #else
 			printf("There is no MYSQL support compiled in\n");
 			return FALSE;
 #endif			
+
 		}else if(strncasecmp(LineBuff, "<snort>",7)==0){
-			/*snort compatibility rules*/
+			// snort compatibility rules
 #ifdef DEBUG			
 			printf("Entering snort compat mode\n");
 #endif			
@@ -524,10 +531,10 @@ int ParseRules(char* FName){
 		}else{
 			printf("Unexpected section %s\n",LineBuff);
 			return FALSE;
-		}
-	}
+*/		} 
+	} 
 
 	fclose(fp);
 
 	return TRUE;
-}
+} 

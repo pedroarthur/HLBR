@@ -23,7 +23,7 @@ all: test.o \
   test_tcp_flags.o \
   test_udp_content.o \
   test_udp_nocase.o \
-  test_dns_numquestions.o 
+#  test_dns_numquestions.o 
 
 
 clean:
@@ -36,8 +36,8 @@ test_udp_nocase.o: test_udp_nocase.c test_udp_nocase.h ../config.h ../engine/hog
 test_udp_content.o: test_udp_content.c test_udp_content.h ../config.h ../engine/hogwash.h
 	$(CC) -c -o test_udp_content.o test_udp_content.c $(DEBUG)
 
-test_dns_numquestions.o: test_dns_numquestions.c test_dns_numquestions.h ../config.h ../engine/hogwash.h
-	$(CC) -c -o test_dns_numquestions.o test_dns_numquestions.c $(DEBUG)
+#test_dns_numquestions.o: test_dns_numquestions.c test_dns_numquestions.h ../config.h ../engine/hogwash.h
+#	$(CC) -c -o test_dns_numquestions.o test_dns_numquestions.c $(DEBUG)
 
 test_tcp_stream_content.o: test_tcp_stream_content.c test_tcp_stream_content.h ../config.h ../engine/hogwash.h
 	$(CC) -c -o test_tcp_stream_content.o test_tcp_stream_content.c $(DEBUG)

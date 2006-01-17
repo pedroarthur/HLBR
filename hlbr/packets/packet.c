@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../engine/bits.h"
-#include "../mangle/mangle.h"
+//#include "../mangle/mangle.h"
 
 /*****************************************
 * Includes for all the interface types
@@ -215,7 +215,7 @@ int WritePacket(int PacketSlot){
 
 	if (InterfaceID!=INTERFACE_BROADCAST){
 		Interface=&Globals.Interfaces[InterfaceID];
-	
+/*	
 #ifdef DEBUG
 		printf("Applying mangling to non-broadcast packet\n");
 #endif	
@@ -226,7 +226,7 @@ int WritePacket(int PacketSlot){
 #endif		
 			return FALSE;
 		}
-	
+*/	
 		switch (Interface->Type){
 		case PACKET_TYPE_LINUX_RAW:
 #ifdef _LINUX_		
@@ -270,7 +270,7 @@ int WritePacket(int PacketSlot){
 		for (i=0;i<Globals.NumInterfaces;i++){
 			if (i!=InterfaceID){
 				Interface=&Globals.Interfaces[i];
-	
+/*	
 #ifdef DEBUG
 				printf("Applying mangling to broadcast packet\n");
 #endif	
@@ -281,7 +281,7 @@ int WritePacket(int PacketSlot){
 #endif		
 					break;
 				}
-		
+*/		
 				switch (Interface->Type){
 #ifdef _LINUX_				
 				case PACKET_TYPE_LINUX_RAW:

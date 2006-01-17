@@ -11,22 +11,24 @@
 extern GlobalVars	Globals;
 
 typedef struct ip_src_data{
-	NumList*		srcs;
+	NumList*				IPS;
+	unsigned char			RuleBits[MAX_RULES/8];
+	struct ip_src_data*	Next;
 } IPSrcData;
 
 //#define DEBUG
 //#define DEBUGMATCH
 
 int IPDecoderID;
+IPSrcData* IPSrcHead;
 
 /******************************************
 * Apply the Test
 ******************************************/
 int TestIPSrc(int PacketSlot, TestNode* Nodes){
-	unsigned int 		IPSrc;
-	IPSrcData*			data;
+	unsigned long 		IPSrc;
+	IPSrcData*			t;
 	IPData*				IData;
-	TestNode*			Node;
 	int					i;
 	PacketRec*			p;
 
@@ -43,14 +45,12 @@ int TestIPSrc(int PacketSlot, TestNode* Nodes){
 	if (!Nodes) return FALSE;
 	
 	/*get the src out of the ip header*/
-	/*todo: make this more efficient*/
-	for (i=p->NumDecoderData; i>=0;i--){
-		if (p->DecoderInfo[i].DecoderID==IPDecoderID){
-			IData=(IPData*)p->DecoderInfo[i].Data;
-			IPSrc=IData->Header->saddr;
-			break;
-		}
+	if (!GetDataByID(PacketSlot, IPDecoderID, (void**)&IData)){
+		printf("Failed to get IP header data\n");
+		return FALSE;
 	}
+	
+	IPSrc=ntohl(IData->Header->saddr);
 	
 	if (i==-1){
 #ifdef DEBUG	
@@ -70,26 +70,13 @@ int TestIPSrc(int PacketSlot, TestNode* Nodes){
 	printf("**************************************\n");
 #endif	
 	
-	Node=Nodes;
-	while(Node){
-		if (RuleIsActive(PacketSlot, Node->RuleID)){
-			data=(IPSrcData*)Node->Data;
-			if (!IsInList(data->srcs,ntohl(IPSrc))){
-#ifdef DEBUGMATCH
-				printf("IP SRc %s",inet_ntoa(*(struct in_addr*)&data->IPSrc));
-				printf("does not match %s\n",inet_ntoa(*(struct in_addr*)&IPSrc));
-#endif			
-				SetRuleInactive(PacketSlot, Node->RuleID);
+	t=IPSrcHead;
+	while (t){
+		if (!IsInList(t->IPS, IPSrc)){
+			/*mark these rules as inactive*/
+			NotAndBitFields(p->RuleBits, t->RuleBits, p->RuleBits, Globals.NumRules);
 			}
-#ifdef DEBUGMATCH			
-			else{
-				printf("IP Src Matches\n");
-			}
-		}else{
-			printf("Rule is inactive\n");
-#endif			
-		}
-		Node=Node->Next;
+		t=t->Next;
 	}
 	
 #ifdef DEBUGMATCH
@@ -111,6 +98,11 @@ int TestIPSrc(int PacketSlot, TestNode* Nodes){
 ******************************************/
 int IPSrcAddNode(int TestID, int RuleID, char* Args){
 	IPSrcData*			data;
+	IPSrcData*			t;
+	IPSrcData*			last;
+#ifdef DEBUG	
+	int					i;
+#endif
 
 #ifdef DEBUGPATH
 	printf("In IPSrcAddNode\n");
@@ -121,15 +113,54 @@ int IPSrcAddNode(int TestID, int RuleID, char* Args){
 #endif
 
 	data=calloc(sizeof(IPSrcData),1);	
-	data->srcs=InitNumList(LIST_TYPE_NORMAL);
 	
-	if (!AddIPRanges(data->srcs, Args)){
+	/*set up the number list*/
+	data->IPS=InitNumList(LIST_TYPE_NORMAL);
+	if (!AddIPRanges(data->IPS, Args)){
 		free(data);
 		data=NULL;
 		return FALSE;
 	}
 	
+	/*check to see if this is a duplicate*/
+	if (!IPSrcHead){
+#ifdef DEBUG
+		printf("First IP Source\n");
+#endif	
+		IPSrcHead=data;
+		SetBit(data->RuleBits, Globals.NumRules, RuleID, 1);
 	return TestAddNode(TestID, RuleID, (void*)data);
+	}else{
+		t=IPSrcHead;
+		last=t;
+		while (t){
+			if (NumListCompare(data->IPS, t->IPS)){
+#ifdef DEBUG
+				printf("This is a duplicate\n");
+#endif			
+				DestroyNumList(data->IPS);
+				free(data);
+				data=NULL;
+				SetBit(t->RuleBits, Globals.NumRules, RuleID, 1);
+#ifdef DEBUG1
+				for (i=0;i<Globals.NumRules+1;i++)
+				if (GetBit(t->RuleBits, Globals.NumRules, i))
+				printf("Bit %i is set\n",i);
+#endif				
+				return TestAddNode(TestID, RuleID, (void*)t);		
+			}
+			
+			last=t;
+			t=t->Next;
+		}
+		
+#ifdef DEBUG
+		printf("This is a new one\n");
+#endif		
+		last->Next=data;
+		SetBit(data->RuleBits, Globals.NumRules, RuleID, 1);
+		return TestAddNode(TestID, RuleID, (void*)data);		
+	}
 }
 
 /****************************************
@@ -141,6 +172,8 @@ int InitTestIPSrc(){
 #ifdef DEBUGPATH
 	printf("In InitTestIPSrc\n");
 #endif
+
+	IPSrcHead=NULL;
 
 	TestID=CreateTest("IPSrc");
 	if (TestID==TEST_NONE) return FALSE;

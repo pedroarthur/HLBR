@@ -27,7 +27,7 @@
 #include "test_tcp_offset.h"
 #include "test_udp_src.h"
 #include "test_udp_dst.h"
-#include "test_dns_numquestions.h"
+//#include "test_dns_numquestions.h"
 #include "test_udp_content.h"
 #include "test_udp_nocase.h"
 
@@ -63,7 +63,7 @@ int InitTests(){
 	if (!InitTestTCPOffset()) return FALSE;
 	if (!InitTestUDPSrc()) return FALSE;
 	if (!InitTestUDPDst()) return FALSE;
-	if (!InitTestDNSNumQ()) return FALSE;
+//	if (!InitTestDNSNumQ()) return FALSE;
 	if (!InitTestUDPContent()) return FALSE;
 	if (!InitTestUDPNoCase()) return FALSE;
 

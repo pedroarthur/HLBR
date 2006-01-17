@@ -7,7 +7,6 @@ HOGWASH_OBJECTS= \
   engine/bits.o \
   engine/parse_config.o \
   engine/parse_rules.o \
-  engine/parse_snort.o \
   engine/main_loop.o \
   engine/session.o \
   engine/jtree.o \
@@ -52,7 +51,6 @@ HOGWASH_OBJECTS= \
   tests/test_tcp_offset.o \
   tests/test_udp_src.o \
   tests/test_udp_dst.o \
-  tests/test_dns_numquestions.o \
   tests/test_udp_content.o \
   tests/test_udp_nocase.o \
   actions/action.o \
@@ -62,7 +60,6 @@ HOGWASH_OBJECTS= \
   actions/action_dump_packet.o \
   actions/action_route_sip.o \
   actions/action_bns.o \
-  actions/action_alert_mysql.o \
   actions/action_alert_syslog.o \
   actions/action_alert_email.o \
   actions/action_alert_socket.o \
@@ -75,15 +72,7 @@ HOGWASH_OBJECTS= \
   routes/route_broadcast.o \
   routes/route_arp.o \
   routes/route_interface.o \
-  routes/route_bns.o \
-  modules/module.o  \
-  modules/module_web_unique.o \
-  modules/module_dns_unique.o \
-  modules/module_dynamic.o \
-  modules/module_covert.o \
-  modules/module_ats2.o \
-  mangle/mangle.o \
-  mangle/mangle_hard_mac.o
+  routes/route_bns.o
     
 all: hogwash
 
@@ -94,14 +83,16 @@ clean:
 	cd tests; make clean
 	cd actions; make clean
 	cd routes; make clean
-	cd modules; make clean
-	cd mangle; make clean
-	rm -f hogwash
-
-distclean:
-	make clean
+#	cd modules; make clean
+#	cd mangle; make clean
 	rm -f config.h
 	rm -f Makefile *.old
+	rm -f hlbr
+
+#distclean:
+#	make clean
+#	rm -f config.h
+#	rm -f Makefile *.old
 
 hogwash: config.h $(HOGWASH_OBJECTS)
 	cd engine;make
@@ -110,6 +101,7 @@ hogwash: config.h $(HOGWASH_OBJECTS)
 	cd tests; make
 	cd actions; make 
 	cd routes; make
-	cd modules; make
-	cd mangle; make
-	$(CC) -o hogwash $(DEBUG) $(HOGWASH_OBJECTS) $(THREAD) $(MYSQL) $(LIB_DL) $(EXTRA_LIBS) $(LATE_BINDING)
+#	cd modules; make
+#	cd mangle; make
+#	$(CC) -o hogwash $(DEBUG) $(HOGWASH_OBJECTS) $(THREAD) $(MYSQL) $(LIB_DL) $(EXTRA_LIBS) $(LATE_BINDING)
+	$(CC) -o hlbr $(DEBUG) $(HOGWASH_OBJECTS) $(THREAD) $(LIB_DL) $(EXTRA_LIBS) $(LATE_BINDING)

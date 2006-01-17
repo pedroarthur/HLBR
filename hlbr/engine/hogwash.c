@@ -9,8 +9,8 @@
 #include "../packets/packet_cache.h"
 #include "../actions/action.h"
 #include "../routes/route.h"
-#include "../modules/module.h"
-#include "../mangle/mangle.h"
+//#include "../modules/module.h"
+//#include "../mangle/mangle.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -65,8 +65,10 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 * print out the version number
 ***************************************/
 void PrintVersion() {
-	printf("Hogwash H2 v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
-	printf("by Jason Larsen\n\n");
+	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
+	printf("by Andre Bertelli and Joao Eriberto\n");
+	printf("http://hlbr.sourceforge.net\n\n");
+	printf("(Jason Larsen's Hogwash based)\n\n");
 }
 
 /*************************************
@@ -88,7 +90,10 @@ void PrintUsage(){
 	printf("  -t  Parse Rules and Exit\n");
 	printf("  -n  Process n packets and exit\n");
 	printf("  -d  Enter Daemon Mode (Background Execution)\n");
-	printf("  -v  Print version and exit\n");
+	printf("  -v  Print version and exit\n\n");
+	printf("------------------\n");
+	printf("Example:\n");
+	printf("  hlbr -c hlbr.config -r hlbr.rules &\n\n\n");
 }
 
 /******************************************
@@ -332,7 +337,7 @@ int main(int argc, char**argv){
 		return FALSE;
 	}
 
-	if (!InitModules()){
+/*	if (!InitModules()){
 		printf("Error initializing modules\n");
 		return FALSE;
 	}
@@ -341,7 +346,7 @@ int main(int argc, char**argv){
 		printf("Error initializing manglers\n");
 		return FALSE;
 	}
-
+*/
 	if (!ParseConfig()){
 		printf("Error loading config file\n");
 		return FALSE;
@@ -381,7 +386,7 @@ int main(int argc, char**argv){
 
 	MainLoop();
 
-	printf("Hogwash is all done.  Calling shutdown handlers\n");
+	printf("HLBR is all done.  Calling shutdown handlers\n");
 	CallShutdownHandlers();
 
 	return TRUE;

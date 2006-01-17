@@ -117,6 +117,8 @@ int TCPSrcAddNode(int TestID, int RuleID, char* Args){
 	printf("Addding a Node with args %s\n",Args);
 #endif
 
+	data=calloc(sizeof(TCPSrcData),1);
+
 	/*set up the number list*/
 	data->Ports=InitNumList(LIST_TYPE_NORMAL);
 	if (!AddRangesString(data->Ports, Args, NULL, 0)){
