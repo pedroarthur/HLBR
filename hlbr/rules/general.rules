@@ -1,0 +1,120 @@
+<rule>
+ip dst(WebServers)
+tcp dst(80)
+tcp nocase(cmd.exe)
+message=cmd.exe attempt
+action=default
+</rule>
+
+<rule>
+ip dst(WebServers)
+tcp dst(80)
+tcp nocase(/Site/biztalkhttpreceive.dll)
+message=/Site/biztalkhttpreceive.dll attempt
+action=default
+</rule>
+
+<rule>
+ip dst(WebServers)
+tcp dst(80)
+tcp nocase(tftp)
+message=tftp attempt
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(/etc/passwd)
+message=attempt to retrieve /etc/passwd
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(/etc/shadow)
+message=attempt to retrieve /etc/shadow
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(sam.-)
+message=attempt to retrieve sam.-
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(/bin/sh)
+message=attempt to execute /bin/sh
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(/bin/bash)
+message=attempt to execute /bin/bash
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(/bin/csh)
+message=attempt to execute /bin/csh
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp nocase(/bin/tcsh)
+message=attempt to execute /bin/tcsh
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp dst(80)
+tcp nocase(RegCreateKeyExA)
+message=IIS Privalege escalation RegCreateKeyExA
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp dst(80)
+tcp nocase(AdjustTokenPrivileges)
+message=IIS Privalege escalation AdjustTokenPrivileges
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp dst(80)
+tcp nocase(LookupPrivilegeValueA)
+message=IIS Privalege escalation LookupPrivilegeValueA
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp dst(80)
+tcp nocase(OpenProcessToken)
+message=IIS Privalege escalation OpenProcessToken
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp dst(80)
+tcp nocase(RegCloseKey)
+message=IIS Privalege escalation RegCloseKey
+action=default
+</rule>
+
+<rule>
+ip dst(AllServers)
+tcp dst(80)
+tcp nocase(CloseHandle)
+message=IIS Privalege escalation2 CloseHandle
+action=default
+</rule>

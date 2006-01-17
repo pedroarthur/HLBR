@@ -1,0 +1,240 @@
+#!/bin/bash
+
+echo "****************************"
+echo "Configure script for Hogwash"
+echo "****************************"
+echo ""
+echo ""
+
+#remove the old Makefile and config.h
+if [ -f "Makefile" ]; then
+mv -f Makefile Makefile.old
+fi
+if [ -f "config.h" ]; then
+mv -f config.h config.h.old
+fi
+
+#start up the config.h file
+echo "#ifndef _HOGWASH_CONFIG_H_" >> config.h
+echo "#define _HOGWASH_CONFIG_H_" >> config.h
+
+#Check for the OS
+echo -n "Checking OS................."
+echo "/* OS */" >> config.h
+THIS_OS=`uname`
+OS=""
+if [ "$THIS_OS" == "Darwin" ]; then
+	OS="OSX"
+	echo "#define HAS_THREADS" >> config.h
+	echo "THREAD=-lpthread" >> Makefile
+fi
+if [ "$THIS_OS" == "Linux" ]; then
+	OS="LINUX"
+	echo "#define HAS_THREADS" >> config.h
+	echo "THREAD=-lpthread" >> Makefile
+fi
+if [ "$THIS_OS" == "SunOS" ]; then
+	OS="SOLARIS"
+	echo "#define HAS_THREADS" >> config.h
+	echo "THREAD=-lpthread" >> Makefile
+	echo "EXTRA_LIBS=-lsocket -lnsl" >> Makefile
+fi
+if [ "$THIS_OS" == "OpenBSD" ]; then
+	OS="OBSD"
+	echo "typedef pthread_mutex_t int;" >> config.h
+	echo "typedef pthread_t int;" >> config.h
+	echo "THREAD=-pthread" >> Makefile
+fi
+
+if [ "$OS" == "" ]; then
+	echo "Couldn't determine OS"
+	exit
+fi
+
+echo -n "#define _" >> config.h
+echo -n $OS >> config.h
+echo "_" >> config.h
+echo "" >> config.h
+echo "$OS"
+
+#done checking the OS
+
+#check for a c compiler
+CCompiler=""
+echo -n "Checking for a C compiler..."
+if [ -f "/usr/local/bin/gcc" ]; then
+	CCompiler="/usr/local/bin/gcc"
+	echo $CCompiler
+elif [ -f "/usr/bin/gcc" ]; then
+	CCompiler="/usr/bin/gcc"
+	echo $CCompiler
+elif [ -f "/bin/gcc" ]; then
+	CCompiler="/bin/gcc"
+	echo $CCompiler
+fi
+
+if [ "$CCompiler" == "" ]; then
+	echo "Not found"
+	exit
+fi
+
+#check the endian
+echo -n "Checking endian-ness........"
+ENDIAN=""
+cat >conftest.endian.c <<EOF
+int main(){
+   long           l;
+   unsigned char* c;
+   
+   l=0x01020304;
+   c=(unsigned char*)&l;
+   
+   if (c[0]==0x04){
+   	printf("LITTLE\n");
+   }else{
+   	printf("BIG\n");
+   }
+}
+EOF
+
+$CCompiler -o conftest.endian conftest.endian.c
+ENDIAN_TEST=`./conftest.endian`
+
+rm -f conftest.endian
+rm -f conftest.endian.c 
+
+if [ "$ENDIAN_TEST" == "LITTLE" ]; then
+	ENDIAN="LITTLE"
+	echo "#define HOGWASH_LITTLE_ENDIAN" >> config.h
+	echo "" >> config.h
+	echo "LITTLE"
+fi
+
+if [ "$ENDIAN_TEST" == "BIG" ]; then
+	ENDIAN="BIG"
+	echo "#define HOGWASH_BIG_ENDIAN" >> config.h
+	echo "" >> config.h
+	echo "BIG";
+fi
+
+if [ "$ENDIAN" == "" ]; then
+	echo "Failed to determine endian-ness";
+	exit	
+fi
+
+#done checking the endian
+
+#check for mysql
+echo -n "Checking for MySQL.........."
+MYSQL_HEADER_DIR=""
+if [ -f "/usr/include/mysql.h" ]; then
+	MYSQL_HEADER_DIR="/usr/include"
+fi
+if [ -f "/usr/include/mysql/mysql.h" ]; then
+	MYSQL_HEADER_DIR="/usr/include/mysql"
+fi
+
+MYSQL_LIB_DIR=""
+if [ -f "/sw/lib/mysql/libmysqlclient.dylib" ]; then
+	MYSQL_LIB_DIR="/sw/lib/mysql"
+fi
+
+#galt's addition
+if [ -f "/usr/lib/libmysqlclient.so" ]; then
+	MYSQL_LIB_DIR="/usr/lib"
+fi
+#noitidda s`tlag
+
+if [ -f "/usr/lib/mysql/libmysqlclient.so" ]; then
+	MYSQL_LIB_DIR="/usr/lib/mysql"
+fi
+
+if [ "$MYSQL_HEADER_DIR" != "" ] && [ "$MYSQL_LIB_DIR" != ""  ]; then
+	echo "#define HAS_MYSQL" >> config.h
+	echo -n "MYSQL=-lmysqlclient -I" >> Makefile
+	echo -n $MYSQL_HEADER_DIR >> Makefile
+	echo -n " -L" >> Makefile
+	echo $MYSQL_LIB_DIR >> Makefile
+	echo "Found"
+else
+	echo "Not Found"
+fi
+
+#done checking for mysql
+
+#check for a built-in daemon call
+echo -n "Checking for daemon........."
+ENDIAN=""
+cat >conftest.daemon.c <<EOF
+#include <unistd.h>
+int main(){
+	daemon(0,0);
+	return 0;
+}
+EOF
+if $CCompiler -o conftest.daemon conftest.daemon.c > /dev/null 2>&1
+then 
+	echo "#define HAS_DAEMON" >> config.h
+	echo "" >> config.h
+	echo "Found"
+else
+	echo "Not Found"
+fi
+rm -f conftest.daemon conftest.daemon.c 
+#end checking for daemon
+
+#check for a built-in freopen call
+echo -n "Checking for freopen........"
+cat >conftest.freopen.c <<EOF
+#include <stdio.h>
+int main() { freopen("/dev/null", "w", stdin); return 0; }
+EOF
+if $CCompiler -o conftest.freopen conftest.freopen.c > /dev/null 2>&1
+then
+	echo "Found"
+        echo "#define HAS_FREOPEN" >> config.h
+else
+        echo "Not Found"
+fi
+rm -f conftest.freopen conftest.freopen.c
+#end checking for freopen
+
+#check for a built-in dlopen call
+echo -n "Checking for dlopen........."
+cat >conftest.dlopen.c <<EOF
+#include <unistd.h>
+int main() { dlopen(0,0); return 0; }
+EOF
+if $CCompiler -o conftest.dlopen conftest.dlopen.c -ldl -rdynamic > /dev/null 2>&1
+then
+        echo "#define HAS_DLOPEN" >> config.h
+        echo "" >> config.h
+        echo "Found"
+	echo "LIB_DL=-ldl" >> Makefile
+	echo "LATE_BINDING=-rdynamic" >> Makefile
+else
+        echo "Not Found"
+fi
+rm -f conftest.dlopen conftest.dlopen.c
+#end checking for dlopen
+
+
+#finish off the config.h file
+echo "#ifndef TRUE" >> config.h
+echo "#define TRUE	1" >> config.h
+echo "#endif" >> config.h
+echo "#ifndef FALSE" >> config.h
+echo "#define FALSE 0" >> config.h
+echo "#endif" >> config.h
+echo "#ifndef NULL" >> config.h
+echo "#define NULL ((void *)0)" >> config.h
+echo "#endif" >> config.h
+echo "" >> config.h
+echo "" >> config.h
+echo "#endif //ifdef hogwash" >> config.h
+
+
+#add in all the stock stuff to the Makefile
+cat Makefile.in >> Makefile
+
+echo "Done."

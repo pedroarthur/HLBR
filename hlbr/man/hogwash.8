@@ -1,0 +1,86 @@
+.TH "hogwash" "8" "0.5" "Ned Ludd" ""
+.SH "NAME"
+.LP 
+hogwash \- (The Inline Packet Scrubber)
+.SH "SYNTAX"
+.LP 
+hogwash [\fIoptions\fP]
+.br 
+.SH "DESCRIPTION"
+.LP 
+Hogwash is an open source network intrusion detection and prevention 
+system, capable  of performing  real\-time  traffic  analysis and packet 
+logging on IP networks. It can perform protocol  analysis,  content  
+searching/matching and  can  be  used  to  detect and prevent a variety of 
+attacks and probes, such as buffer overflows, stealth port scans, 
+CGI attacks, SMB probes, OS fingerprinting  attempts, and much more. 
+Hogwash uses a flexible rules language to describe if traffic should 
+passed or droped, as well as a detection engine that utilizes a modular 
+plugin architecture.  Hogwash also has modular real\-time alerting capability,
+incorporating  alerting  and logging plugins for syslog, a ASCII text files 
+and MySql databases.
+.SH "OPTIONS"
+.LP 
+
+.TP 
+\fBNote\fR
+long options are not supported on all platforms.
+.TP 
+\fB\-h, \-\-help\fR
+Output help information and exit.
+.TP 
+\fB\-v, \-\-version\fR
+Output version information and exit.
+.TP 
+\fB \-c, \-\-config\fR
+<Config File>
+.TP 
+\fB\-r, \-\-rules\fR
+<Rules File>
+.TP 
+\fB\-t, \-\-test\fR
+Parse Rules and Exit
+.TP 
+\fB\-n, \-\-number\fR
+Process n packets and exit
+.TP 
+\fB\-l, \-\-log\fR
+<Log Directory>
+.TP 
+\fB\-d, \-\-daemon\fR
+Enter Daemon Mode (Background Execution)
+.br 
+
+
+
+.SH "FILES"
+.LP 
+\fI/etc/hogwash/stock.config\fP 
+.br 
+\fI/var/log/hogwash\fP 
+.SH "ENVIRONMENT VARIABLES"
+.LP 
+.TP 
+\fBNONE\fP
+Hogwash does not support include any support for ENVIROMENT variables.
+
+.SH "EXAMPLES"
+.LP 
+To run this program the standard way type:
+.LP 
+hogwash \-c /etc/hogwash/stock.config \-r /etc/hogwash/stock.rules \-l /var/log/hogwash
+.LP 
+Alternativly you can run it as:
+.LP 
+hogwash \-c /etc/hogwash/stock.config \-r /etc/hogwash/stock.rules \-l /var/log/hogwash \-d
+.br 
+
+.SH "AUTHORS"
+.LP 
+Hogwash was written by Jason Larson <anonpoet@users.sourceforge.net>
+.br 
+Ned Ludd <solar@linbsd.net>/<solar@gentoo.org> wrote this manpage
+.br 
+.SH "SEE ALSO"
+.LP 
+syslog(2) mysql(1) dlopen(3)

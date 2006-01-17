@@ -1,0 +1,42 @@
+implement TCP stream reassembly
+implement control channel
+spawn n threads in config file
+line continuation is broken in the config file parsers
+finish message language for alerts
+check checksums in headers
+There is a bug in the IPlist parser if there is only one entry
+add a SIGHUP handler
+add a SIGUSR1 handler to display stats
+mutex locking is broken
+Expand on SQL logging, (add fields for protocols etc.)
+.rules->database utility
+Paired IP lists
+Autolists
+Global user defined message format
+Add generic option parser for modules/etc so everyone doesn't have to parse themselves
+dynamic modules are currently unaware of the hogwash version
+multiple tcp content matches per rule
+decode_telnet and decode_ftp to check logins
+
+Galt's Gulch
+
+v6 support?
+I'll probably have to redo hogwash_print AGAIN!;P
+more initscript-fu, hopefully stuff that buck won't overwrite
+autobarf?
+prepare for a LiveCD  ETA: August 1,2003
+
+----------
+When hogwash submits info the mysql, is it possible to also enter
+additional into the db. The goal is to generate add more detail to
+reports if they wish to submit a certain attack for a report etc.
+
+Namely things like perhaps:
+tcp info: SEQ number
+ACK number
+WINDOW number
+any Flags the packet may have
+the TCP Checksum
+TTL
+TOS
+the Length of the packet

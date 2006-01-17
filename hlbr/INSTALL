@@ -1,0 +1,24 @@
+Installation Instructions for Hogwash 0.5
+
+1. Download into a directory
+2. Untar the tarball
+3. Execute the ./configure script and type make
+4. Copy hogwash to a directory in your roots $PATH such as 
+	/sbin /usr/sbin/ /usr/local/sbin and optionaly strip.
+5. Copy the rules you wish to use with hogwash to your target directory
+	eg: cp -R rules /etc/hogwash/
+6. If dynamic modules are suppored by your platform, copy any dynamic modules
+	you wish to run to a modules directory. 
+	eg: cp modules/mod_*.so /usr/lib/hogwash/modules/
+	and load them in your config.
+
+See http://hogwash.sourceforge.net/docs/setting.html for more information.
+
+Upgrading from previous versions.
+
+When upgrading, please remove ALL traces of old hogwash, including
+the directory containing it, and the working directory.
+
+Be aware that the application config file, and the working directory
+layout, file structure and index structure have been incompatibly
+changed from the previous versions.

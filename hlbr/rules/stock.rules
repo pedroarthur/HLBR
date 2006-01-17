@@ -1,0 +1,83 @@
+############################################
+# Stock Rules file
+############################################
+
+###########################
+# example rule:
+# <rule>
+# ip  dst(WebServers)
+# tcp dst(80)
+# tcp nocase(cmd.exe)
+# message=%sip:%sip->%dip:%dp cmd.exe attempt
+# action=default
+# </rule>
+#
+# Possible rule options:
+#
+# interface name(eth0, eth1, eth5-eth6)
+# ethernet src(01:02:03:04:05:06)
+# ethernet dst(01:02:03:04:05:06)
+# ethernet type(IP, ARP, 0804)
+# ip src(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
+# ip dst(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
+# ip proto(TCP, UDP, ICMP, IGMP, PIM, OSPF, 13-15)
+# ip ttl(1-5)
+# icmp code(6)
+# icmp type(4)
+# tcp src(80, 21-25)
+# tcp dst(80, 21-25)
+# tcp content(bind|00 00 0A|)
+# tcp nocase(cmd.exe|00 00 0A|)
+# tcp flags(Sfr)  //Must have Syn Must not have Fin or Rst, ignore others
+# tcp offset(10,Hello World)
+# udp src(53)
+# udp dst(32000-32999, 53)
+# dns numquestions(2-10)
+# 
+# Possible message items:
+# %sip  - Source IP
+# %dip  - Destination IP
+# %sp   - Source Port
+# %dp   - Destination Port
+# %y    - Year
+# %m    - Month
+# %d    - Day
+# %h    - Hour
+# %min  - Minute
+# %s    - Second
+# %usec - MicroSecond
+# %pn   - Packet Number
+# %ac   - Alert Count
+#
+# Action defines the action to 
+# perform when this rule matches.
+# Actions are defined in the
+# config file
+###########################
+
+################################################
+# Snort rule compatibility isn't done yet
+# 
+# Example:
+# <snort>
+# alert tcp any any <> any 80 (content:"cmd.exe";nocase;msg:"cmd.exe access";)
+# alert tcp any any <> any 80 (content:"H4x0r";nocase;msg:"the kiddies are here";)
+# </snort>
+################################################
+
+
+################################################
+#
+# To load rules from a mysql database
+#<mysql>
+#dbase=hogwash5
+#user=hogwash
+#password=password
+#host=localhost
+#</mysql>
+################################################
+
+<include nikto.rules>
+<include x11.rules>
+<include nimda.rules>
+<include general.rules>
