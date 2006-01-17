@@ -1,0 +1,25 @@
+use hogwash5;
+
+-- GRANT ALL ON hogwash5.* TO hogwash IDENTIFIED BY 'password';
+
+DROP TABLE IF EXISTS Alerts;
+DROP TABLE IF EXISTS Messages;
+
+CREATE TABLE Alerts (
+	ID		INT(6) UNSIGNED NOT NULL AUTO_INCREMENT,
+	RuleNum		INT(11) default 0,
+	UnixTime	INT(11) default 0,
+	SrcAddress	CHAR(15) default NULL,
+	SrcPort		INT(5) default NULL,  
+	DstAddress	CHAR(15) default NULL,
+	DstPort		INT(5) default NULL,
+	RawPacket	TEXT,
+	PRIMARY		KEY (ID)
+);
+
+CREATE TABLE Messages (
+	ID		INT(6) UNSIGNED NOT NULL AUTO_INCREMENT,
+	UnixTime	INT(11) default 0,
+	Data		TEXT,
+	PRIMARY		KEY  (ID)
+);
