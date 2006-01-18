@@ -1,0 +1,9 @@
+from 0.1-rc1 to 0.1-rc2:
+
+- hlbr.config revised
+- README.pt_BR revised and more stuff added
+- README.en created
+- hlbr.config.en created
+- created: make install, installen and uninstall
+- first source code standard revision
+- new rules

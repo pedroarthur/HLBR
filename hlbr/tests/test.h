@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_TEST_H_
-#define _HOGWASH_TEST_H_
+#ifndef _HLBR_TEST_H_
+#define _HLBR_TEST_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 
 #define TEST_NONE	-1
 

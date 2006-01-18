@@ -1,0 +1,50 @@
+
+# nome / name:             mailvirus.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             14 Dez 05 / 14 Dec 05
+# atualizacao / update:    nenhuma / none
+
+# Objetivo / Target: Bloquear virus de email / Block mail virus.
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.scr")
+message=(mailvirus) Tentativa de .scr / .scr attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.pif")
+message=(mailvirus) Tentativa de .pif / .pif attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.bat")
+message=(mailvirus) Tentativa de .bat / .bat attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.com")
+message=(mailvirus) Tentativa de .com / .com attempt
+action=acao1
+</rule>
+
+# Comente a regra a seguir se quiser receber arquivos .exe
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.exe")
+message=(mailvirus) Tentativa de .exe / .exe attempt
+action=acao1
+</rule>
+

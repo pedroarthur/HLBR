@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_DECODE_ETHERNET_H_
-#define _HOGWASH_DECODE_ETHERNET_H_
+#ifndef _HLBR_DECODE_ETHERNET_H_
+#define _HLBR_DECODE_ETHERNET_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "decode.h"
 
 #define ETHERNET_TYPE_IP	0x0800

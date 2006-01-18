@@ -2,8 +2,8 @@
 DEBUG=-g -Wall
 CC=gcc -g
 
-HOGWASH_OBJECTS= \
-  engine/hogwash.o \
+HLBR_OBJECTS= \
+  engine/hlbr.o \
   engine/bits.o \
   engine/parse_config.o \
   engine/parse_rules.o \
@@ -74,7 +74,7 @@ HOGWASH_OBJECTS= \
   routes/route_interface.o \
   routes/route_bns.o
     
-all: hogwash
+all: hlbr
 
 clean:
 	cd engine; make clean
@@ -83,25 +83,80 @@ clean:
 	cd tests; make clean
 	cd actions; make clean
 	cd routes; make clean
-#	cd modules; make clean
-#	cd mangle; make clean
 	rm -f config.h
 	rm -f Makefile *.old
 	rm -f hlbr
 
-#distclean:
-#	make clean
-#	rm -f config.h
-#	rm -f Makefile *.old
-
-hogwash: config.h $(HOGWASH_OBJECTS)
+hlbr: config.h $(HLBR_OBJECTS)
 	cd engine;make
 	cd packets; make
 	cd decoders; make
 	cd tests; make
 	cd actions; make 
 	cd routes; make
-#	cd modules; make
-#	cd mangle; make
-#	$(CC) -o hogwash $(DEBUG) $(HOGWASH_OBJECTS) $(THREAD) $(MYSQL) $(LIB_DL) $(EXTRA_LIBS) $(LATE_BINDING)
-	$(CC) -o hlbr $(DEBUG) $(HOGWASH_OBJECTS) $(THREAD) $(LIB_DL) $(EXTRA_LIBS) $(LATE_BINDING)
+	$(CC) -o hlbr $(DEBUG) $(HLBR_OBJECTS) $(THREAD) $(LIB_DL) $(EXTRA_LIBS) $(LATE_BINDING)
+	#
+	# ---------------------------------------
+	# Execute "# make install" para instalar.
+	# Run "# make installen" to install.
+	# ---------------------------------------
+	#
+
+
+install: 
+	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
+	if [ -d "/etc/hlbr/" ]; then mv -f /etc/hlbr /etc/hlbr.old; fi
+	mkdir /etc/hlbr
+	mkdir /etc/hlbr/rules
+	if [ -d "/var/log/hlbr.old" ]; then rm -rf /var/log/hlbr.old; fi
+	if [ -d "/var/log/hlbr/" ]; then mv -f /var/log/hlbr /var/log/hlbr.old; fi
+	mkdir /var/log/hlbr
+	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
+	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
+	cp hlbr /usr/sbin
+	cp hlbr.config empty.rules hlbr.rules /etc/hlbr
+	cp rules/* /etc/hlbr/rules
+	#
+	# ---------------------------------------------------------
+	# HLBR instalado.
+	# O arquivo de configuracao e as regras estao em /etc/hlbr.
+	#
+	# Execute "# make uninstall" para desinstalar.
+	# ---------------------------------------------------------
+	#
+
+installen: 
+	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
+	if [ -d "/etc/hlbr/" ]; then mv -f /etc/hlbr /etc/hlbr.old; fi
+	mkdir /etc/hlbr
+	mkdir /etc/hlbr/rules
+	if [ -d "/var/log/hlbr.old" ]; then rm -rf /var/log/hlbr.old; fi
+	if [ -d "/var/log/hlbr/" ]; then mv -f /var/log/hlbr /var/log/hlbr.old; fi
+	mkdir /var/log/hlbr
+	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
+	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
+	cp hlbr /usr/sbin
+	cp empty.rules hlbr.rules /etc/hlbr
+	cp hlbr.config.en /etc/hlbr/hlbr.config
+	cp rules/* /etc/hlbr/rules
+	#
+	# --------------------------------------------------
+	# HLBR has been installed.
+	# The configuration file and rules are in /etc/hlbr.
+	#
+	# Run "# make uninstall" to uninstall.
+	# --------------------------------------------------
+	#
+
+uninstall: 
+	if [ -d "/etc/hlbr/" ]; then rm -rf /etc/hlbr; fi
+	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
+	if [ -d "/var/log/hlbr/" ]; then rm -rf /var/log/hlbr; fi
+	if [ -d "/var/log/hlbr.old/" ]; then rm -rf /var/log/hlbr.old; fi
+	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
+	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
+	#
+	# -------------------------------------------------
+	# HLBR foi desinstalado. HLBR has been uninstalled.
+	# -------------------------------------------------
+	#

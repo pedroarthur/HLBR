@@ -1,5 +1,5 @@
-#ifndef _HOGWASH_HOGLIB_H_
-#define _HOGWASH_HOGLIB_H_
+#ifndef _HLBR_HOGLIB_H_
+#define _HLBR_HOGLIB_H_
 
 
 /* Used to queue a lot of things */
@@ -55,4 +55,4 @@ void ListClear(QueueList *);
 }
 
 
-#endif /* _HOGWASH_HOGLIB_H_ */
+#endif /* _HLBR_HOGLIB_H_ */

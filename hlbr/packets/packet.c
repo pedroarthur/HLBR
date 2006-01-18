@@ -343,14 +343,14 @@ int AddPacketToPending(int PacketSlot){
 	printf("In AddPacketToPending\n");
 #endif
 
-	hogwash_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
+	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
 	
 	Globals.Packets[PacketSlot].Status=PACKET_STATUS_PENDING;
 	LastPendingSlot=PacketSlot;
 	Globals.PendingCount++;
 	Globals.AllocatedCount--;
 	
-	hogwash_mutex_unlock(&PacketMutex);
+	hlbr_mutex_unlock(&PacketMutex);
 
 	return TRUE;
 }
@@ -367,19 +367,19 @@ int PopFromPending(){
 #endif
 	
 	PacketSlot=PACKET_NONE;
-	hogwash_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
+	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
 	
 	for (i=0;i<MAX_PACKETS;i++){
 		if (Globals.Packets[i].Status==PACKET_STATUS_PENDING){
 			Globals.Packets[i].Status=PACKET_STATUS_PROCESSING;
-			hogwash_mutex_unlock(&PacketMutex);
+			hlbr_mutex_unlock(&PacketMutex);
 			Globals.PendingCount--;
 			Globals.ProcessingCount++;
 			return i;
 		}
 	}
 	
-	hogwash_mutex_unlock(&PacketMutex);
+	hlbr_mutex_unlock(&PacketMutex);
 	
 	return PACKET_NONE;
 }
@@ -394,7 +394,7 @@ int GetEmptyPacket(){
 	printf("In GetEmptyPacket\n");
 #endif	
 
-	hogwash_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
+	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
 
 	Packet=NULL;
 	for (i=LastFreeSlot; i<MAX_PACKETS;i++){
@@ -428,7 +428,7 @@ int GetEmptyPacket(){
 #ifdef DEBUG
 		printf("There were no free packets\n");
 #endif	
-		hogwash_mutex_unlock(&PacketMutex);
+		hlbr_mutex_unlock(&PacketMutex);
 		return PACKET_NONE;
 	}
 	
@@ -447,7 +447,7 @@ int GetEmptyPacket(){
 	Globals.AllocatedCount++;
 	Globals.IdleCount--;
 
-	hogwash_mutex_unlock(&PacketMutex);
+	hlbr_mutex_unlock(&PacketMutex);
 	
 	return i;	
 }
@@ -464,7 +464,7 @@ void ReturnEmptyPacket(int PacketSlot){
 	printf("In ReturnEmptyPacket\n");
 #endif	
 
-	hogwash_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
+	hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 	
 	if (Globals.Packets[PacketSlot].SaveCount<1){
 		p=&Globals.Packets[PacketSlot];
@@ -496,7 +496,7 @@ void ReturnEmptyPacket(int PacketSlot){
 		Globals.SavedCount++;
 	}
 
-	hogwash_mutex_unlock(&PacketMutex);
+	hlbr_mutex_unlock(&PacketMutex);
 
 #ifdef DEBUG_PACKETS
 	printf("There are:\n");

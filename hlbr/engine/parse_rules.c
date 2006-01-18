@@ -391,8 +391,8 @@ int ParseRuleMysql(FILE* fp){
 	printf("Pulling rules from mysql database\n");
 #endif
 	/* made these use strncpy() as its a tad less expensive than snprintf() */
-	strncpy(DBase, "hogwash5", sizeof(DBase));
-	strncpy(User, "hogwash", sizeof(User));
+	strncpy(DBase, "hlbr5", sizeof(DBase));
+	strncpy(User, "hlbr", sizeof(User));
 	strncpy(Pass, "password", sizeof(Pass));
 	strncpy(Host, "localhost", sizeof(Host));
 

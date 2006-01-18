@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_DECODE_TCP_H_
-#define _HOGWASH_DECODE_TCP_H_
+#ifndef _HLBR_DECODE_TCP_H_
+#define _HLBR_DECODE_TCP_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "decode.h"
 
 
@@ -11,7 +11,7 @@ typedef struct tcp_header {
 	unsigned short	dest;
 	unsigned int	seq;
 	unsigned int	ack_seq;
-#ifdef HOGWASH_LITTLE_ENDIAN
+#ifdef HLBR_LITTLE_ENDIAN
 	unsigned short	res1:4,
 		doff:4,
 		fin:1,

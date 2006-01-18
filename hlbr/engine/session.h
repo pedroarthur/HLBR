@@ -1,8 +1,8 @@
-#ifndef HOGWASH_SESSION_H
-#define HOGWASH_SESSION_H
+#ifndef HLBR_SESSION_H
+#define HLBR_SESSION_H
 
 #include "../config.h"
-#include "hogwash.h"
+#include "hlbr.h"
 
 #define IP_START	1
 #define IP_GROW		1

@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_PACKET_SOLARIS_DLPI_H_
-#define _HOGWASH_PACKET_SOLARIS_DLPI_H_
+#ifndef _HLBR_PACKET_SOLARIS_DLPI_H_
+#define _HLBR_PACKET_SOLARIS_DLPI_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "packet.h"
 
 int OpenInterfaceSolarisDLPI(int InterfaceID);

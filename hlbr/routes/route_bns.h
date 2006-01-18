@@ -1,8 +1,8 @@
-#ifndef HOGWASH_BNS_H
-#define HOGWASH_BNS_H
+#ifndef HLBR_BNS_H
+#define HLBR_BNS_H
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "route.h"
 
 #define MAX_BNS		1024

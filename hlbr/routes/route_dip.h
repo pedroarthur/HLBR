@@ -1,8 +1,8 @@
-#ifndef HOGWASH_DIP_H
-#define HOGWASH_DIP_H
+#ifndef HLBR_DIP_H
+#define HLBR_DIP_H
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "route.h"
 
 #define MAX_RDIPS		256

@@ -106,8 +106,8 @@ void FreeSaved(int SaveID){
 	Saves[SaveID].KeyLen=0;
 	Saves[SaveID].NextTime=-1;
 	Saves[SaveID].PrevTime=-1;
-	hogwash_mutex_unlock(&Globals.Packets[Saves[SaveID].PacketSlot].Mutex);
-	hogwash_mutex_unlock(&Saves[SaveID].Mutex);
+	hlbr_mutex_unlock(&Globals.Packets[Saves[SaveID].PacketSlot].Mutex);
+	hlbr_mutex_unlock(&Saves[SaveID].Mutex);
 	
 	/*return the packet into distribution*/
 	Globals.Packets[Saves[SaveID].PacketSlot].SaveCount--;
@@ -129,7 +129,7 @@ void FreeSaveQuery(SaveQuery* q){
 	if (!q) return;
 
 	/*lock the saved structs*/
-	hogwash_mutex_lock(&SavedMutex, FREE_SAVED_1, &SaveLockID);
+	hlbr_mutex_lock(&SavedMutex, FREE_SAVED_1, &SaveLockID);
 	
 	for (i=0;i<q->NumResults;i++){
 		FreeSaved(q->Saves[i]);
@@ -138,7 +138,7 @@ void FreeSaveQuery(SaveQuery* q){
 	free(q);
 	
 	/*unlock the saved structs*/
-	hogwash_mutex_unlock(&SavedMutex);
+	hlbr_mutex_unlock(&SavedMutex);
 }
 
 /********************************************
@@ -159,16 +159,16 @@ void TimeoutSavedPackets(long CurTime){
 	DelPacket=-1;
 	This=SaveTimeHead;
 	while (This!=-1){
-		hogwash_mutex_lock(&Saves[This].Mutex, TIMEOUT_SAVED_1, &Saves[This].LockID);
+		hlbr_mutex_lock(&Saves[This].Mutex, TIMEOUT_SAVED_1, &Saves[This].LockID);
 		if (CurTime > Saves[This].Timeout){
 			FreeSaved(This);
-			hogwash_mutex_unlock(&Saves[This].Mutex);
+			hlbr_mutex_unlock(&Saves[This].Mutex);
 			This=SaveTimeHead;
 		}else{
 #ifdef DEBUG		
 			printf("Didn't need to be timed out\n");
 #endif						
-			hogwash_mutex_unlock(&Saves[This].Mutex);
+			hlbr_mutex_unlock(&Saves[This].Mutex);
 			return;
 		}
 	}
@@ -203,14 +203,14 @@ int SavePacket(int PacketSlot, char* Key, int KeyLen, int Timeout){
 	printf("In SavePacket\n");
 #endif
 
-	hogwash_mutex_lock(&SavedMutex, SAVE_PACKET_1, &SaveLockID);
+	hlbr_mutex_lock(&SavedMutex, SAVE_PACKET_1, &SaveLockID);
 	TimeoutSavedPackets(Globals.Packets[PacketSlot].tv.tv_sec);	
-	hogwash_mutex_lock(&Globals.Packets[PacketSlot].Mutex, SAVE_PACKET_2, &Globals.Packets[PacketSlot].LockID);
+	hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, SAVE_PACKET_2, &Globals.Packets[PacketSlot].LockID);
 
 	/*Create a record to hold the new packet*/
 	if ( (SaveID=GetFreeSaved())==-1){
 		printf("There are no free save records\n");
-		hogwash_mutex_unlock(&SavedMutex);
+		hlbr_mutex_unlock(&SavedMutex);
 		return FALSE;
 	}
 
@@ -248,8 +248,8 @@ int SavePacket(int PacketSlot, char* Key, int KeyLen, int Timeout){
 	Globals.Packets[PacketSlot].SaveCount++;
 	
 	/*unlock the save structures*/
-	hogwash_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
-	hogwash_mutex_unlock(&SavedMutex);
+	hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
+	hlbr_mutex_unlock(&SavedMutex);
 	
 	return TRUE;
 }
@@ -273,7 +273,7 @@ SaveQuery* GetAndLockSavedPackets(char* Key, int KeyLen){
 	q->NumResults=0;
 	
 	/*Lock the saved structs*/
-	hogwash_mutex_lock(&SavedMutex, GET_SAVED_1, &SaveLockID);
+	hlbr_mutex_lock(&SavedMutex, GET_SAVED_1, &SaveLockID);
 	
 	/*perform the query*/
 	for (i=0;i<SBins[KeyHash].NumInBin;i++){
@@ -281,8 +281,8 @@ SaveQuery* GetAndLockSavedPackets(char* Key, int KeyLen){
 	
 		if (s->KeyLen==KeyLen)
 		if (memcmp(s->Key, Key, KeyLen)==0){
-			hogwash_mutex_lock(&s->Mutex, GET_SAVED_2, &s->LockID);		
-			hogwash_mutex_lock(&Globals.Packets[s->PacketSlot].Mutex, GET_SAVED_3, &Globals.Packets[s->PacketSlot].LockID);
+			hlbr_mutex_lock(&s->Mutex, GET_SAVED_2, &s->LockID);		
+			hlbr_mutex_lock(&Globals.Packets[s->PacketSlot].Mutex, GET_SAVED_3, &Globals.Packets[s->PacketSlot].LockID);
 			
 			q->Saves[q->NumResults]=SBins[KeyHash].Items[i];
 			q->Packets[q->NumResults]=s->PacketSlot;
@@ -292,14 +292,14 @@ SaveQuery* GetAndLockSavedPackets(char* Key, int KeyLen){
 #ifdef DEBUG
 				printf("Too Many results to fit in struct\n");
 #endif		
-				hogwash_mutex_unlock(&SavedMutex);
+				hlbr_mutex_unlock(&SavedMutex);
 				return q;
 			}
 		}
 	}
 		
 	/*unlock the saved structs*/
-	hogwash_mutex_unlock(&SavedMutex);
+	hlbr_mutex_unlock(&SavedMutex);
 		
 #ifdef DEBUG
 	printf("Query Returned %i results\n",q->NumResults);
@@ -320,16 +320,16 @@ void UnlockSavedQuery(SaveQuery* q){
 	if (!q) return;
 	
 	/*lock the saved structs*/
-	hogwash_mutex_lock(&SavedMutex, UNLOCK_SAVED_1, &SaveLockID);
+	hlbr_mutex_lock(&SavedMutex, UNLOCK_SAVED_1, &SaveLockID);
 	
 	/*iterate through and unlock*/
 	for (i=0;i<q->NumResults;i++){
-		hogwash_mutex_unlock(&Globals.Packets[Saves[q->Saves[i]].PacketSlot].Mutex);
-		hogwash_mutex_unlock(&Saves[q->Saves[i]].Mutex);
+		hlbr_mutex_unlock(&Globals.Packets[Saves[q->Saves[i]].PacketSlot].Mutex);
+		hlbr_mutex_unlock(&Saves[q->Saves[i]].Mutex);
 	}
 	
 	/*unlock the saved structs*/
-	hogwash_mutex_unlock(&SavedMutex);
+	hlbr_mutex_unlock(&SavedMutex);
 	
 	free(q);
 }

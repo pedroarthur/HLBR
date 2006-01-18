@@ -1,0 +1,7 @@
+<include rules/bufferoverflow.rules>
+<include rules/codered-nimda.rules>
+<include rules/exploits-tcp.rules>
+<include rules/exploits-udp.rules>
+<include rules/http.rules>
+<include rules/mailvirus.rules>
+#<include rules/www.rules>

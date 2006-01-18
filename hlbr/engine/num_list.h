@@ -1,5 +1,5 @@
-#ifndef HOGWASH_NUM_LIST_H
-#define HOGWASH_NUM_LIST_H
+#ifndef HLBR_NUM_LIST_H
+#define HLBR_NUM_LIST_H
 
 #include "../config.h"
 

@@ -1,7 +1,7 @@
-#ifndef HOGWASH_JTREE_H
-#define HOGWASH_JTREE_H
+#ifndef HLBR_JTREE_H
+#define HLBR_JTREE_H
 
-#include "hogwash.h"
+#include "hlbr.h"
 
 #define MAX_STRING_LEN	1024
 

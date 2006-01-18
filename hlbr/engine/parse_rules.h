@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_PARSE_RULES_H_
-#define _HOGWASH_PARSE_RULES_H_
+#ifndef _HLBR_PARSE_RULES_H_
+#define _HLBR_PARSE_RULES_H_
 
 #include "../config.h"
-#include "hogwash.h"
+#include "hlbr.h"
 #include <stdio.h>
 
 /* In case were getting told our table name from config.h */

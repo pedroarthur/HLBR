@@ -1,8 +1,8 @@
-#ifndef HOGWASH_MACFILTER_H
-#define HOGWASH_MACFILTER_H
+#ifndef HLBR_MACFILTER_H
+#define HLBR_MACFILTER_H
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "route.h"
 
 

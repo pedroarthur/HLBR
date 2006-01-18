@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_PARSE_CONFIG_H_
-#define _HOGWASH_PARSE_CONFIG_H_
+#ifndef _HLBR_PARSE_CONFIG_H_
+#define _HLBR_PARSE_CONFIG_H_
 
 #include "../config.h"
-#include "hogwash.h"
+#include "hlbr.h"
 #include <stdio.h>
 
 int ParseConfig();

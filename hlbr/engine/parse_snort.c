@@ -136,7 +136,7 @@ int ParseSnort(char* DecoderLine, int RuleNum){
 #endif	
 
 	/**********************************/
-	/* Make hogwash lines out of these*/
+	/* Make hlbr lines out of these*/
 	/**********************************/
 	if ( (Globals.Rules[RuleNum].Action=SetAction(RuleNum, action))==ACTION_NONE){
 		printf("Error: Couldn't find action %s\n",action);

@@ -1,34 +1,75 @@
-Hogwash Light BR
+HOGWASH LIGHT BR
+
+by Andre Bertelli Araujo e
+   Joao Eriberto Mota Filho.
 
 INSTALACAO
 ----------
 
 Para instalar o HLBR, siga os seguintes procedimentos:
 
-1. Apos descompactar o tarball, execute o comando #./configure.
-2. Execute o comando #make (eh necessario ter o compilador C instalado).
-3. Copie o binario hlbr para /sbin.
-4. Crie o diretorio /etc/hlbr.
-5. Copie os arquivos hlbr.config e empty.rules para /etc/hlbr.
-6. Copie todos os arquivos existentes dentro do diretorio rules para 
-   /etc/hlbr.
-7. Ajuste o arquivo /etc/hlbr.config, se for o caso.
-8. Compile o kernel para retirar toda a parte TCP/IP ou suba as interfaces
+1. Apos descompactar o tarball, execute o comando "# ./configure".
+
+2. Execute o comando "# make". Eh necessario ter os compiladores C (gcc) e
+   C++ (g++) instalados.
+
+3. Execute o comando "# make" install para instalar o sistema com o arquivo
+   de configuracao comentado em portugues do Brasil. Se desejar que os comen-
+   tarios estejam em ingles, execute o comando #make installen.
+
+4. Ajuste as configuracoes no arquivo /etc/hlbr.config.
+
+5. Compile o kernel para retirar toda a parte TCP/IP OU suba as interfaces
    de rede com enderecos da rede 127.0.0.0 (nao use 127.0.0.1, pois jah
-   pertence ao loopback). Use algo como 127.0.0.2, 127.0.0.3 etc.
-9. Entre no diretório /etc/hlbr e execute:
+   pertence ao loopback). Use algo como 127.0.0.2, 127.0.0.3 etc. Recomen-
+   damos a utilizacao da segunda opcao, ao inves de compilar o kernel.
+   Isso evitarah a compilacao e permitirah auditorias com Iptraf, TCPdump
+   etc, uma vez que existe suporte ao IP (camada 3). O fluxo de dados se
+   darah pela camada 2 (enlace), mas poderah ser visto pela camada 3
+   (rede).
 
-    # hlbr -c hlbr.config -r empty.rules -l
+6. Para testar, entre no diretório /etc/hlbr e execute:
 
-    O daemon do HLBR devera ir ao ar.
-10. Pare o servico com Ctrl C.
-11. Ajuste/configure os arquivos de regras (*.rules).
-12. Execute:
+    # hlbr -c hlbr.config -r empty.rules
 
-    # hlbr -c hlbr.config -r empty.rules -l &
+    O daemon do HLBR deverah ir ao ar.
 
-13. Para voltar ao estado original (sem compilacao), digite #make clean
-14. Para maiores informações, visite o site http://hlbr.sourceforge.net.
+7. Pare o servico com Ctrl-C.
+
+8. Ajuste/configure os arquivos de regras (*.rules), existentes dentro de
+   /etc/hlbr/rules. Esses arquivos serao carregados pelo arquivo
+   /etc/hlbr/hlbr.rules.
+
+9. Para colocar o HLBR no ar, execute:
+
+    # hlbr -c hlbr.config -r hlbr.rules &
+    
+10. Os logs poderao ser encontrados em /var/log/hlbr, a nao ser que voce
+    mude isso no arquivo de configuracao (/etc/hlbr/hlbr.config) ou utilize
+    a opcao -l do daemon (digite "# hlbr" para ver as opcoes).
+
+11. Para retirah-lo do ar execute:
+
+    # killall hlbr
+
+12. Para desinstalar o HLBR, digite "# make uninstall". CUIDADO: todos os
+    arquivos de configuracao, regras e logs serao apagados.
+
+13. Para voltar o diretorio que contem o codigo fonte ao estado original
+    (sem compilacao), digite "# make clean".
+
+14. Para obter maiores informacoes e uma documentacao mais completa, visite
+    o site http://hlbr.sourceforge.net (ou http://hlbr.sf.net).
+
+
+
+UPGRADE
+-------
+
+Se voce estiver fazendo upgrade da versao 0.1-rc1 para 0.1-rc2, sugerimos que
+remova completamente a versao 0.1-rc1 antes de instalar a rc2. Ocorre que
+houve varias mudancas entre as duas versoes. A rc2 jah eh uma versao mais
+madura e, dela para a 0.1-final, esse procedimento nao serah mais necessario.
 
 
 
@@ -40,6 +81,17 @@ utilizado uma entrada include. Exemplo:
 
 <include codered.rules>
 <include nimda.rules>
+
+Qualquer arquivo de regras poderah ser carregado diretamente pelo HLBR com a
+opcao -r. No entanto, consideramos o /etc/hlbr/hlbr.rules como sendo o
+principal.
+
+Alguns "includes" existentes em /etc/hlbr/hlbr.rules poderao estar
+comentados.
+Isso significa que o conteudo dos arquivos de regras chamados por esses
+includes deverao ser analisados antes de serem colocados em producao. Esses
+arquivos contem regras que poderao paralisar a rede, dependendo do que voce
+usa tal rede.
 
 
 
@@ -56,7 +108,13 @@ message=Tentativa de comando remoto cmd.exe
 action=acao1
 </rule>
 
-Todas as regras iniciam com <rule> e terminam com </rule>.
+Todas as regras iniciam com <rule> e terminam com </rule>. O diretorio
+contrib contem as regras originais do projeto Hogwash, versao 0.5. Tenha
+cautela ao utilizar tais regras, pois algumas sao genericas, desatualizadas
+ou poderao conter argumentos que nao existem no HLBR. Sugerimos utilizar tais
+regras apenas para aprender sobre a confeccao de regras. Assim, procure uti-
+lizar as regras que vem juntamente com o HLBR. Ou desenvolva as suas proprias
+regras! Isso nao eh uma tarefa dificil.
 
 
 
@@ -70,18 +128,17 @@ interface name(eth0, eth1, eth5-eth6, ppp0)
 
 ethernet src(01:02:03:04:05:06)
 
-    Permite especificar o endereco MAC de origem.
+    Permite especificar o endereco MAC de origem. (ainda nao testado)
     
 ethernet dst(01:02:03:04:05:06)
 
-    Permite especificar o endereco MAC de destino.
+    Permite especificar o endereco MAC de destino. (ainda nao testado)
     
 ethernet type(IP, ARP, 0804)
 
-    Especifica um ou mais tipos de protocolos, especificados pelo campo
+    Especifica um ou mais tipos de protocolos, a serem encontrados no campo
     type do frame ethernet. O protocolo poderah ser especificado pelo nome
-    ou pelo numero. Vide definicoes da IANA no link 
-    http://www.iana.org/assignments/ethernet-numbers.
+    ou pelo numero. Vide definicoes da IANA [1]. (ainda nao testado)
 
 ip src(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
 
@@ -94,25 +151,29 @@ ip dst(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
 
 ip proto(TCP, UDP, ICMP, IGMP, PIM, OSPF, 13-15)
 
-    Especifica o tipo de protocolo IP, pelo nome ou pelo numero. Nos
-    GNU/Linux, hah uma relacao dentro de /etc/protocols.
-
+    Especifica o tipo de protocolo IP, pelo nome ou pelo numero. Em
+    sistemas Unix, hah uma relacao dentro de /etc/protocols. Vide IANA [4].
+    
 ip ttl(1-5)
 
-    Aguardando definicao. 
+    Verifica se o campo ttl de um pacote possui um dos valores declarados.
+    (ainda nao testado)
     
 icmp code(6)
 
-    Especifica o codigo ICMP. Vide RFC 792.
+    Especifica o codigo ICMP. Vide RFC 792 [2] e IANA [3]. (ainda nao
+    testado)
 
 icmp type(4)
 
-    Especifica o tipo ICMP. Vide RFC 792.
+    Especifica o tipo ICMP. Vide RFC 792 [2] e IANA [3]. (ainda nao
+    testado)
 
 tcp src(80, 21-25)
 
-    Especifica a porta TCP de origem. Pode ser utilizado um range ou mais de
-    uma porta.
+    Especifica a(s) porta(s) TCP de origem. Pode ser utilizado um range ou
+    mais de uma porta. Em sistemas Unix, hah uma relacao de portas dentro do
+    arquivo /etc/services.
     
 tcp dst(80, 21-25)
 
@@ -130,9 +191,9 @@ tcp content(/etc/passwd)
 
     Especifica um conteudo, dentro de um trafego TCP. O content considera a
     caixa do caractere (diferencia caracteres maiusculos e minusculos). 
-    Espacos serao considerados como caracteres. Sequencias em hexadecimal
-    poderao ser inseridas entre caracteres "pipe". Neste ultimo caso, nao
-    havera distincao da caixa. Exemplo: (test |00 00 00| attack).
+    Espacos serao considerados como caracteres. Sequencias de bytes em 
+    hexadecimal poderao ser inseridas entre caracteres "pipe". Neste ultimo
+    caso, nao havera distincao da caixa. Exemplo: (test |00 00 00| attack).
     
 tcp nocase(default.ida? XXXXXXX)
 
@@ -152,12 +213,13 @@ tcp flags(Sfr)
     Analise os estados da conexao dos pacotes TCP. As letras S, F, R, P, A,
     U, E, e C representam, repectivamente, os estados SYN, FIN, RST, PSH,
     ACK, URG, EGE e CWR. Se a letra for maiuscula, o estado deverah ocorrer.
-    Se for minuscula, o estado nao poderah ocorrer. Vide RFCs 793 e 3168.
+    Se for minuscula, o estado nao poderah ocorrer. Vide RFCs 793 [5] e
+    3168 [6]. (ainda nao testado)
     
 tcp offset(10,Hello World)
 
-    Determina a busca de um determinado conteudo, a partir do decimo byte
-    dentro de cada pacote (ou do payload????)
+    Determina a busca de um determinado conteudo, a partir do decimo byte,
+    dentro do payload de cada pacote. (ainda nao testado)
 
 
 
@@ -165,6 +227,33 @@ GARANTIAS
 ---------
 
 Todos os testes foram realizados no GNU/Linux Debian Sarge Stable R0a.
-Isso funciona perfeitamente!
+Isso funciona perfeitamente. Recomendamos o DEBIAN!
+
+
+
+REFERENCIAS
+-----------
+
+[1] http://www.iana.org/assignments/ethernet-numbers
+[2] ftp://ftp.rfc-editor.org/in-notes/rfc792.txt
+[3] http://www.iana.org/assignments/icmp-parameters
+[4] http://www.iana.org/assignments/protocol-numbers
+[5] ftp://ftp.rfc-editor.org/in-notes/rfc793.txt
+[6] ftp://ftp.rfc-editor.org/in-notes/rfc3168.txt
+
+
+
+AJUDEM_NOS!
+-----------
+
+Estamos precisando de voluntarios para integrar o grupo de desenvolvimento
+do HLBR. Voce pode ajudar desenvolvendo codigo, testando o HLBR, desenvol-
+vendo regras ou traduzindo documentos. Se estiver interessado, visite o
+site http://hlbr.sourceforge.net para maiores esclarecimentos.
+
+Todo o trabalho realizado por voluntarios serah testado, revisto  e
+homologado pelos lideres do projeto antes de serem liberados para uso em
+maquinas em producao.
+
 
 

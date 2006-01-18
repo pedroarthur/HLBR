@@ -1,0 +1,11 @@
+
+# nome / name:             exploits-tcp.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             14 Dez 05 / 14 Dec 05
+# atualizacao / update:    nenhuma / none
+
+# Objetivo / Target: Bloquear tentativas de buffer overflow / Block buffer overflow attempts.
+
+
+<rule>
+....

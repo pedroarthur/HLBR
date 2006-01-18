@@ -1,8 +1,8 @@
-#ifndef HOGWASH_PACKET_CACHE_H
-#define HOGWASH_PACKET_CACHE_H
+#ifndef HLBR_PACKET_CACHE_H
+#define HLBR_PACKET_CACHE_H
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 
 #define MAX_QUERY_RESULTS	128
 #define MAX_SAVES			1024

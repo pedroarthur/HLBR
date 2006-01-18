@@ -1,8 +1,10 @@
 #!/bin/bash
 
-echo "*************************"
-echo "Configure script for HLBR"
-echo "*************************"
+echo
+echo "***********************************"
+echo "Arquivo de configuracao para o HLBR"
+echo "     Configure script for HLBR"
+echo "***********************************"
 echo ""
 echo ""
 
@@ -15,11 +17,11 @@ mv -f config.h config.h.old
 fi
 
 #start up the config.h file
-echo "#ifndef _HOGWASH_CONFIG_H_" >> config.h
-echo "#define _HOGWASH_CONFIG_H_" >> config.h
+echo "#ifndef _HLBR_CONFIG_H_" >> config.h
+echo "#define _HLBR_CONFIG_H_" >> config.h
 
 #Check for the OS
-echo -n "Checking OS................."
+echo -n "Buscando SO / Checking OS.........................."
 echo "/* OS */" >> config.h
 THIS_OS=`uname`
 OS=""
@@ -47,7 +49,7 @@ if [ "$THIS_OS" == "OpenBSD" ]; then
 fi
 
 if [ "$OS" == "" ]; then
-	echo "Couldn't determine OS"
+	echo "Nao posso determinar o SO / Couldn't determine OS"
 	exit
 fi
 
@@ -61,7 +63,7 @@ echo "$OS"
 
 #check for a c compiler
 CCompiler=""
-echo -n "Checking for a C compiler..."
+echo -n "Buscando compilador C / Checking for a C compiler.."
 if [ -f "/usr/local/bin/gcc" ]; then
 	CCompiler="/usr/local/bin/gcc"
 	echo $CCompiler
@@ -74,12 +76,12 @@ elif [ -f "/bin/gcc" ]; then
 fi
 
 if [ "$CCompiler" == "" ]; then
-	echo "Not found"
+	echo "Nao encontrado / Not found"
 	exit
 fi
 
 #check the endian
-echo -n "Checking endian-ness........"
+echo -n "Buscando endianness / Checking endianness.........."
 ENDIAN=""
 cat >conftest.endian.c <<EOF
 int main(){
@@ -105,20 +107,20 @@ rm -f conftest.endian.c
 
 if [ "$ENDIAN_TEST" == "LITTLE" ]; then
 	ENDIAN="LITTLE"
-	echo "#define HOGWASH_LITTLE_ENDIAN" >> config.h
+	echo "#define HLBR_LITTLE_ENDIAN" >> config.h
 	echo "" >> config.h
 	echo "LITTLE"
 fi
 
 if [ "$ENDIAN_TEST" == "BIG" ]; then
 	ENDIAN="BIG"
-	echo "#define HOGWASH_BIG_ENDIAN" >> config.h
+	echo "#define HLBR_BIG_ENDIAN" >> config.h
 	echo "" >> config.h
 	echo "BIG";
 fi
 
 if [ "$ENDIAN" == "" ]; then
-	echo "Failed to determine endian-ness";
+	echo "Falha ao determinar o endianness / Failed to determine endianness";
 	exit	
 fi
 
@@ -163,7 +165,7 @@ fi
 #done checking for mysql
 
 #check for a built-in daemon call
-echo -n "Checking for daemon........."
+echo -n "Buscando o daemon / Checking for daemon............"
 ENDIAN=""
 cat >conftest.daemon.c <<EOF
 #include <unistd.h>
@@ -176,31 +178,31 @@ if $CCompiler -o conftest.daemon conftest.daemon.c > /dev/null 2>&1
 then 
 	echo "#define HAS_DAEMON" >> config.h
 	echo "" >> config.h
-	echo "Found"
+	echo "Encontrado / Found"
 else
-	echo "Not Found"
+	echo "Nao encontrado / Not found"
 fi
 rm -f conftest.daemon conftest.daemon.c 
 #end checking for daemon
 
 #check for a built-in freopen call
-echo -n "Checking for freopen........"
+echo -n "Buscando freopen / Checking for freopen............"
 cat >conftest.freopen.c <<EOF
 #include <stdio.h>
 int main() { freopen("/dev/null", "w", stdin); return 0; }
 EOF
 if $CCompiler -o conftest.freopen conftest.freopen.c > /dev/null 2>&1
 then
-	echo "Found"
+	echo "Encontrado / Found"
         echo "#define HAS_FREOPEN" >> config.h
 else
-        echo "Not Found"
+        echo "Nao encontrado / Not found"
 fi
 rm -f conftest.freopen conftest.freopen.c
 #end checking for freopen
 
 #check for a built-in dlopen call
-echo -n "Checking for dlopen........."
+echo -n "Buscando dlopen / Checking for dlopen.............."
 cat >conftest.dlopen.c <<EOF
 #include <unistd.h>
 int main() { dlopen(0,0); return 0; }
@@ -209,11 +211,11 @@ if $CCompiler -o conftest.dlopen conftest.dlopen.c -ldl -rdynamic > /dev/null 2>
 then
         echo "#define HAS_DLOPEN" >> config.h
         echo "" >> config.h
-        echo "Found"
+        echo "Encontrado / Found"
 	echo "LIB_DL=-ldl" >> Makefile
 	echo "LATE_BINDING=-rdynamic" >> Makefile
 else
-        echo "Not Found"
+        echo "Nao encontrado / Not found"
 fi
 rm -f conftest.dlopen conftest.dlopen.c
 #end checking for dlopen
@@ -231,10 +233,17 @@ echo "#define NULL ((void *)0)" >> config.h
 echo "#endif" >> config.h
 echo "" >> config.h
 echo "" >> config.h
-echo "#endif //ifdef hogwash" >> config.h
+echo "#endif //ifdef hlbr" >> config.h
 
 
 #add in all the stock stuff to the Makefile
 cat Makefile.in >> Makefile
 
-echo "Done."
+echo
+echo "Pronto / Done."
+echo
+echo "-------------------------------"
+echo 'Execute "# make" para compilar.'
+echo 'Run "# make" to compile.'
+echo "-------------------------------"
+echo

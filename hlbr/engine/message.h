@@ -1,8 +1,8 @@
-#ifndef HOGWASH_MESSAGE_H
-#define HOGWASH_MESSAGE_H
+#ifndef HLBR_MESSAGE_H
+#define HLBR_MESSAGE_H
 
 #include "../config.h"
-#include "hogwash.h"
+#include "hlbr.h"
 
 #define	MESSAGE_ITEM_CHAR			1
 #define	MESSAGE_ITEM_SIP			2

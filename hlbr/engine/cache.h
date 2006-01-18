@@ -1,8 +1,8 @@
-#ifndef HOGWASH_CACHE_H
-#define HOGWASH_CACHE_H
+#ifndef HLBR_CACHE_H
+#define HLBR_CACHE_H
 
 #include "../config.h"
-#include "hogwash.h"
+#include "hlbr.h"
 
 #define CACHE_MAX_KEYS				256
 #define CACHE_MAX_ITEMS_PER_KEY		64

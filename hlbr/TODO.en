@@ -1,0 +1,41 @@
+To version 0.1
+
+- apply patches (done)
+- fix errors in text files (done)
+- create manual
+- check README (done)
+- translate README to english
+- change make distclean to make clean (done)
+- create make install, installen and uninstall (done)
+- change /sbin/hlbr to /usr/sbin/hlbr (done)
+- make .deb package
+- check stability
+
+
+
+To version 0.2
+
+- test to see if it works (in a real environment)
+- check all errors documented at UCB
+- check response (route sip)
+- check B&S and change hlbr.conf file
+- insert actions renocase and recontent (re=regular expression; will accept 
+          commas to separate more than one expression)
+- insert tests tcp dbcontent and tcp dbnocase (will consult a txt file with a
+          list of words. if the words aren't found in the traffic, it will
+          receive the action)
+- create online manual
+- create file for /etc/init.d
+- error messages also in pt_BR
+	  
+
+
+To version 1.0
+
+- l10n
+- rules!!!!!!
+- expand actions renocase and recontent using libpcre
+- finish documentation at website
+- remove useless comments from code
+- create more possibilities of regular expressions
+- create a Snort rules conversor

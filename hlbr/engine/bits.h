@@ -1,5 +1,5 @@
-#ifndef _HOGWASH_BITS_H_
-#define _HOGWASH_BITS_H_
+#ifndef _HLBR_BITS_H_
+#define _HLBR_BITS_H_
 
 #ifndef TRUE
 #define TRUE	1

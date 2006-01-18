@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_DECODE_IP_H_
-#define _HOGWASH_DECODE_IP_H_
+#ifndef _HLBR_DECODE_IP_H_
+#define _HLBR_DECODE_IP_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "decode.h"
 
 #define IP_PROTO_ICMP	1
@@ -10,7 +10,7 @@
 #define IP_PROTO_UDP	17
 
 typedef struct ip_header{
-#ifdef HOGWASH_LITTLE_ENDIAN
+#ifdef HLBR_LITTLE_ENDIAN
 	unsigned char	ihl:4,
 		version:4;
 #else

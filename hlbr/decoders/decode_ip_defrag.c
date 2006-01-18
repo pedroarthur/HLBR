@@ -306,7 +306,7 @@ void* DecodeIPDefrag(int PacketSlot){
 		printf("Proto is %u\n",idata->Header->protocol);
 		
 		/*check to see if we have all the pieces*/
-		hogwash_mutex_lock(&FragMutex, FRAG_LOCK_1, &FragLockID);
+		hlbr_mutex_lock(&FragMutex, FRAG_LOCK_1, &FragLockID);
 		CI=CacheGet(FragCache, (unsigned char*)&Key, sizeof(Key), p->tv.tv_sec);
 		NumFrags=0;
 		if (CI){
@@ -377,7 +377,7 @@ void* DecodeIPDefrag(int PacketSlot){
 			printf("First piece\n");
 #endif											
 		}
-		hogwash_mutex_unlock(&FragMutex);
+		hlbr_mutex_unlock(&FragMutex);
 	}else{
 		data=calloc(sizeof(IPDefragData),1);
 		data->IsRebuilt=FALSE;

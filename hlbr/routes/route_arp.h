@@ -1,8 +1,8 @@
-#ifndef HOGWASH_ROUTE_ARP_H
-#define HOGWASH_ROUTE_ARP_H
+#ifndef HLBR_ROUTE_ARP_H
+#define HLBR_ROUTE_ARP_H
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "route.h"
 
 int InitRouteARP();

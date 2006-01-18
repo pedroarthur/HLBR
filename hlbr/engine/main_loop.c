@@ -24,7 +24,7 @@ extern int			TCPDecoderID;
 extern int			UDPDecoderID;
 
 /************************************
-* Called whenever hogwash is idle
+* Called whenever hlbr is idle
 ************************************/
 void IdleFunc(){
 #ifdef DEBUGPATH

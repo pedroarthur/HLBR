@@ -1,8 +1,8 @@
-#ifndef HOGWASH_BOYER_MOORE_TREE_H
-#define HOGWASH_BOYER_MOORE_TREE_H
+#ifndef HLBR_BOYER_MOORE_TREE_H
+#define HLBR_BOYER_MOORE_TREE_H
 
 #include "../config.h"
-#include "hogwash.h"
+#include "hlbr.h"
 
 typedef struct bnode{
 	unsigned char	byte;

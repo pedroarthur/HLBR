@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_PACKET_LINUX_RAW_H_
-#define _HOGWASH_PACKET_LINUX_RAW_H_
+#ifndef _HLBR_PACKET_LINUX_RAW_H_
+#define _HLBR_PACKET_LINUX_RAW_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "packet.h"
 
 int OpenInterfaceLinuxRaw(int InterfaceID);

@@ -1,0 +1,72 @@
+
+# nome / name:             shell.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             14 Dez 05 / 14 Dec 05
+# atualizacao / update:    nenhuma / none
+
+# Objetivo / Target: Bloquear chamadas a shells remotos / Block remote shell calls.
+
+<rule>
+ip dst(servers)
+tcp dst(53,80,110,220)
+tcp nocase(/bin/bash)
+message=(shell) Tentativa de /bin/bash / /bin/bash attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+tcp dst(53,80,110,220)
+tcp nocase(/bin/sh)
+message=(shell) Tentativa de /bin/sh / /bin/sh attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+tcp dst(53,80,110,220)
+tcp nocase(/bin/ksh)
+message=(shell) Tentativa de /bin/ksh / /bin/ksh attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+tcp dst(53,80,110,220)
+tcp nocase(/bin/csh)
+message=(shell) Tentativa de /bin/csh / /bin/csh attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(/bin/bash)
+message=(shell) Tentativa de /bin/bash / /bin/bash attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(/bin/sh)
+message=(shell) Tentativa de /bin/sh / /bin/sh attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(/bin/ksh)
+message=(shell) Tentativa de /bin/ksh / /bin/ksh attempt
+action=acao1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(/bin/csh)
+message=(shell) Tentativa de /bin/csh / /bin/csh attempt
+action=acao1
+</rule>
+

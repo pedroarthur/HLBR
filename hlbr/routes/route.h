@@ -1,8 +1,8 @@
-#ifndef HOGWASH_ROUTE_H
-#define HOGWASH_ROUTE_H
+#ifndef HLBR_ROUTE_H
+#define HLBR_ROUTE_H
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 
 #define ROUTE_NONE	-1
 

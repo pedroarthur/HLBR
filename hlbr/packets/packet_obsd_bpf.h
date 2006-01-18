@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_PACKET_OBSD_BPF_H_
-#define _HOGWASH_PACKET_OBSD_BPF_H_
+#ifndef _HLBR_PACKET_OBSD_BPF_H_
+#define _HLBR_PACKET_OBSD_BPF_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "packet.h"
 
 int OpenInterfaceOBSDBPF(int InterfaceID);

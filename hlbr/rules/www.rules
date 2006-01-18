@@ -1,19 +1,48 @@
-# Bloqueio de acessos www indevidos
 
-# Descomente a regra a seguir se nao possuir paginas ASP
-#<rule>
-#ip dst(www)
-#tcp dst(80,443)
-#tcp content(.asp)
-#message=Tentativa de .asp (.asp attempt)
-#action=acao1
-#</rule>
+# nome / name:             www.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             29 Nov 05 / 29 Nov 05
+# atualizacao / update:    14 Dez 05 / 14 Dec 05
 
-# Descomente a regra a seguir se nao possuir paginas PHP
-#<rule>
-#ip dst(www)
-#tcp dst(80,443)
-#tcp content(.asp)
-#message=Tentativa de .php (.php attempt)
-#action=acao1
-#</rule>
+# Objetivo / Target: Bloquear tentativas de acesso www / Block www access attempts.
+
+# Comente a regra a seguir se possuir paginas ASP
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(.asp)
+message=(www) Acesso .asp / .asp access
+action=acao1
+</rule>
+
+# Comente a regra a seguir se possuir paginas PHP
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(.php)
+message=(www) Acesso .php / .php access
+action=acao1
+</rule>
+
+# Comente a regra a seguir se possuir paginas SHTML
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(.shtml)
+message=(www) Acesso .shtml / .shtml access
+action=acao1
+</rule>
+
+# Comente a regra a seguir se possuir paginas CGI
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(/cgi-bin/)
+message=(www) Acesso CGI / CGI access
+action=acao1
+</rule>
+

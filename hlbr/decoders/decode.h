@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_DECODE_H_
-#define _HOGWASH_DECODE_H_
+#ifndef _HLBR_DECODE_H_
+#define _HLBR_DECODE_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 
 #define DECODER_NONE	-1
 

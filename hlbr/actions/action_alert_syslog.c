@@ -1,35 +1,3 @@
-/*
- * Author: solar@linbsd.net
- * File: action_alert_syslog.c
- * License: GNU General Public License (GPL)
- * Indent Options:
- *      indent -kr -nbad -i4 -br -ce -nbc -npcs -cli4 -sc action_alert_syslog.c
- *
- * This file was made possible thanks to 
- * (K.A.S Offering Secure Managed Security Solutions) http://www.kas.net.au
- *
- */
-
-/* 
- * 
- *  Hogwash (Inline packet scrubber)
- *  Copyright (C) 2001,2002,2003  Jason Larsen
- *  
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- * 
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *   
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -145,9 +113,9 @@ int SyslogInit(ActionSyslogRec * Data)
 	return FALSE;
     }
     data = (ActionSyslogRec *) Data;
-    openlog("hogwash", data->options, data->facility);
+    openlog("hlbr", data->options, data->facility);
     DBG((printf
-	 ("Calling openlog(\"%s\", 0%x, 0%x)\n", "hogwash", data->options,
+	 ("Calling openlog(\"%s\", 0%x, 0%x)\n", "hlbr", data->options,
 	  data->facility)
 	));
     data->Active = TRUE;

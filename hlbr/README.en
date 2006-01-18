@@ -1,0 +1,248 @@
+HOGWASH LIGHT BR
+
+by Andre Bertelli Araujo e
+   Joao Eriberto Mota Filho.
+
+INSTALLATION
+------------
+
+To install HLBR, follow these steps:
+
+1. After decompressing the tarball, run the command "# ./configure".
+
+2. Run the command "# make". You will need to have compilers for C (gcc) and
+   C++ (g++) already installed.
+
+3. Run the command "# make installen" to install HLBR with the english version
+   of the config file (comments in the file will be in english). To install
+   the file with comments in brazilian portuguese, run the command
+   "#make install".
+
+4. Edit the file /etc/hlbr.config as needed.
+
+5. Compile a new kernel removing all the TCP/IP stack and related stuff OR
+   set up the network interfaces with address in the 127.0.0.0 range (don't
+   use 127.0.0.1, because that's already used by the loopback interface).
+   Use address like 127.0.0.2, 127.0.0.3, and so on. We recommend the
+   second option instead of recompiling the kernel. That will make the
+   installation easier and you will able to use other programs to audit the
+   traffic, like Iptraf, TCPdump, and others, because there will be IP
+   support (layer 3). The data will flow by the layer 2 (link), but it will
+   be visible from the layer 3 (network).
+
+6. To test, go to directory /etc/hlbr and run:
+
+    # hlbr -c hlbr.config -r empty.rules
+
+	HLBR daemon should be loaded.
+
+7. Stop the service with Ctrl-C.
+
+8. Change the rule files (*.rules) inside /etc/hlbr/rules as needed. These
+   files will be loaded by /etc/hlbr/hlbr.rules.
+
+9. To run HLBR, use:
+
+    # hlbr -c hlbr.config -r hlbr.rules &
+
+10. Log files can be find in /var/log/hlbr, unless you change this path in
+    the configuration file (/etc/hlbr/hlbr.config) or use the -l option
+    (type "hlbr" to see the options).
+
+11. To stop it, run:
+
+    # killall hlbr
+
+12. To uninstall , use "# make uninstall". WARNING: all the configuration 
+    files, rules and logs will be deleted.
+
+13. To 'clean up' the source code directory (as if it never was compiled),
+    use "# make clean".
+
+14. For more information and better documentation, go to the project website:
+    http://hlbr.sourceforge.net (or http://hlbr.sf.net).
+
+
+
+UPGRADE
+-------
+
+If you're upgrading from version 0.1-rc1 to 0.1-rc2, we recommend you do a
+complete removal of version 0.1-rc1 before installing rc2. That's because
+there were too much changes between the two versions. 0.1-rc2 is a more
+mature version, and this procedure won't be necessary when the 0.1 final
+version is released.
+
+
+
+RULES FILES
+-----------
+
+The rules files can have several rules and include other files, using an
+<include> directive. Example:
+
+<include codered.rules>
+<include nimda.rules>
+
+Any rules files can be loaded directly by HLBR with the -r option. However,
+we consider /etc/hlbr/hlbr.rules as the main rules file.
+
+Some <include>s in /etc/hlbr/hlbr.rules can be commented out.
+That means the rules files indicated by these <include>s must be analysed
+before being activated and used in production. These files can have rules
+that can, potentially, paralise your network, depending of what you use in
+your network.
+
+
+
+HLBR RULES
+----------
+
+An example of a rule:
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(cmd.exe)
+message=Remote shell try cmd.exe
+action=action1
+</rule>
+
+All rules start with <rule> and end with </rule>. The contrib directory
+have the original rules from the Hogwash project, version 0.5. Be careful
+with those rules, because some of them are generic, out of date or can have
+options not present in HLBR. Such rules can be useful to learning about how
+to make rules, though. So, use only the rules that come with HLBR in your
+production environment, or develop your own rules! - it's not hard.
+
+
+
+RULES OPTIONS EXAMPLES
+----------------------
+
+interface name(eth0, eth1, eth5-eth6, ppp0)
+
+    Matches an interface, several interfaces or ranges.
+
+ethernet src(01:02:03:04:05:06)
+
+    Matches the source MAC address. (not tested yet)
+    
+ethernet dst(01:02:03:04:05:06)
+
+    Matches the destination MAC address. (not tested yet)
+    
+ethernet type(IP, ARP, 0804)
+
+    Matches one or more protocols, as defined in the 'type' field of the
+    ethernet frame. The protocol can be specified by his name or number.
+    See IANA definitions[1]. (not tested yet)
+
+ip src(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
+
+    Matches the source IP address. It can be specified as direct IP
+    addresses, network addresses, ranges or IP lists.
+    
+ip dst(10.10.10.2, WebServers, 192.168.0.0/16, 172.12.34.24-172.12.34.55)
+
+    Matches the destination IP address.
+
+ip proto(TCP, UDP, ICMP, IGMP, PIM, OSPF, 13-15)
+
+    Matches the protocol type carried by the IP packet. Unix systems have
+    a list of protocols in /etc/protocols. See IANA[4].
+    
+ip ttl(1-5)
+
+    Verify the value of the ttl field. (not tested yet)
+    
+icmp code(6)
+
+    Matches the ICMP code. See RFC 792 [2] and IANA [3]. (not tested yet)
+
+icmp type(4)
+
+    Matches the ICMP type. See RFC 792 [2] and IANA [3]. (not tested yet)
+
+tcp src(80, 21-25)
+
+    Matches the TCP source port(s). Several ports or ranges can be used.
+    Unix systems have a list of ports in /etc/services.
+    
+tcp dst(80, 21-25)
+
+    Matches TCP destination port(s).
+    
+udp src(53)
+
+    matches UDP source port(s).
+    
+udp dst(32000-32999, 53)
+
+    Matches UDP destination port(s).
+    
+tcp content(/etc/passwd)
+
+    Matches content inside a TCP stream. This test does NOT ignore case.
+    Spaces are considered as characters. Non-ASCII byte strings can be
+    specified in hexadecimal between two pipe ('|') characters.
+    
+tcp nocase(default.ida? XXXXXXX)
+
+    Similar to tcp content, but it DOES ignore case.
+
+udp content(bind|90 90 90|)
+
+    Similar to tcp content, but for UDP packets.
+    
+udp nocase(|90 90 90 90 90 90 90 90|)
+
+    Similar to tcp nocase, but for UDP packets.
+    
+tcp flags(Sfr)
+
+    Test the TCP connection flags. Letters S, F, R, P, A, U, E, and C mean,
+    respectively, the flags SYN, FIN, RST, PSH, ACK, URG, EGE and CWR. If
+    the letter is in uppercase, the flag must be set. If the letter is in
+    lowercase, the flag must NOT be set. See RFCs 793 [5] and 3168 [6].
+    (not tested yet)
+    
+tcp offset(10,Hello World)
+
+    Test the specified string ("Hello world") inside the TCP payload, 
+    starting from the 10th byte. (not tested yet)
+
+
+
+WARRANTIES
+----------
+
+All tests were done under Debian GNU/Linux Sarge Stable R0a. It works nicely.
+We recommend DEBIAN!
+
+
+
+REFERENCIES
+-----------
+
+[1] http://www.iana.org/assignments/ethernet-numbers
+[2] ftp://ftp.rfc-editor.org/in-notes/rfc792.txt
+[3] http://www.iana.org/assignments/icmp-parameters
+[4] http://www.iana.org/assignments/protocol-numbers
+[5] ftp://ftp.rfc-editor.org/in-notes/rfc793.txt
+[6] ftp://ftp.rfc-editor.org/in-notes/rfc3168.txt
+
+
+
+HELP US!
+--------
+
+We need volunteers to help HLBR development team. You can help developing
+code, testing HLBR, writing rules or translating documents. If you're
+interested, visit http://hlbr.sourceforge.net for mroe information.
+
+All work done by volunteers will be tested, revised and homologated by the
+project leaders before being released to be used in production servers.
+
+
+

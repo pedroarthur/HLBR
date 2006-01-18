@@ -1,48 +1,76 @@
-# Bloqueio de metodos HTTP
-# Vide RFCs 1945 e 2616
+
+# nome / name:             http.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             29 Nov 05 / 29 Nov 05
+# atualizacao / update:    13 Dez 05 / 13 Dec 05
+
+# Objetivo / Target: Bloqueio de metodos HTTP (Vide RFCs 1945 e 2616) / Block HTTP methods.
+
+# Para a sua seguranca, os metodos SEARCH e CONNECT devem ser bloqueados.
+# For your security SEARCH and CONNECT methods has been blocked.
 
 <rule>
 ip dst(www)
-tcp dst(80,443)
+tcp dst(80)
 tcp content(SEARCH)
-message=Possivel tentativa de buffer overflow (Buffer overflow attempt)
+message=(http) Tentativa de buffer overflow / Buffer overflow attempt
 action=acao1
 </rule>
 
 <rule>
 ip dst(www)
-tcp dst(80,443)
+tcp dst(80)
 tcp content(CONNECT)
-message=Tentativa de utilizacao de open proxy (Open proxy usage attempt)
+message=(http) Tentativa de open proxy / Open proxy attempt
 action=acao1
 </rule>
 
-# Descomente a regra a seguir se quiser bloquear POST
+# Comente a regra a seguir se nao quiser bloquear POST. Por acaso, voce precisa de POST?
 
-#<rule>
-#ip dst(www)
-#tcp dst(80,443)
-#tcp content(POST)
-#message=Tentativa de POST (POST attempt)
-#action=acao1
-#</rule>
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(POST)
+message=(http) Tentativa de POST / POST attempt
+action=acao1
+</rule>
 
-# Descomente a regra a seguir se quiser bloquear PUT
+# Comente a regra a seguir se nao quiser bloquear PUT. Por acaso, voce precisa de PUT?
 
-#<rule>
-#ip dst(www)
-#tcp dst(80,443)
-#tcp content(PUT)
-#message=Tentativa de PUT (PUT attempt)
-#action=acao1
-#</rule>
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(PUT)
+message=(http) Tentativa de PUT / PUT attempt
+action=acao1
+</rule>
 
-# Descomente a regra a seguir se quiser bloquear OPTIONS
+# Comente a regra a seguir se nao quiser bloquear OPTIONS. Por acaso, voce precisa de OPTIONS?
 
-#<rule>
-#ip dst(www)
-#tcp dst(80,443)
-#tcp content(OPTIONS)
-#message=Tentativa de OPTIONS (OPTIONS attempt)
-#action=acao1
-#</rule>
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(OPTIONS)
+message=(http) Tentativa de OPTIONS / OPTIONS attempt
+action=acao1
+</rule>
+
+# Comente a regra a seguir se nao quiser bloquear TRACE. Por acaso, voce precisa de TRACE?
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(TRACE)
+message=(http) Tentativa de TRACE / TRACE attempt
+action=acao1
+</rule>
+
+# Comente a regra a seguir se nao quiser bloquear DELETE. Por acaso, voce precisa de DELETE?
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(DELETE)
+message=(http) Tentativa de DELETE / DELETE attempt
+action=acao1
+</rule>

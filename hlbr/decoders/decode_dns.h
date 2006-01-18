@@ -1,8 +1,8 @@
-#ifndef _HOGWASH_DECODE_DNS_H_
-#define _HOGWASH_DECODE_DNS_H_
+#ifndef _HLBR_DECODE_DNS_H_
+#define _HLBR_DECODE_DNS_H_
 
 #include "../config.h"
-#include "../engine/hogwash.h"
+#include "../engine/hlbr.h"
 #include "decode.h"
 
 #define MAX_DNS_QUESTIONS	5
