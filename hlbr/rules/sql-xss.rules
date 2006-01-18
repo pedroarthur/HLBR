@@ -1,0 +1,48 @@
+
+# nome / name:             sql-xss.rules
+# criado por / created by: Hardik Shah
+# data / date:             10 jan 06
+# atualizacao / update:    nenhuma / none
+
+# Objetivo / Target: Checar SQL injection e cross site script / SQL injection and xss checks
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(' or 1=1--)
+message=(sql-xss-1) Requisicao / Request sql injection sql server
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(--)
+message=(sql-xss-2) Requisicao / Request sql injection sql server
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(' or '1'='1)
+message=(sql-xss-3) Requisicao / Request sql injection ms-access, oracle
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(' or union select)
+message=(sql-xss-4) Requisicao / Request sql injection union 
+action=action1
+</rule>
+
+#XSS checks
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(<script>)
+message=(sql-xss-5) Requisicao / Request XSS
+action=action1
+</rule>
