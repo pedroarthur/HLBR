@@ -1,0 +1,15 @@
+
+# nome / name:             php.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             06 Jan 06 / 06 Jan 06
+# atualizacao / update:    
+
+# Objetivo / Target: Bloquear ataques ao php / Block attacks to php.
+
+<rule>
+ip dst(www3)
+tcp dst(80)
+tcp content(/xmlrpc.php)
+message=(php-1) Requisicao xmlrpc / xmlrpc request
+action=action1
+</rule>
