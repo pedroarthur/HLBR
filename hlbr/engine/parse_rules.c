@@ -23,7 +23,7 @@ int ParseDecoderLine(char* DecoderLine, int RuleNum);
 ***********************************/
 int SetAction(int RuleID, char* ActionName){
 	int i;
-	
+
 	DEBUGPATH;
 
 	for (i=0;i<Globals.NumActions;i++){
@@ -31,7 +31,7 @@ int SetAction(int RuleID, char* ActionName){
 			return i;
 		}
 	}
-	
+
 	return ACTION_NONE;
 }
 
@@ -46,7 +46,7 @@ int ParseRule(FILE* fp){
 	char		DefaultRule[256];
 	int			GID;
 	int			Revision;
-	
+
 	DEBUGPATH;
 
 	RuleNum=Globals.NumRules;
@@ -60,7 +60,7 @@ int ParseRule(FILE* fp){
 		if (strcasecmp(LineBuff, "</rule>")==0){
 #ifdef DEBUG
 			printf("All done with this rule\n");
-#endif			
+#endif
 			if (!ActionSet){
 				printf("Warning: Action defaults to drop for rule %d\n", RuleNum);
 			}
@@ -76,22 +76,22 @@ int ParseRule(FILE* fp){
 				printf("Warning: Action was already set to %s\n",
 					Globals.Actions[Globals.Rules[RuleNum].Action].Name);
 			}
-			
+
 			if ( (Globals.Rules[RuleNum].Action=SetAction(RuleNum, LineBuff+7))!=ACTION_NONE){
 				ActionSet=TRUE;
 #ifdef DEBUG
 			printf("Setting Action %s\n",Globals.Actions[Globals.Rules[RuleNum].Action].Name);
-#endif							
+#endif
 			}
-			
+
 			if (!ActionSet){
 				printf("Error: Couldn't find action %s\n",LineBuff+7);
 				return FALSE;
-			}	
+			}
 		}else if (strncasecmp(LineBuff, "message=",	8)==0){
 #ifdef DEBUG
 			printf("Setting Message To \"%s\"\n",LineBuff+8);
-#endif		
+#endif
 			if (MessageSet){
 				printf("Warning: Message was already set\n");
 			}
@@ -102,20 +102,20 @@ int ParseRule(FILE* fp){
 			Globals.Rules[RuleNum].GlobalID=atoi(LineBuff+4);
 #ifdef DEBUG
 			printf("Setting GID To %i\n",Globals.Rules[RuleNum].GlobalID);
-#endif					
+#endif
 		}else if (strncasecmp(LineBuff, "rev=",	4)==0){
 			Globals.Rules[RuleNum].Revision=atoi(LineBuff+4);
 #ifdef DEBUG
 			printf("Setting Rev To %i\n",Globals.Rules[RuleNum].Revision);
-#endif					
+#endif
 		}else{
 			if (!ParseDecoderLine(LineBuff, RuleNum)){
 				printf("Warning: Couldn't understand rule option: %s\n",LineBuff);
 			}else{
-			}	
+			}
 		}
 	}
-	
+
 	return FALSE;
 }
 
@@ -143,14 +143,14 @@ int ParseDecoderLine(char* DecoderLine, int RuleNum){
 		printf("Warning: Invalid line %s\n",Line);
 		return FALSE;
 	}
-	
+
 	*Delim=0x00;
 	TestName=Delim+1;
-	
+
 	/*find that decoder*/
 #ifdef DEBUG
 	printf("Decoder Name is %s\n",DecoderName);
-#endif	
+#endif
 
 	DecoderID=GetDecoderByName(DecoderName);
 	if (DecoderID==DECODER_NONE){
@@ -164,7 +164,7 @@ int ParseDecoderLine(char* DecoderLine, int RuleNum){
 		printf("There are no known tests for decoder %s\n", Decoder->Name);
 		return FALSE;
 	}
-	
+
 	Delim=strchr(TestName, '(');
 	if (!Delim){
 		printf("Error: Expected (\n");
@@ -173,7 +173,7 @@ int ParseDecoderLine(char* DecoderLine, int RuleNum){
 		*Delim=0x00;
 		Args=Delim+1;
 	}
-		
+
 	Delim=strchr(Args, ')');
 	if (!Delim){
 		printf("Error: Expected )\n");
@@ -190,14 +190,14 @@ int ParseDecoderLine(char* DecoderLine, int RuleNum){
 		){
 #ifdef DEBUG
 			printf("Found test %s\n",TestName);
-#endif			
+#endif
 			if (Test->AddNode) return Test->AddNode(Test->ID, RuleNum, Args);
 			return FALSE;
 		}
 		Test=Test->Next;
 	}
-	
-	printf("Warning: There is no test \"%s\" for decoder \"%s\"\n",TestName, DecoderName);	
+
+	printf("Warning: There is no test \"%s\" for decoder \"%s\"\n",TestName, DecoderName);
 	return FALSE;
 }
 
@@ -214,29 +214,29 @@ int RetrieveRuleMysql(char* DBase, char* User, char* Pass, char* Host){
 	char			query[1024];
 	MYSQL_RES*		res;
 	MYSQL_ROW		row;
-	
+
 	MYSQL_RES*		res2;
 	MYSQL_ROW		row2;
-	
+
 	char			DecoderLine[512];
 	int			RuleNum;
 
 	DEBUGPATH;
-	
+
 	mysql_init(&sql);
 	if (!mysql_real_connect(&sql, Host, User, Pass, DBase, 0, NULL, 0)){
 		printf("Failed to connect to database\n");
 		return FALSE;
 	}
-	
-		
+
+
 	snprintf(query, 1024, "SELECT ID, GID, Revision, Action, Message from %s",
 		RULES_MYSQL_TABLENAME);
 	if (mysql_real_query(&sql, query, strlen(query))){
 		printf("Query failed \"%s\"\n",query);
 		return FALSE;
 	}
-	
+
 	res=mysql_store_result(&sql);
 	RuleNum=Globals.NumRules;
 	while ( (row=mysql_fetch_row(res)) ){
@@ -263,7 +263,7 @@ int RetrieveRuleMysql(char* DBase, char* User, char* Pass, char* Host){
 			printf("Query failed \"%s\"\n",query);
 			return FALSE;
 		}
-	
+
 		res2=mysql_store_result(&sql);
 		while ( (row2=mysql_fetch_row(res2)) ){
 #ifdef DEBUG
@@ -272,22 +272,22 @@ int RetrieveRuleMysql(char* DBase, char* User, char* Pass, char* Host){
 				row2[1],
 				row2[2]
 			);
-#endif	
+#endif
 			snprintf(DecoderLine, 512, "%s %s(%s)", row2[0], row2[1], row2[2]);
 			if (!ParseDecoderLine(DecoderLine, RuleNum)){
 				printf("Warning: Couldn't understand rule option: %s\n",DecoderLine);
 			}
 		}
-#ifdef DEBUG		
+#ifdef DEBUG
 		printf("+++++++++++++++++++\n");
-#endif		
+#endif
 		RuleNum++;
 		Globals.NumRules++;
 	}
 
 
 	mysql_close(&sql);
-	
+
 	return TRUE;
 #endif //HAS_MYSQL
 }
@@ -308,7 +308,7 @@ int WriteMysqlRules(char* DBase, char* User, char* Pass, char* Host) {
 	int			BuffLen;
 
 	DEBUGPATH;
-	
+
 	mysql_init(&sql);
 	if (!mysql_real_connect(&sql, Host, User, Pass, DBase, 0, NULL, 0)) {
 		fprintf(stderr, "Failed to connect to database: %s\n", mysql_error(&sql));
@@ -328,9 +328,9 @@ int WriteMysqlRules(char* DBase, char* User, char* Pass, char* Host) {
 		BuffLen = strlen(Buff[0]);
 		if (BuffLen >= (sizeof(Buff[0]) / 2)) {
 			/* 512 should be more than plenty */
-			fprintf(stderr, "Message to long to format(%d/%d): %s\n", 
+			fprintf(stderr, "Message to long to format(%d/%d): %s\n",
 				BuffLen, sizeof(Buff[0]), Buff[0]);
-			goto sql_errr; 
+			goto sql_errr;
 		}
 		// mysql_real_escape_string(&sql, Buff[1], Buff[0], BuffLen * 2);
 		mysql_real_escape_string(&sql, Buff[1], Buff[0], BuffLen);
@@ -342,13 +342,13 @@ int WriteMysqlRules(char* DBase, char* User, char* Pass, char* Host) {
 
 		}
 
-		/* 
-		#INSERT INTO Rules(ID, GID, Revision, Action, Message) VALUES(2, 1002, 1, 'Default', '%sip:%sp->%dip:%dp Test Rule2'); 
+		/*
+		#INSERT INTO Rules(ID, GID, Revision, Action, Message) VALUES(2, 1002, 1, 'Default', '%sip:%sp->%dip:%dp Test Rule2');
 		#INSERT INTO tests(ID, RuleID, Decoder, Test, Args) VALUES(3, 2, 'ip', 'dst', 'WebServers');
 		*/
 
 		// Prepare the query
-		snprintf(query, sizeof(query)-1, 
+		snprintf(query, sizeof(query)-1,
 			"INSERT INTO %s(ID,GID,Revision,Action,Message) VALUES(%d,%d,%d,\"%s\",\"%s\")",
 			RULES_MYSQL_TABLENAME,
 			Globals.Rules[RuleNum].GlobalID,
@@ -379,7 +379,7 @@ sql_errr:
 ***********************************/
 int ParseRuleMysql(FILE* fp){
 	char		LineBuff[10240];
-	
+
 	char 		DBase[512];
 	char		User[512];
 	char		Pass[512];
@@ -400,31 +400,31 @@ int ParseRuleMysql(FILE* fp){
 		if (strcasecmp(LineBuff, "</mysql>")==0){
 #ifdef DEBUG
 			printf("All done with this mysql section.  Pull the rules.\n");
-#endif			
+#endif
 			return RetrieveRuleMysql(DBase, User, Pass, Host);
 		}else if (strncasecmp(LineBuff,"dbase=",6)==0){
 #ifdef DEBUG
 			printf("Setting Dbase to \"%s\"\n",LineBuff+6);
-#endif							
+#endif
 			snprintf(DBase, 512, "%s", LineBuff+6);
 		}else if (strncasecmp(LineBuff,"user=",5)==0){
 #ifdef DEBUG
 			printf("Setting user to \"%s\"\n",LineBuff+5);
-#endif							
+#endif
 			snprintf(User, 512, "%s", LineBuff+5);
 		}else if (strncasecmp(LineBuff,"password=",9)==0){
 #ifdef DEBUG
 			printf("Setting password to \"%s\"\n",LineBuff+9);
-#endif							
+#endif
 			snprintf(Pass, 512, "%s", LineBuff+9);
 		}else if (strncasecmp(LineBuff,"host=",5)==0){
 #ifdef DEBUG
 			printf("Setting host to \"%s\"\n",LineBuff+5);
-#endif							
+#endif
 			snprintf(Host, 512, "%s", LineBuff+5);
 		}
 	}
-	
+
 	return FALSE;
 }
 
@@ -438,7 +438,7 @@ int ParseSnortSet(FILE* fp){
 	char		DefaultRule[256];
 	int			GID;
 	int			Revision;
-	
+
 	DEBUGPATH;
 
 	RuleNum=Globals.NumRules;
@@ -450,12 +450,12 @@ int ParseSnortSet(FILE* fp){
 		if (strcasecmp(LineBuff, "</snort>")==0){
 #ifdef DEBUG
 			printf("All done with this snort section\n");
-#endif			
+#endif
 			return TRUE;
 		}else{
-#ifdef DEBUG		
+#ifdef DEBUG
 			printf("Sending \"%s\" to ParseSnort\n", LineBuff);
-#endif			
+#endif
 			if (!ParseSnort(LineBuff, RuleNum)){
 				printf("Couldn't understand snort rule\n");
 				return FALSE;
@@ -464,7 +464,7 @@ int ParseSnortSet(FILE* fp){
 			}
 		}
 	}
-	
+
 	return FALSE;
 }
 */
@@ -478,19 +478,32 @@ int ParseRules(char* FName){
 	char*		End;
 	char*		Start;
 	char		Name[512];
-	
+	char		FDir[512];
+	int			i;
+
 	DEBUGPATH;
-	
+
 #ifdef DEBUG
 	printf("About to parse rule file %s\n", FName);
 #endif
+
+
+
 	fp=fopen(FName, "r");
 	if (!fp){
-		snprintf(Name, 512, "rules/%s", FName);
-		fp=fopen(Name, "r");
-		if (!fp){ 
-			printf("Couldn't open rules file %s\n",FName);
-			return FALSE;
+		//Extract path of Rules file...
+		strcpy(FDir, Globals.RulesFilename);
+		for (i = strlen(FDir); i >= 0 && FDir[i] != '/'; i--);
+    	FDir[i+1] = 0;
+		strcat(FDir, FName);
+		fp=fopen(FDir, "r");
+		if (!fp){
+			snprintf(Name, 512, "rules/%s", FName);
+			fp=fopen(Name, "r");
+			if (!fp){
+				printf("Couldn't open rules file %s\n",FName);
+				return FALSE;
+			}
 		}
 	}
 
@@ -513,9 +526,9 @@ int ParseRules(char* FName){
 			*End=0x00;
 			if (!ParseRules(Start)) return FALSE;
 	}
-	} 
+	}
 
 	fclose(fp);
 
 	return TRUE;
-} 
+}
