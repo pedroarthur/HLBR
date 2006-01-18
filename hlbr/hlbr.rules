@@ -17,6 +17,7 @@
 # because they be able interrupt part of the legitimate traffic from net.
 # 
 #<include rules/http.rules>
+#<include sql-xss.rules>
 #<include rules/www.rules>
 
 
