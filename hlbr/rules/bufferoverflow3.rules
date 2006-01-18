@@ -1,0 +1,217 @@
+
+# nome / name:             bufferoverflow3.rules
+# criado por / created by: Joao Eriberto Mota Filho
+# data / date:             14 Dez 05 / 14 Dec 05
+# atualizacao / update:    nenhuma / none
+
+# Objetivo / Target: Bloquear tentativas de buffer overflow / Block buffer overflow attempts.
+
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA)
+message=(bufferoverflow3-1) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB)
+message=(bufferoverflow3-2) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC)
+message=(bufferoverflow3-3) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD)
+message=(bufferoverflow3-4) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE)
+message=(bufferoverflow3-5) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+message=(bufferoverflow3-6) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(GGGGGGGGGGGGGGGGGGGGGGGGGGGGGG)
+message=(bufferoverflow3-7) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(HHHHHHHHHHHHHHHHHHHHHHHHHHHHHH)
+message=(bufferoverflow3-8) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(IIIIIIIIIIIIIIIIIIIIIIIIIIIIII)
+message=(bufferoverflow3-9) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)
+message=(bufferoverflow3-10) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK)
+message=(bufferoverflow3-11) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(LLLLLLLLLLLLLLLLLLLLLLLLLLLLLL)
+message=(bufferoverflow3-12) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM)
+message=(bufferoverflow3-13) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN)
+message=(bufferoverflow3-14) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO)
+message=(bufferoverflow3-15) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP)
+message=(bufferoverflow3-16) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ)
+message=(bufferoverflow3-17) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR)
+message=(bufferoverflow3-18) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS)
+message=(bufferoverflow3-19) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT)
+message=(bufferoverflow3-20) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(UUUUUUUUUUUUUUUUUUUUUUUUUUUUUU)
+message=(bufferoverflow3-21) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(VVVVVVVVVVVVVVVVVVVVVVVVVVVVVV)
+message=(bufferoverflow3-22) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW)
+message=(bufferoverflow3-23) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+message=(bufferoverflow3-24) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY)
+message=(bufferoverflow3-25) Buffer overflow
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(13,37,53,123)
+udp nocase(ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ)
+message=(bufferoverflow3-26) Buffer overflow
+action=action1
+</rule>
+

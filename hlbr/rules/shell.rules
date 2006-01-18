@@ -10,63 +10,63 @@
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/bash)
-message=(shell) Tentativa de /bin/bash / /bin/bash attempt
-action=acao1
+message=(shell-1) Chamada a /bin/bash / /bin/bash call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/sh)
-message=(shell) Tentativa de /bin/sh / /bin/sh attempt
-action=acao1
+message=(shell-2) Chamada a /bin/sh / /bin/sh call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/ksh)
-message=(shell) Tentativa de /bin/ksh / /bin/ksh attempt
-action=acao1
+message=(shell-3) Chamada a /bin/ksh / /bin/ksh call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/csh)
-message=(shell) Tentativa de /bin/csh / /bin/csh attempt
-action=acao1
+message=(shell-4) Chamada a /bin/csh / /bin/csh call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/bash)
-message=(shell) Tentativa de /bin/bash / /bin/bash attempt
-action=acao1
+message=(shell-5) Chamada a /bin/bash / /bin/bash call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/sh)
-message=(shell) Tentativa de /bin/sh / /bin/sh attempt
-action=acao1
+message=(shell-6) Chamada a /bin/sh / /bin/sh call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/ksh)
-message=(shell) Tentativa de /bin/ksh / /bin/ksh attempt
-action=acao1
+message=(shell-7) Chamada a /bin/ksh / /bin/ksh call
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/csh)
-message=(shell) Tentativa de /bin/csh / /bin/csh attempt
-action=acao1
+message=(shell-8) Chamada a /bin/csh / /bin/csh call
+action=action1
 </rule>
 

@@ -1,7 +1,25 @@
+<include rules/awstats.rules>
 <include rules/bufferoverflow.rules>
+<include rules/bufferoverflow2.rules>
+<include rules/bufferoverflow3.rules>
 <include rules/codered-nimda.rules>
-<include rules/exploits-tcp.rules>
-<include rules/exploits-udp.rules>
-<include rules/http.rules>
+<include rules/coppermine.rules>
 <include rules/mailvirus.rules>
+<include rules/mambo-phpnuke.rules>
+<include rules/webattacks.rules>
+
+
+# As regras dos arquivos abaixo deverao ser analisadas antes de serem
+# utilizadas. Isso porque elas poderao interromper parte do trafego legitimo
+# da rede.
+#
+# The rules of the files below shall be analysed before being used. That
+# because they be able interrupt part of the legitimate traffic from net.
+# 
+#<include rules/http.rules>
 #<include rules/www.rules>
+
+
+# nao implementado ainda /not implemented yet
+#
+#<include rules/php.rules>

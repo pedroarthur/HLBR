@@ -7,3 +7,14 @@ de 0.1-rc1 para 0.1-rc2:
 - criado o make install, installen e uninstall
 - primeira revisao de padroes do codigo fonte
 - novas regras
+
+
+de 0.1-rc2 para 0.1-final
+
+- retirada parte dos comentarios deixados no codigo
+- criada uma acao e um log somente para virus de email
+- novar regras e tunning de algumas jah existentes
+- implementacao de inicializacao por arquivo em /etc/init.d
+- implementacao do roteamento de logs
+
+

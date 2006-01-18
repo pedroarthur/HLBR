@@ -1,7 +1,7 @@
 #include "parse_rules.h"
 #include "parse_config.h"
 #include "parse_snort.h"
-#include "hoglib.h"
+#include "hlbrlib.h"
 #include "../decoders/decode.h"
 #include "../actions/action.h"
 #include <string.h>
@@ -512,26 +512,7 @@ int ParseRules(char* FName){
 			}
 			*End=0x00;
 			if (!ParseRules(Start)) return FALSE;
-/*
-		}else if(strncasecmp(LineBuff, "<mysql>",7)==0){
-			// go load rules from a mysql database
-#ifdef HAS_MYSQL
-			if (!ParseRuleMysql(fp)) return FALSE;
-#else
-			printf("There is no MYSQL support compiled in\n");
-			return FALSE;
-#endif			
-
-		}else if(strncasecmp(LineBuff, "<snort>",7)==0){
-			// snort compatibility rules
-#ifdef DEBUG			
-			printf("Entering snort compat mode\n");
-#endif			
-			if (!ParseSnortSet(fp)) return FALSE;
-		}else{
-			printf("Unexpected section %s\n",LineBuff);
-			return FALSE;
-*/		} 
+	}
 	} 
 
 	fclose(fp);

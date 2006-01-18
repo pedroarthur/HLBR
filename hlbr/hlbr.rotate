@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# -c 52 = 1 ano/year
+
+if [ -d /var/log/hlbr ];
+    then
+
+	logs=`ls --color=never /var/log/hlbr | grep -v [0-9]$`
+
+	for i in $logs
+	do
+	savelog -m 640 -u root -c 52 -l /var/log/hlbr/$i > /dev/null
+	done
+
+fi
+
+	

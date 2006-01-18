@@ -8,7 +8,6 @@ action_alert_file.o \
 action_dump_packet.o \
 action_route_sip.o \
 action_bns.o \
-#action_alert_mysql.o \
 action_alert_syslog.o \
 action_alert_email.o \
 action_alert_socket.o \
@@ -29,9 +28,6 @@ action_alert_email.o: action_alert_email.c action_alert_email.h ../config.h ../e
 
 action_alert_syslog.o: action_alert_syslog.c action_alert_syslog.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o action_alert_syslog.o action_alert_syslog.c $(DEBUG)
-
-#action_alert_mysql.o: action_alert_mysql.c action_alert_mysql.h ../config.h ../engine/hlbr.h
-#	$(CC) -c -o action_alert_mysql.o action_alert_mysql.c $(DEBUG)
 
 action_bns.o: action_bns.c action_bns.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o action_bns.o action_bns.c $(DEBUG)

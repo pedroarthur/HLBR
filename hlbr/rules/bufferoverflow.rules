@@ -10,14 +10,14 @@
 ip dst(servers)
 tcp dst(1-1023)
 tcp nocase(|90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90|)
-message=(bufferoverflow) Tentativa de NOP / NOP attempt
-action=acao1
+message=(bufferoverflow-1) Envio de NOP / NOP send
+action=action1
 </rule>
 
 <rule>
 ip dst(servers)
 udp dst(1-1023)
 udp nocase(|90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90|)
-message=(bufferoverflow) Tentativa de NOP / NOP attempt
-action=acao1
+message=(bufferoverflow-2) Envio de NOP / NOP send
+action=action1
 </rule>

@@ -13,7 +13,7 @@ HLBR_OBJECTS= \
   engine/num_list.o \
   engine/message.o \
   engine/cache.o \
-  engine/hoglib.o \
+  engine/hlbrlib.o \
   packets/packet.o \
   packets/packet_linux_raw.o \
   packets/packet_obsd_bpf.o \
@@ -113,9 +113,13 @@ install:
 	mkdir /var/log/hlbr
 	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
 	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
+	if [ -d "/etc/init.d" ]; then cp -f hlbr.init /etc/init.d/hlbr; fi
+	if [ -d "/etc/rc.d/init.d" ]; then cp -f hlbr.init /etc/rc.d/init.d/hlbr; fi
+	if [ -d "/etc/cron.weekly" ]; then cp -f hlbr.rotate /etc/cron.weekly/hlbr; fi
 	cp hlbr /usr/sbin
 	cp hlbr.config empty.rules hlbr.rules /etc/hlbr
 	cp rules/* /etc/hlbr/rules
+	cp VERSION /etc/hlbr
 	#
 	# ---------------------------------------------------------
 	# HLBR instalado.
@@ -135,10 +139,14 @@ installen:
 	mkdir /var/log/hlbr
 	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
 	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
+	if [ -d "/etc/init.d" ]; then cp -f hlbr.init /etc/init.d/hlbr; fi
+	if [ -d "/etc/rc.d/init.d" ]; then cp -f hlbr.init /etc/rc.d/init.d/hlbr; fi
+	if [ -d "/etc/cron.weekly" ]; then cp -f hlbr.rotate /etc/cron.weekly/hlbr; fi
 	cp hlbr /usr/sbin
 	cp empty.rules hlbr.rules /etc/hlbr
 	cp hlbr.config.en /etc/hlbr/hlbr.config
 	cp rules/* /etc/hlbr/rules
+	cp VERSION /etc/hlbr
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
@@ -155,6 +163,9 @@ uninstall:
 	if [ -d "/var/log/hlbr.old/" ]; then rm -rf /var/log/hlbr.old; fi
 	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
 	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
+	if [ -e "/etc/init.d/hlbr" ]; then rm -f /etc/init.d/hlbr; fi
+	if [ -e "/etc/rc.d/init.d/hlbr" ]; then rm -f /etc/rc.d/init.d/hlbr; fi
+	if [ -e "/etc/cron.weekly/hlbr" ]; then rm -f /etc/cron.weekly/hlbr; fi
 	#
 	# -------------------------------------------------
 	# HLBR foi desinstalado. HLBR has been uninstalled.

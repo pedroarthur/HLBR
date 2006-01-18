@@ -1,0 +1,31 @@
+#!/bin/sh
+# Inicia/para o daemon hlbr.
+# Start/stop the hlbr daemon.
+
+if [ -x "/usr/sbin/hlbr" ]; then echo; else echo Nao instalado / Not installed; exit 0; fi
+
+conf="/etc/hlbr/hlbr.config"
+rules="/etc/hlbr/hlbr.rules"
+opts="-c $conf -r $rules"
+
+case "$1" in
+start)	echo "Inicializando o HLBR / Starting HLBR"
+        cd /etc/hlbr
+	/usr/sbin/hlbr $opts &
+#        echo "OK" 
+	;;
+stop)	echo "Parando o HLBR / Stopping HLBR"
+        killall hlbr
+#        echo "Parado / Stoped"
+        ;;
+restart) echo "Reinicializando o HLBR / Restarting HLBR"
+	killall /usr/sbin/hlbr
+	cd /etc/hlbr
+	/usr/sbin/hlbr $opts &
+        echo "OK"
+        ;;
+*)	echo "Uso / Usage: /etc/init.d/hlbr start|stop|restart"
+        exit 1 
+        ;;
+esac
+exit 0

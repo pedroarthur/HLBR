@@ -7,70 +7,75 @@
 # Objetivo / Target: Bloqueio de metodos HTTP (Vide RFCs 1945 e 2616) / Block HTTP methods.
 
 # Para a sua seguranca, os metodos SEARCH e CONNECT devem ser bloqueados.
-# For your security SEARCH and CONNECT methods has been blocked.
+# For your security SEARCH and CONNECT methods must be blocked.
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(SEARCH)
-message=(http) Tentativa de buffer overflow / Buffer overflow attempt
-action=acao1
+message=(http-1) Tentativa de buffer overflow / Buffer overflow attempt
+action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(CONNECT)
-message=(http) Tentativa de open proxy / Open proxy attempt
-action=acao1
+message=(http-2) Busca de open proxy / Open proxy search
+action=action1
 </rule>
 
 # Comente a regra a seguir se nao quiser bloquear POST. Por acaso, voce precisa de POST?
+# Comment the following rule if you don't want to block POST. By the way, do you need POST?
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(POST)
-message=(http) Tentativa de POST / POST attempt
-action=acao1
+message=(http-3) Uso de POST / POST use
+action=action1
 </rule>
 
 # Comente a regra a seguir se nao quiser bloquear PUT. Por acaso, voce precisa de PUT?
+# Comment the following rule if you don't want to block PUT. By the way, do you need PUT?
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(PUT)
-message=(http) Tentativa de PUT / PUT attempt
-action=acao1
+message=(http-4) Uso de PUT / PUT use
+action=action1
 </rule>
 
 # Comente a regra a seguir se nao quiser bloquear OPTIONS. Por acaso, voce precisa de OPTIONS?
+# Comment the following rule if you don't want to block OPTIONS. By the way, do you need OPTIONS?
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(OPTIONS)
-message=(http) Tentativa de OPTIONS / OPTIONS attempt
-action=acao1
+message=(http-5) Uso de OPTIONS / OPTIONS use
+action=action1
 </rule>
 
 # Comente a regra a seguir se nao quiser bloquear TRACE. Por acaso, voce precisa de TRACE?
+# Comment the following rule if you don't want to block TRACE. By the way, do you need TRACE?
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(TRACE)
-message=(http) Tentativa de TRACE / TRACE attempt
-action=acao1
+message=(http-6) Uso de TRACE / TRACE use
+action=action1
 </rule>
 
 # Comente a regra a seguir se nao quiser bloquear DELETE. Por acaso, voce precisa de DELETE?
+# Comment the following rule if you don't want to block DELETE. By the way, do you need DELETE?
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(DELETE)
-message=(http) Tentativa de DELETE / DELETE attempt
-action=acao1
+message=(http-7) Uso de DELETE / DELETE use
+action=action1
 </rule>

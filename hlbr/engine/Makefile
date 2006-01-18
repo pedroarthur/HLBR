@@ -11,14 +11,14 @@ num_list.o      \
 message.o       \
 cache.o         \
 jtree.o 	\
-hoglib.o
+hlbrlib.o
 
 clean:
 	rm -f *.o
 	rm -f *core
 
-hoglib.o: hoglib.c hoglib.h ../config.h hlbr.h
-	$(CC) -c -o hoglib.o hoglib.c $(DEBUG)
+hlbrlib.o: hlbrlib.c hlbrlib.h ../config.h hlbr.h
+	$(CC) -c -o hlbrlib.o hlbrlib.c $(DEBUG)
 
 cache.o: cache.c cache.h ../config.h hlbr.h
 	$(CC) -c -o cache.o cache.c $(DEBUG)

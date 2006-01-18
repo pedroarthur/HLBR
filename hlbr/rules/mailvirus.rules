@@ -2,7 +2,7 @@
 # nome / name:             mailvirus.rules
 # criado por / created by: Joao Eriberto Mota Filho
 # data / date:             14 Dez 05 / 14 Dec 05
-# atualizacao / update:    nenhuma / none
+# atualizacao / update:    26 Dez 05 / 16 Dec 05
 
 # Objetivo / Target: Bloquear virus de email / Block mail virus.
 
@@ -10,41 +10,162 @@
 ip dst(email)
 tcp dst(25)
 tcp nocase(.scr")
-message=(mailvirus) Tentativa de .scr / .scr attempt
-action=acao1
+message=(mailvirus-1) Anexo .scr / .scr attach
+action=virus
 </rule>
 
 <rule>
 ip dst(email)
 tcp dst(25)
 tcp nocase(.pif")
-message=(mailvirus) Tentativa de .pif / .pif attempt
-action=acao1
+message=(mailvirus-2) Anexo .pif / .pif attach
+action=virus
 </rule>
 
 <rule>
 ip dst(email)
 tcp dst(25)
 tcp nocase(.bat")
-message=(mailvirus) Tentativa de .bat / .bat attempt
-action=acao1
+message=(mailvirus-3) Anexo .bat / .bat attach
+action=virus
 </rule>
 
-<rule>
-ip dst(email)
-tcp dst(25)
-tcp nocase(.com")
-message=(mailvirus) Tentativa de .com / .com attempt
-action=acao1
-</rule>
+# Falsos positivos com href=".....com" / False positive
 
-# Comente a regra a seguir se quiser receber arquivos .exe
+#<rule>
+#ip dst(email)
+#tcp dst(25)
+#tcp nocase(.com")
+#message=(mailvirus-4) Anexo .com / .com attach
+#action=virus
+#</rule>
 
+# Comente a regra a seguir se quiser receber arquivos .exe.
+# Comment the folowing rule if you want to receive .exe files.
 <rule>
 ip dst(email)
 tcp dst(25)
 tcp nocase(.exe")
-message=(mailvirus) Tentativa de .exe / .exe attempt
-action=acao1
+message=(mailvirus-5) Anexo .exe / .exe attach
+action=virus
 </rule>
 
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.vbs")
+message=(mailvirus-6) Anexo .vbs / .vbs attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.doc.exe")
+message=(mailvirus-7) Anexo .doc.exe / .doc.exe attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.doc.bat")
+message=(mailvirus-8) Anexo .doc.bat / .doc.bat attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.doc.com")
+message=(mailvirus-9) Anexo .doc.com / .doc.com attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.htm.bat")
+message=(mailvirus-10) Anexo .htm.bat / .htm.bat attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.htm.com")
+message=(mailvirus-11) Anexo .htm.com / .htm.com attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.htm.exe")
+message=(mailvirus-12) Anexo .htm.exe / .htm.exe attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.rtf.bat")
+message=(mailvirus-13) Anexo .rtf.bat / .rtf.bat attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.rtf.com")
+message=(mailvirus-14) Anexo .rtf.com / .rtf.com attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.rtf.exe")
+message=(mailvirus-15) Anexo .rtf.exe / .rtf.exe attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.txt.bat")
+message=(mailvirus-16) Anexo .txt.bat / .txt.bat attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.txt.com")
+message=(mailvirus-17) Anexo .txt.com / .txt.com attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(.txt.exe")
+message=(mailvirus-18) Anexo .txt.exe / .txt.exe attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(freeporn4all)
+message=(mailvirus-19) Anexo freeporn4all / freeporn4all attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp nocase(myx4free)
+message=(mailvirus-20) Anexo myxforfree / myxforfree attach
+action=virus
+</rule>

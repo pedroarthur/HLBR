@@ -2,9 +2,7 @@
 #include "parse_config.h"
 #include "../packets/packet.h"
 #include "../routes/route.h"
-//#include "../mangle/mangle.h"
 #include "../actions/action.h"
-//#include "../modules/module.h"
 #include "../engine/message.h"
 #include <stdio.h>
 #include <string.h>
@@ -155,70 +153,6 @@ int ParseList(FILE* fp, char* Name, int ListType){
 	return FALSE;
 }
 
-/***********************************
-* Make sense out of this module
-***********************************/
-/*
-int ParseModule(FILE* fp, char* Name){
-	char		LineBuff[10240];
-	int 		ModuleID;
-	ModuleRec*	Module;
-	DecoderRec*	d;
-	
-#ifdef DEBUGPATH
-	printf("In ParseModule\n");
-#endif
-
-	if (!Name) return FALSE;	
-	while (*Name==' ') Name++;
-
-#ifdef DEBUG
-	printf("Setting for module %s\n",Name);
-#endif
-
-	ModuleID=GetModuleByName(Name);
-	if (ModuleID==MODULE_NONE){
-		printf("I couldn't find module %s\n",Name);
-		return FALSE;
-	}
-
-	Module=&Globals.Modules[ModuleID];
-	
-	Module->Active=TRUE;
-	
-	d=&Globals.Decoders[Module->DecoderID];
-	while (d){
-#ifdef DEBUG
-		printf("Setting Decoder %s Active\n",d->Name);
-#endif		
-		d->Active=TRUE;
-		d=d->Parent;
-	}
-	
-
-	while(GetLine(fp, LineBuff, 10240)){
-		if (*LineBuff=='#') continue;
-		if (strcasecmp(LineBuff, "</module>")==0){
-#ifdef DEBUG
-			printf("All done with module \"%s\"\n",Module->Name);
-#endif			
-			return TRUE;
-		}else{
-#ifdef DEBUG
-			printf("Sending line %s\n",LineBuff);
-#endif		
-			if (Module->ParseArg)
-			if (!Module->ParseArg(LineBuff)){
-				printf("Couldn't understand %s\n",LineBuff);
-				return FALSE;
-			}
-		}
-	}
-
-
-	return FALSE;
-}
-*/
 
 /***********************************
 * Make sense out of this action
@@ -490,63 +424,6 @@ int ParseRouting(FILE* fp){
 	return FALSE;
 }
 
-/*******************************************
-* make sense of the mangling options
-*******************************************/
-/* int ParseMangling(FILE* fp){
-	char			LineBuff[10240];
-	int				MangleID;
-	char*			Pos;
-	char*			Pos2;
-		
-#ifdef DEBUGPATH
-	printf("In ParseMangling\n");
-#endif
-*/
-	/*set the defaults*/
-
-	/*loop through the lines*/
-/*	while(GetLine(fp, LineBuff, 10240)){
-		if (strcasecmp(LineBuff, "</mangling>")==0){
-#ifdef DEBUG
-			printf("All Done with mangling options\n");
-#endif		
-			return TRUE;
-		}else{
-			Pos=strchr(LineBuff, '(');
-			if (Pos){
-				*Pos=0x00;
-				Pos2=strchr(Pos+1, ')');
-				if (!Pos2){
-					printf("Error: Expected ) is %s\n",LineBuff);
-					return FALSE;
-				}
-				*Pos2=0x00;
-			}
-			if ( (MangleID=GetManglerByName(LineBuff))==MANGLE_NONE){
-				printf("ERROR: Unknown Mangling Option: %s\n",LineBuff);
-				return FALSE;
-			}
-			
-			if (Pos){
-				if (!ManglerAdd(MangleID, Pos+1)){
-					printf("Mangling option \"%s\" failed\n",LineBuff);
-					return FALSE;
-				}
-				Globals.Mangles[MangleID].Active=TRUE;
-			}else{
-				if (!ManglerAdd(MangleID, NULL)){
-					printf("Mangling option \"%s\" failed\n",LineBuff);
-					return FALSE;
-				}				
-				Globals.Mangles[MangleID].Active=TRUE;
-			} 
-		}
-	}
-
-	return FALSE;
-}
-*/
 
 /*******************************************
 * make sense of the config file
@@ -591,8 +468,6 @@ int ParseConfig(){
 			if (!ParseInterface(fp, Start)) return FALSE;
 		}else if (strncasecmp(LineBuff, "<routing>",11)==0){
 			if (!ParseRouting(fp)) return FALSE;			
-//		}else if (strncasecmp(LineBuff, "<mangling>",11)==0){
-//			if (!ParseMangling(fp)) return FALSE;
 		}else if(strncasecmp(LineBuff, "<action",7)==0){
 			Start=LineBuff+7;
 			while (*Start==' ') Start++;
@@ -620,7 +495,6 @@ int ParseConfig(){
 				return FALSE;
 			}
 			*End=0x00;		
-//			if (!ParseModule(fp, Start)) return FALSE;				
 		}else if(strncasecmp(LineBuff, "<iplist ",8)==0){
 			Start=LineBuff+7;
 			while (*Start==' ') Start++;

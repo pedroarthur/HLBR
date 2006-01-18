@@ -2,7 +2,7 @@
 # nome / name:             codered-nimda.rules
 # criado por / created by: Joao Eriberto Mota Filho
 # data / date:             14 Dez 05 / 14 Dec 05
-# atualizacao / update:    nenhuma / none
+# atualizacao / update:    26 Dez 05 / 26 Dec 05
 
 # Objetivo / Target: Bloquear os Worms Code Red e NIMDA / Block the Code Red and NIMDA Worms.
 
@@ -12,30 +12,30 @@
 ip dst(www)
 tcp dst(80)
 tcp content(default.ida)
-message=(codered_nimda) Tentativa de default.ida / default.ida attempt
-action=acao1
+message=(codered_nimda-1) Requisicao default.ida / default.ida request
+action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(root.exe)
-message=(codered_nimda) Tentativa de root.exe / root.exe attempt
-action=acao1
+message=(codered_nimda-2) Requisicao root.exe / root.exe request
+action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp nocase(cmd.exe)
-message=(codered_nimda) Tentativa de cmd.exe / cmd.exe attempt
-action=acao1
+message=(codered_nimda-3) Requisicao cmd.exe / cmd.exe request
+action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(explorer.exe)
-message=(codered_nimda) Tentativa de explorer.exe / explorer.exe attempt
-action=acao1
+message=(codered_nimda-4) Requisicao explorer.exe / explorer.exe request
+action=action1
 </rule>

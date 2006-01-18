@@ -1,20 +1,23 @@
-To version 0.1
+To version 0.1 final
 
 - apply patches (done)
 - fix errors in text files (done)
-- create manual
 - check README (done)
-- translate README to english
+- translate README to english (done)
 - change make distclean to make clean (done)
 - create make install, installen and uninstall (done)
 - change /sbin/hlbr to /usr/sbin/hlbr (done)
+- check stability (done)
+- remove useless comments from code (done)
+- create file for /etc/init.d (done)
+- logrotate! (done)
+
+
+
+To version 0.2 final
+
 - make .deb package
-- check stability
-
-
-
-To version 0.2
-
+- create manual
 - test to see if it works (in a real environment)
 - check all errors documented at UCB
 - check response (route sip)
@@ -24,18 +27,20 @@ To version 0.2
 - insert tests tcp dbcontent and tcp dbnocase (will consult a txt file with a
           list of words. if the words aren't found in the traffic, it will
           receive the action)
-- create online manual
-- create file for /etc/init.d
+- create online manual (man)
 - error messages also in pt_BR
 	  
 
 
-To version 1.0
+To version 1.0 final
 
-- l10n
 - rules!!!!!!
 - expand actions renocase and recontent using libpcre
 - finish documentation at website
-- remove useless comments from code
 - create more possibilities of regular expressions
+
+
+To version 2.0 final
+
 - create a Snort rules conversor
+- implement AI

@@ -1,4 +1,4 @@
-Para a versao 0.1
+Para a versao 0.1 final
 
 - aplicar patches (feito)
 - retirar erros nos arquivos texto (feito)
@@ -7,37 +7,43 @@ Para a versao 0.1
 - transformar o make distclean em make clean (feito)
 - criar make install, installen e uninstall (feito)
 - troca de /sbin/hlbr para /usr/sbin/hlbr (feito)
+- testar estabilidade (feito)
+- retirar comentarios inuteis do codigo (feito)
+- criar o arquivo para /etc/init.d (feito)
+- logrotate! (feito)
+
+
+
+Para a versao 0.2 final
+
 - empacotar .deb
-- testar estabilidade
-
-
-
-Para a versao 0.2
-
 - criar manual
 - checar todo o funcionamento
 - checar todos os erros documentados na UCB
 - verificar a resposta (route sip)
 - checar o funcionamento do B&S e alterar o arquivo hlbr.conf
-- inserir acoes ernocase e ercontent (er=expressao regular / irah aceitar virgula para
-          colocar mais de uma expressao na linha)
-- inserir tcp dbcontent e tcp dbnocase (irah consultar um arquivo txt com palavras diversas. se o
-          trafego nao contiver tais palavras, irah sofrer a acao)
-- recriar manual on-line
-- criar o arquivo para /etc/init.d
-- mensagens de erro tambem e pt_BR
+- inserir acoes ernocase e ercontent (er=expressao regular / irah aceitar
+          virgula para colocar mais de uma expressao na linha)
+- inserir tcp dbcontent e tcp dbnocase (irah consultar um arquivo txt com
+          palavras diversas. se o trafego nao contiver tais palavras, irah
+	  sofrer a acao)
+- criar manual on-line (man)
+- mensagens de erro tambem em pt_BR
 	  
 
 
-Para a versao 1.0
+Para a versao 1.0 final
 
-- l10n
 - regras!!!!!!
 - expandir acoes ernocase e ercontent com a libpcre
 - finalizar a documentacao no site
-- retirar comentarios inuteis do codigo
 - criar mais possibilidades de expressoes regulares
+
+
+Para a versao 2.0 final
+
 - criar conversor de regras do Snort
+- implementar IA
 
 
 

@@ -9,8 +9,6 @@
 #include "../packets/packet_cache.h"
 #include "../actions/action.h"
 #include "../routes/route.h"
-//#include "../modules/module.h"
-//#include "../mangle/mangle.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -66,7 +64,7 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 ***************************************/
 void PrintVersion() {
 	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
-	printf("by Andre Bertelli Araujo and\n   Joao Eriberto Mota Filho\n\n");
+//	printf("by Andre Bertelli Araujo and\n   Joao Eriberto Mota Filho\n\n");
 	printf("http://hlbr.sourceforge.net\n\n");
 	printf("(Jason Larsen's Hogwash based)\n\n");
 }
@@ -340,16 +338,6 @@ int main(int argc, char**argv){
 		return FALSE;
 	}
 
-/*	if (!InitModules()){
-		printf("Error initializing modules\n");
-		return FALSE;
-	}
-
-	if (!InitManglers()){
-		printf("Error initializing manglers\n");
-		return FALSE;
-	}
-*/
 	if (!ParseConfig()){
 		printf("Error loading config file\n");
 		return FALSE;

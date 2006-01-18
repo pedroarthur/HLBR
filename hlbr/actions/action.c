@@ -12,7 +12,6 @@
 #include "action_dump_packet.h"
 #include "action_route_sip.h"
 #include "action_bns.h"
-//#include "action_alert_mysql.h"
 #include "action_alert_syslog.h"
 #include "action_alert_email.h"
 #include "action_alert_socket.h"
@@ -36,7 +35,6 @@ int InitActions(){
 	if (!InitActionDumpPacket()) return FALSE;
 	if (!InitActionRouteSIP()) return FALSE;
 	if (!InitActionBNS()) return FALSE;
-//	if (!InitActionAlertMysql()) return FALSE;
 	if (!InitActionAlertSyslog()) return FALSE;
 	if (!InitActionAlertEMail()) return FALSE;
 	if (!InitActionAlertSocket()) return FALSE;

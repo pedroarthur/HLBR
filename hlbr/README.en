@@ -1,8 +1,5 @@
 HOGWASH LIGHT BR
 
-by Andre Bertelli Araujo e
-   Joao Eriberto Mota Filho.
-
 INSTALLATION
 ------------
 
@@ -44,6 +41,10 @@ To install HLBR, follow these steps:
 9. To run HLBR, use:
 
     # hlbr -c hlbr.config -r hlbr.rules &
+    
+    or
+    
+    # /etc/init.d/hlbr start
 
 10. Log files can be find in /var/log/hlbr, unless you change this path in
     the configuration file (/etc/hlbr/hlbr.config) or use the -l option
@@ -52,6 +53,10 @@ To install HLBR, follow these steps:
 11. To stop it, run:
 
     # killall hlbr
+    
+    or
+    
+    # /etc/init.d/hlbr stop
 
 12. To uninstall , use "# make uninstall". WARNING: all the configuration 
     files, rules and logs will be deleted.
@@ -217,8 +222,8 @@ tcp offset(10,Hello World)
 WARRANTIES
 ----------
 
-All tests were done under Debian GNU/Linux Sarge Stable R0a. It works nicely.
-We recommend DEBIAN!
+All tests were done under Debian GNU/Linux Sarge Stable R0a and R1. It works
+nicely. We recommend DEBIAN!
 
 
 

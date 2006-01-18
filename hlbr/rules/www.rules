@@ -2,47 +2,110 @@
 # nome / name:             www.rules
 # criado por / created by: Joao Eriberto Mota Filho
 # data / date:             29 Nov 05 / 29 Nov 05
-# atualizacao / update:    14 Dez 05 / 14 Dec 05
+# atualizacao / update:    26 Dez 05 / 26 Dec 05
 
-# Objetivo / Target: Bloquear tentativas de acesso www / Block www access attempts.
+# Objetivo / Target: Bloquear requisicoes www invalidas / Block invalid www requests.
 
 # Comente a regra a seguir se possuir paginas ASP
+# Comment the following rule if you have ASP web pages
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(.asp)
-message=(www) Acesso .asp / .asp access
-action=acao1
+message=(www-1) Requisicao .asp / .asp request
+action=action1
 </rule>
 
 # Comente a regra a seguir se possuir paginas PHP
+# Comment the following rule if you have PHP web pages
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(.php)
-message=(www) Acesso .php / .php access
-action=acao1
+message=(www-2) Requisicao .php / .php request
+action=action1
 </rule>
 
 # Comente a regra a seguir se possuir paginas SHTML
+# Comment the following rule if you have SHTML web pages
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(.shtml)
-message=(www) Acesso .shtml / .shtml access
-action=acao1
+message=(www-3) Requisicao .shtml / .shtml request
+action=action1
 </rule>
 
-# Comente a regra a seguir se possuir paginas CGI
+# Comente a regra a seguir se possuir paginas XML
+# Comment the following rule if you have XML web pages
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(.xml)
+message=(www-4) Requisicao .xml / .xml request
+action=action1
+</rule>
+
+# Comente a regra a seguir se possuir rotinas Perl
+# Comment the following rule if you have Perl routines
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(.pl)
+message=(www-5) Requisicao .pl / .pl request
+action=action1
+</rule>
+
+# Comente as regras a seguir se possuir rotinas CGI
+# Comment the following rules if you have CGI routines
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(/cgi-bin/)
-message=(www) Acesso CGI / CGI access
-action=acao1
+message=(www-6) Requisicao CGI / CGI request
+action=action1
 </rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(.cgi)
+message=(www-7) Requisicao CGI / CGI request
+action=action1
+</rule>
+
+# Comente a regra a seguir se possuir paginas em MAMBO.
+# Se ativada, esta regra desobriga o uso do arquivo mambo.rules.
+#
+# Comment the following rule if you have MAMBO web pages
+# If activated this rule releases the use of the mambo.rules archive. 
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(mambo)
+message=(www-8) Requisicao ao mambo / Mambo request
+action=action1
+</rule>
+
+# Comente a regra a seguir se possuir analisador de logs Awstats
+# Se ativada, esta regra desobriga o uso do arquivo awstats.rules.
+#
+# Comment the following rule if you have Awstats Log Analyser.
+# If activated this rule releases the use of the awstats.rules archive. 
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(awstats)
+message=(www-9) Requisicao awstats / Awstats request
+action=action1
+</rule>
+
 

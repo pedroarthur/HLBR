@@ -126,44 +126,6 @@ fi
 
 #done checking the endian
 
-#check for mysql
-#echo -n "Checking for MySQL.........."
-#MYSQL_HEADER_DIR=""
-#if [ -f "/usr/include/mysql.h" ]; then
-#	MYSQL_HEADER_DIR="/usr/include"
-#fi
-#if [ -f "/usr/include/mysql/mysql.h" ]; then
-#	MYSQL_HEADER_DIR="/usr/include/mysql"
-#fi
-
-#MYSQL_LIB_DIR=""
-#if [ -f "/sw/lib/mysql/libmysqlclient.dylib" ]; then
-#	MYSQL_LIB_DIR="/sw/lib/mysql"
-#fi
-
-#galt's addition
-#if [ -f "/usr/lib/libmysqlclient.so" ]; then
-#	MYSQL_LIB_DIR="/usr/lib"
-#fi
-#noitidda s`tlag
-
-#if [ -f "/usr/lib/mysql/libmysqlclient.so" ]; then
-#	MYSQL_LIB_DIR="/usr/lib/mysql"
-#fi
-
-#if [ "$MYSQL_HEADER_DIR" != "" ] && [ "$MYSQL_LIB_DIR" != ""  ]; then
-#	echo "#define HAS_MYSQL" >> config.h
-#	echo -n "MYSQL=-lmysqlclient -I" >> Makefile
-#	echo -n $MYSQL_HEADER_DIR >> Makefile
-#	echo -n " -L" >> Makefile
-#	echo $MYSQL_LIB_DIR >> Makefile
-#	echo "Found"
-#else
-#	echo "Not Found"
-#fi
-
-#done checking for mysql
-
 #check for a built-in daemon call
 echo -n "Buscando o daemon / Checking for daemon............"
 ENDIAN=""
@@ -239,6 +201,12 @@ echo "#endif //ifdef hlbr" >> config.h
 #add in all the stock stuff to the Makefile
 cat Makefile.in >> Makefile
 
+echo
+echo
+echo
+echo "-------------------------------"
+echo
+cat ./VERSION
 echo
 echo "Pronto / Done."
 echo

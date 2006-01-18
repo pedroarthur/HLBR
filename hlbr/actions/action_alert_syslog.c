@@ -9,14 +9,14 @@
 #define DEBUGPATH 1
 #endif
 
-#include "../engine/hoglib.h"
+#include "../engine/hlbrlib.h"
 
-typedef struct _hog_syslog_t {
+typedef struct _hlbr_syslog_t {
     char *name;
     int val;
-} hog_syslog_t;
+} hlbr_syslog_t;
 
-hog_syslog_t hog_syslog_prioritys[] = {
+hlbr_syslog_t hlbr_syslog_prioritys[] = {
     {"LOG_ALERT", LOG_ALERT},
     {"LOG_CRIT", LOG_CRIT},
     {"LOG_DEBUG", LOG_DEBUG},
@@ -27,7 +27,7 @@ hog_syslog_t hog_syslog_prioritys[] = {
     {"LOG_WARNING", LOG_WARNING},
 };
 
-hog_syslog_t hog_syslog_facilitys[] = {
+hlbr_syslog_t hlbr_syslog_facilitys[] = {
 #ifdef LOG_AUTHPRIV	
     {"LOG_AUTHPRIV", LOG_AUTHPRIV},
 #endif	
@@ -54,7 +54,7 @@ hog_syslog_t hog_syslog_facilitys[] = {
     {"LOG_LOCAL7", LOG_LOCAL7},
 };
 
-hog_syslog_t hog_syslog_options[] = {
+hlbr_syslog_t hlbr_syslog_options[] = {
 
 #ifdef LOG_CONS
     {"LOG_CONS", LOG_CONS},	/* Write directly to system console if  there  is  an  error  while sending to system logger. */
@@ -196,23 +196,23 @@ void *AlertSyslogParseArgs(char *Args)
     list = ListAdd(Args, list, ',');
     for (ll = list; ll != NULL; ll = ll->next) {
 	if ((ptr = ParseCmp("facility", ll->item)) != NULL) {
-	    for (idx = 0; idx < ARRAYSIZE(hog_syslog_facilitys); idx++) {
-		if (strcasecmp(hog_syslog_facilitys[idx].name, ptr) == 0) {
+	    for (idx = 0; idx < ARRAYSIZE(hlbr_syslog_facilitys); idx++) {
+		if (strcasecmp(hlbr_syslog_facilitys[idx].name, ptr) == 0) {
 		    DBG((printf
 			 ("facility(%s) = %d\n", ptr,
-			  hog_syslog_facilitys[idx].val)));
-		    data->facility = hog_syslog_facilitys[idx].val;
+			  hlbr_syslog_facilitys[idx].val)));
+		    data->facility = hlbr_syslog_facilitys[idx].val;
 		}
 	    }
 	    FREE(ptr);
 	}
 	if ((ptr = ParseCmp("priority", ll->item)) != NULL) {
-	    for (idx = 0; idx < ARRAYSIZE(hog_syslog_prioritys); idx++) {
-		if (strcasecmp(hog_syslog_prioritys[idx].name, ptr) == 0) {
+	    for (idx = 0; idx < ARRAYSIZE(hlbr_syslog_prioritys); idx++) {
+		if (strcasecmp(hlbr_syslog_prioritys[idx].name, ptr) == 0) {
 		    DBG((printf
 			 ("priority(%s) = %d\n", ptr,
-			  hog_syslog_prioritys[idx].val)));
-		    data->priority = hog_syslog_prioritys[idx].val;
+			  hlbr_syslog_prioritys[idx].val)));
+		    data->priority = hlbr_syslog_prioritys[idx].val;
 		}
 	    }
 	    FREE(ptr);
@@ -220,13 +220,13 @@ void *AlertSyslogParseArgs(char *Args)
 	if ((ptr = ParseCmp("options", ll->item)) != NULL) {
 	    options = ListAdd(ptr, options, '|');
 	    for (opt = options; opt != NULL; opt = opt->next) {
-		for (idx = 0; idx < ARRAYSIZE(hog_syslog_options); idx++) {
-		    if (strcasecmp(hog_syslog_options[idx].name, opt->item)
+		for (idx = 0; idx < ARRAYSIZE(hlbr_syslog_options); idx++) {
+		    if (strcasecmp(hlbr_syslog_options[idx].name, opt->item)
 			== 0) {
 			DBG((printf
 			     ("priority(%s) = %d\n", opt->item,
-			      hog_syslog_options[idx].val)));
-			data->options |= hog_syslog_options[idx].val;
+			      hlbr_syslog_options[idx].val)));
+			data->options |= hlbr_syslog_options[idx].val;
 		    }
 		}
 	    }

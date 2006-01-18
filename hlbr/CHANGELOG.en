@@ -7,3 +7,11 @@ from 0.1-rc1 to 0.1-rc2:
 - created: make install, installen and uninstall
 - first source code standard revision
 - new rules
+
+from 0.1-rc2 to 0.1-final
+
+- retreat some of the comments let into the code
+- created one action and one log only for e-mail virus
+- new rules and "tunning" of some rules already existing
+- implementation of initialization by files in /etc/init.d
+- log rotate implementation
