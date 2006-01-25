@@ -216,7 +216,7 @@ response=drop
 ############################################################################
 # Routing Section
 #
-# This section defines how the bridging will be done, usind the interfaces 
+# This section defines how the bridging will be done, using the interfaces 
 # previously defined.
 #
 # Possible options are:
