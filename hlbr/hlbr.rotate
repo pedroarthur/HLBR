@@ -1,15 +1,25 @@
 #!/bin/bash
 
 # -c 52 = 1 ano/year
+# by eriberto
 
 if [ -d /var/log/hlbr ];
     then
 
-	logs=`ls --color=never /var/log/hlbr | grep -v [0-9]$`
+	logs=`ls --color=never /var/log/hlbr | grep -v [0-9]$ | grep -v dump$`
 
 	for i in $logs
 	do
 	savelog -m 640 -u root -c 52 -l -n /var/log/hlbr/$i > /dev/null
+	done
+
+
+	logs=`ls --color=never /var/log/hlbr | grep -v [0-9]$ | grep dump$`
+
+	for i in $logs
+	do
+	savelog -m 640 -u root -c 52 -l -n /var/log/hlbr/$i > /dev/null
+	cat /var/lib/hlbr/hlbr.dump.header > /var/log/hlbr/$i
 	done
 
 fi

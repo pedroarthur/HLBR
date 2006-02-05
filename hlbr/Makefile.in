@@ -120,6 +120,8 @@ install:
 	cp hlbr.config empty.rules hlbr.rules /etc/hlbr
 	cp rules/* /etc/hlbr/rules
 	cp VERSION /etc/hlbr
+	mkdir /var/lib/hlbr 2> /dev/null
+	cp -f hlbr.dump.header /var/lib/hlbr
 	#
 	# ---------------------------------------------------------
 	# HLBR instalado.
@@ -147,6 +149,8 @@ installen:
 	cp hlbr.config.en /etc/hlbr/hlbr.config
 	cp rules/* /etc/hlbr/rules
 	cp VERSION /etc/hlbr
+	mkdir /var/lib/hlbr 2> /dev/null
+	cp -f hlbr.dump.header /var/lib/hlbr
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
