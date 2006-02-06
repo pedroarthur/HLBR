@@ -117,8 +117,9 @@ install:
 	if [ -d "/etc/rc.d/init.d" ]; then cp -f hlbr.init /etc/rc.d/init.d/hlbr; fi
 	if [ -d "/etc/cron.weekly" ]; then cp -f hlbr.rotate /etc/cron.weekly/hlbr; fi
 	cp hlbr /usr/sbin
-	cp hlbr.config empty.rules hlbr.rules /etc/hlbr
-	cp rules/* /etc/hlbr/rules
+	cp empty.rules hlbr.rules /etc/hlbr
+	cp hlbr.config.pt_BR /etc/hlbr/hlbr.config
+		cp rules/* /etc/hlbr/rules
 	cp VERSION /etc/hlbr
 	mkdir /var/lib/hlbr 2> /dev/null
 	cp -f hlbr.dump.header /var/lib/hlbr
