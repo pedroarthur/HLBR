@@ -10,7 +10,7 @@ if [ -d /var/log/hlbr ];
 
 	for i in $logs
 	do
-	savelog -m 640 -u root -c 52 -l -n /var/log/hlbr/$i > /dev/null
+	savelog -m 640 -u root -c 52 -l /var/log/hlbr/$i > /dev/null
 	done
 
 
@@ -18,7 +18,7 @@ if [ -d /var/log/hlbr ];
 
 	for i in $logs
 	do
-	savelog -m 640 -u root -c 52 -l -n /var/log/hlbr/$i > /dev/null
+	savelog -m 640 -u root -c 52 -l /var/log/hlbr/$i > /dev/null
 	cat /var/lib/hlbr/hlbr.dump.header > /var/log/hlbr/$i
 	done
 
