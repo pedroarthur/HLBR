@@ -98,12 +98,14 @@ hlbr: config.h $(HLBR_OBJECTS)
 	#
 	# ---------------------------------------
 	# Execute "# make install" para instalar.
-	# Run "# make installen" to install.
+	# Run "# make install" to install.
 	# ---------------------------------------
 	#
 
 
-install: 
+install: $(INSTALL_LANG)
+
+portuguese:
 	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
 	if [ -d "/etc/hlbr/" ]; then mv -f /etc/hlbr /etc/hlbr.old; fi
 	mkdir /etc/hlbr
@@ -119,7 +121,7 @@ install:
 	cp hlbr /usr/sbin
 	cp empty.rules hlbr.rules /etc/hlbr
 	cp hlbr.config.pt_BR /etc/hlbr/hlbr.config
-		cp rules/* /etc/hlbr/rules
+	cp rules/* /etc/hlbr/rules
 	cp VERSION /etc/hlbr
 	mkdir /var/lib/hlbr 2> /dev/null
 	cp -f hlbr.dump.header /var/lib/hlbr
@@ -132,7 +134,7 @@ install:
 	# ---------------------------------------------------------
 	#
 
-installen: 
+english:
 	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
 	if [ -d "/etc/hlbr/" ]; then mv -f /etc/hlbr /etc/hlbr.old; fi
 	mkdir /etc/hlbr
@@ -162,17 +164,31 @@ installen:
 	#
 
 uninstall: 
+	# 
+	# Removendo arquivos de configuracao / Removing configuration files
+	#
 	if [ -d "/etc/hlbr/" ]; then rm -rf /etc/hlbr; fi
 	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
+	#
+	# Removendo logs / Removing logs
+	#
 	if [ -d "/var/log/hlbr/" ]; then rm -rf /var/log/hlbr; fi
 	if [ -d "/var/log/hlbr.old/" ]; then rm -rf /var/log/hlbr.old; fi
+	#
+	# Removendo daemon / Removing daemon
+	#
 	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
 	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
 	if [ -e "/etc/init.d/hlbr" ]; then rm -f /etc/init.d/hlbr; fi
 	if [ -e "/etc/rc.d/init.d/hlbr" ]; then rm -f /etc/rc.d/init.d/hlbr; fi
+	#
+	# Removendo cron e libs / Removing cron and libs
+	#
 	if [ -e "/etc/cron.weekly/hlbr" ]; then rm -f /etc/cron.weekly/hlbr; fi
+	if [ -e "/var/lib/hlbr" ]; then rm -rf /var/lib/hlbr; fi
 	#
 	# -------------------------------------------------
 	# HLBR foi desinstalado. HLBR has been uninstalled.
 	# -------------------------------------------------
 	#
+

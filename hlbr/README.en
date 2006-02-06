@@ -10,10 +10,7 @@ To install HLBR, follow these steps:
 2. Run the command "# make". You will need to have compilers for C (gcc) and
    C++ (g++) already installed.
 
-3. Run the command "# make installen" to install HLBR with the english version
-   of the config file (comments in the file will be in english). To install
-   the file with comments in brazilian portuguese, run the command
-   "#make install".
+3. Run the command "# make install" to install HLBR.
 
 4. Edit the file /etc/hlbr.config as needed.
 

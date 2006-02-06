@@ -126,6 +126,24 @@ fi
 
 #done checking the endian
 
+#select language
+echo
+echo '-----------------------------------------------------------'
+echo 'Por favor, selecione o idioma / Please, select the language'
+echo 
+echo 'Portugues - Pressione p e ENTER'
+echo 'English - Press ENTER'
+echo '-----------------------------------------------------------'
+echo
+read INSTALL_LANG
+
+if [ "$INSTALL_LANG" = "p" ]
+    then echo 'INSTALL_LANG=portuguese' >> Makefile; echo 'Idioma: portugues.'
+    else echo 'INSTALL_LANG=english' >> Makefile; echo 'Language: english'
+fi
+echo
+echo
+
 #check for a built-in daemon call
 echo -n "Buscando o daemon / Checking for daemon............"
 ENDIAN=""
@@ -215,3 +233,5 @@ echo 'Execute "# make" para compilar.'
 echo 'Run "# make" to compile.'
 echo "-------------------------------"
 echo
+
+

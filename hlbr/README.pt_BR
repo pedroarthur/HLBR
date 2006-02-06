@@ -10,9 +10,7 @@ Para instalar o HLBR, siga os seguintes procedimentos:
 2. Execute o comando "# make". Eh necessario ter os compiladores C (gcc) e
    C++ (g++) instalados.
 
-3. Execute o comando "# make" install para instalar o sistema com o arquivo
-   de configuracao comentado em portugues do Brasil. Se desejar que os comen-
-   tarios estejam em ingles, execute o comando #make installen.
+3. Execute o comando "# make install" para instalar o sistema.
 
 4. Ajuste as configuracoes no arquivo /etc/hlbr.config.
 
