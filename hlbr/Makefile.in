@@ -125,6 +125,7 @@ portuguese:
 	cp VERSION /etc/hlbr
 	mkdir /var/lib/hlbr 2> /dev/null
 	cp -f hlbr.dump.header /var/lib/hlbr
+	cp hlbr.8.gz /usr/share/man/man8
 	#
 	# ---------------------------------------------------------
 	# HLBR instalado.
@@ -154,6 +155,7 @@ english:
 	cp VERSION /etc/hlbr
 	mkdir /var/lib/hlbr 2> /dev/null
 	cp -f hlbr.dump.header /var/lib/hlbr
+	cp hlbr.8.gz /usr/share/man/man8
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
@@ -182,10 +184,11 @@ uninstall:
 	if [ -e "/etc/init.d/hlbr" ]; then rm -f /etc/init.d/hlbr; fi
 	if [ -e "/etc/rc.d/init.d/hlbr" ]; then rm -f /etc/rc.d/init.d/hlbr; fi
 	#
-	# Removendo cron e libs / Removing cron and libs
+	# Removendo cron, libs e manual / Removing cron, libs and man page
 	#
 	if [ -e "/etc/cron.weekly/hlbr" ]; then rm -f /etc/cron.weekly/hlbr; fi
-	if [ -e "/var/lib/hlbr" ]; then rm -rf /var/lib/hlbr; fi
+	if [ -d "/var/lib/hlbr" ]; then rm -rf /var/lib/hlbr; fi
+	if [ -e "/usr/share/man/man8/hlbr.8.gz" ]; then rm -rf /usr/share/man/man8/hlbr.8.gz; fi
 	#
 	# -------------------------------------------------
 	# HLBR foi desinstalado. HLBR has been uninstalled.
