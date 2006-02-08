@@ -3,6 +3,8 @@
 # -c 52 = 1 ano/year
 # by eriberto
 
+path=/var/log/hlbr
+
 if [ -d /var/log/hlbr ];
     then
 
@@ -10,7 +12,7 @@ if [ -d /var/log/hlbr ];
 
 	for i in $logs
 	do
-	savelog -m 640 -u root -c 52 -l /var/log/hlbr/$i > /dev/null
+	savelog -m 640 -u root -c 52 -l -n $path/$i > /dev/null
 	done
 
 
@@ -18,8 +20,13 @@ if [ -d /var/log/hlbr ];
 
 	for i in $logs
 	do
-	savelog -m 640 -u root -c 52 -l /var/log/hlbr/$i > /dev/null
-	cat /var/lib/hlbr/hlbr.dump.header > /var/log/hlbr/$i
+	    length=`ls --color=never -l $path/$i|tr -s " "|cut -d" " -f5`
+
+	    if [ $length -gt 30 ]
+		then
+		    savelog -m 640 -u root -c 52 -l $path/$i > /dev/null
+		    cat /var/lib/hlbr/hlbr.dump.header > /var/log/hlbr/$i
+	    fi
 	done
 
 fi
