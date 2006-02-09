@@ -1,49 +1,32 @@
-Para a versao 0.1 final
+Para a versao 1.0: 
 
-- aplicar patches (feito)
-- retirar erros nos arquivos texto (feito)
-- revisar todo o README (feito)
-- traduzir o README para ingles (feito)
-- transformar o make distclean em make clean (feito)
-- criar make install, installen e uninstall (feito)
-- troca de /sbin/hlbr para /usr/sbin/hlbr (feito)
-- testar estabilidade (feito)
-- retirar comentarios inuteis do codigo (feito)
-- criar o arquivo para /etc/init.d (feito)
-- logrotate! (feito)
-
-
-
-Para a versao 0.2 final
-
-- empacotar .deb
-- criar manual
-- checar todo o funcionamento
-- checar todos os erros documentados na UCB
-- verificar a resposta (route sip)
-- checar o funcionamento do B&S e alterar o arquivo hlbr.conf
-- inserir acoes ernocase e ercontent (er=expressao regular / irah aceitar
-          virgula para colocar mais de uma expressao na linha)
-- inserir tcp dbcontent e tcp dbnocase (irah consultar um arquivo txt com
-          palavras diversas. se o trafego nao contiver tais palavras, irah
-	  sofrer a acao)
-- criar manual on-line (man)
-- mensagens de erro tambem em pt_BR
-	  
-
-
-Para a versao 1.0 final
-
-- regras!!!!!!
-- expandir acoes ernocase e ercontent com a libpcre
+- implementacao de expressoes regulares
+- novas regras usando expressoes regulares
+- adaptacao de algumas regras antigas (expressoes regulares)
+- checagem de sites baseando-se em listas
 - finalizar a documentacao no site
-- criar mais possibilidades de expressoes regulares
+- criar faq
 
 
-Para a versao 2.0 final
+Para a versao 1.1:
+
+- checagem de virus com clamav
+- deteccao em trafego uuencode
+- inserir not, and, or
+- adicionar possibilidade de reload
+
+
+Para a versao 2.0:
 
 - criar conversor de regras do Snort
 - implementar IA
+- criar documentacao sobre IA
+
+
+O futuro:
+
+- soh Deus sabe...
+
 
 
 

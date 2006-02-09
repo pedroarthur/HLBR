@@ -1,3 +1,22 @@
+de 0.1-final para 0.2:
+
+- bug corrigido: HLBR nao iniciava corretamente fora do diretorio de configuracoes e regras
+- bug corrigido: arquivos .dump ficavam corrompidos
+- criado manual on-line
+- criadas novas regras
+- criado novo sistema de roteamento de logs
+- alterado o sistema de instalacao
+
+
+de 0.1-rc2 para 0.1-final:
+
+- retirada parte dos comentarios deixados no codigo
+- criada uma acao e um log somente para virus de email
+- novar regras e tunning de algumas jah existentes
+- implementacao de inicializacao por arquivo em /etc/init.d
+- implementacao do roteamento de logs
+
+
 de 0.1-rc1 para 0.1-rc2:
 
 - revisto o hlbr.config
@@ -9,12 +28,5 @@ de 0.1-rc1 para 0.1-rc2:
 - novas regras
 
 
-de 0.1-rc2 para 0.1-final
-
-- retirada parte dos comentarios deixados no codigo
-- criada uma acao e um log somente para virus de email
-- novar regras e tunning de algumas jah existentes
-- implementacao de inicializacao por arquivo em /etc/init.d
-- implementacao do roteamento de logs
 
 
