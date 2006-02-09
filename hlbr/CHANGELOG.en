@@ -1,3 +1,13 @@
+from 0.1-final to 0.2:
+
+- corrected bug: HLBR didn't start correctly out of the directory of configurations and rules
+- corrected bug: .dump files getting corrupted
+- on-line manual created
+- new rules created
+- new log rotating system
+- installation system altered
+
+
 from 0.1-rc1 to 0.1-rc2:
 
 - hlbr.config revised
@@ -7,6 +17,7 @@ from 0.1-rc1 to 0.1-rc2:
 - created: make install, installen and uninstall
 - first source code standard revision
 - new rules
+
 
 from 0.1-rc2 to 0.1-final
 

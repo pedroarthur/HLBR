@@ -1,46 +1,28 @@
-To version 0.1 final
+To version 1.0:
 
-- apply patches (done)
-- fix errors in text files (done)
-- check README (done)
-- translate README to english (done)
-- change make distclean to make clean (done)
-- create make install, installen and uninstall (done)
-- change /sbin/hlbr to /usr/sbin/hlbr (done)
-- check stability (done)
-- remove useless comments from code (done)
-- create file for /etc/init.d (done)
-- logrotate! (done)
+- implementation of regular expression rules
+- new rules using regular expressions
+- adaptation of some old rules (regular expression)
+- site checking based on lists
+- finish documentation at site
+- create faq
 
 
+To version 1.1:
 
-To version 0.2 final
-
-- make .deb package
-- create manual
-- test to see if it works (in a real environment)
-- check all errors documented at UCB
-- check response (route sip)
-- check B&S and change hlbr.conf file
-- insert actions renocase and recontent (re=regular expression; will accept 
-          commas to separate more than one expression)
-- insert tests tcp dbcontent and tcp dbnocase (will consult a txt file with a
-          list of words. if the words aren't found in the traffic, it will
-          receive the action)
-- create online manual (man)
-- error messages also in pt_BR
-	  
+- virus checking with clamav
+- uuencode detection
+- insert logic operations (not, and, or)
+- add possibility of reload
 
 
-To version 1.0 final
+To version 2.0:
 
-- rules!!!!!!
-- expand actions renocase and recontent using libpcre
-- finish documentation at website
-- create more possibilities of regular expressions
-
-
-To version 2.0 final
-
-- create a Snort rules conversor
+- create a Snort rules converter
 - implement AI
+- create documentation about AI
+
+
+The future:
+
+- only God knows...
