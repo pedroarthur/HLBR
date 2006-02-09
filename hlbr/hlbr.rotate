@@ -30,5 +30,3 @@ if [ -d /var/log/hlbr ];
 	done
 
 fi
-
-	
