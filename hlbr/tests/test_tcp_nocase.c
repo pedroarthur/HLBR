@@ -24,6 +24,7 @@ JTree			TCPNoCaseTree;
 ******************************************/
 int TestTCPNoCase(int PacketSlot, TestNode* Nodes){
 	PacketRec*			p;
+	TCPNoCaseData* data;
 #ifdef DEBUGMATCH	
 	int					i;
 #endif	
@@ -50,7 +51,6 @@ int TestTCPNoCase(int PacketSlot, TestNode* Nodes){
 		printf("Rule %i is inactive\n",i);
 	printf("**************************************\n");
 #endif	
-
 	MatchStrings(&TCPNoCaseTree, p->RuleBits, p->RawPacket+p->BeginData, p->PacketLen - p->BeginData);
 	
 #ifdef DEBUGMATCH

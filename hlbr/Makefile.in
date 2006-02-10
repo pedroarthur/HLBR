@@ -14,6 +14,7 @@ HLBR_OBJECTS= \
   engine/message.o \
   engine/cache.o \
   engine/hlbrlib.o \
+  engine/regex.o \
   packets/packet.o \
   packets/packet_linux_raw.o \
   packets/packet_obsd_bpf.o \
@@ -49,6 +50,7 @@ HLBR_OBJECTS= \
   tests/test_tcp_nocase.o \
   tests/test_tcp_flags.o \
   tests/test_tcp_offset.o \
+  tests/test_tcp_regex.o \
   tests/test_udp_src.o \
   tests/test_udp_dst.o \
   tests/test_udp_content.o \

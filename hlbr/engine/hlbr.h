@@ -102,8 +102,8 @@ typedef struct interface_rec{
 } InterfaceRec;
 
 typedef struct test_node{
-	int					RuleID;
-	void*				Data;
+	int			RuleID;
+	void*			Data;
 	struct test_node*	Next;
 } TestNode;
 
