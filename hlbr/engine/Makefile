@@ -3,7 +3,6 @@ DEBUG=-g -Wall
 all: hlbr.o  \
 parse_config.o  \
 parse_rules.o   \
-parse_snort.o	\
 main_loop.o     \
 bits.o          \
 session.o       \
@@ -40,9 +39,6 @@ session.o: session.c session.h ../config.h hlbr.h
 
 main_loop.o: main_loop.c main_loop.h ../config.h hlbr.h
 	$(CC) -c -o main_loop.o main_loop.c $(DEBUG)
-
-parse_snort.o: parse_snort.c parse_snort.h ../config.h hlbr.h
-	$(CC) -c -o parse_snort.o parse_snort.c $(DEBUG)
 
 parse_rules.o: parse_rules.c parse_rules.h ../config.h hlbr.h
 	$(CC) -c -o parse_rules.o parse_rules.c $(DEBUG)

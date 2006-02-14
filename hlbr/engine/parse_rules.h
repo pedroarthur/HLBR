@@ -6,9 +6,9 @@
 #include <stdio.h>
 
 /* In case were getting told our table name from config.h */
-#ifndef RULES_MYSQL_TABLENAME
-#define RULES_MYSQL_TABLENAME "Rules"
-#endif
+//#ifndef RULES_MYSQL_TABLENAME
+//#define RULES_MYSQL_TABLENAME "Rules"
+//#endif
 
 int ParseRules(char* FName);
 int ParseDecoderLine(char* DecoderLine, int RuleNum);
