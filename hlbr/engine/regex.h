@@ -1,7 +1,7 @@
 /*
  * File: regex.h
  *
- * Description: interface file for regexp.c
+ * Description: interface file for regex.c
  *
  * History: 
  *          date - sf login - description
@@ -16,4 +16,5 @@
 
 // Function to search for a pattern (regular expression) inside a string
 // Returns 0 if found
-int match(char *string, char *pattern, regex_t *re);
+int match(char *string, regex_t *re);
+//int match(char *string, char *pattern, regex_t *re);

@@ -10,6 +10,7 @@ extern GlobalVars	Globals;
 
 typedef struct tcp_regexp_data{
 	unsigned char	tcp_content[MAX_CONTENT_LEN];
+	regex_t            *re;
 } TCPRegExpData;
 
 //#define DEBUG
@@ -60,8 +61,9 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 	  	data=(TCPRegExpData*)Node->Data;
 	  	result=0;
 
-	  	result = match(p->RawPacket+p->BeginData, data->tcp_content, &re);
-	  	regfree(&re);
+	  	//regfree(&re);
+
+		result = match(p->RawPacket+p->BeginData, data->re);
 
 		if (result != 0)
 			SetRuleInactive(PacketSlot, Node->RuleID);
@@ -91,6 +93,7 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 ******************************************/
 int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 	TCPRegExpData* data;
+	int status;
 
 #ifdef DEBUGPATH
 	printf("In TCPRegExpAddNode\n");
@@ -101,9 +104,14 @@ int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 #endif
 
 	data=calloc(sizeof(TCPRegExpData),1);
+	data->re=calloc(sizeof(regex_t),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, "%s", Args);
+     	
+	if((status=regcomp( data->re, data->tcp_content, REG_EXTENDED)) != 0)
+        return(status);
+	
 	//data = regular expression
-	return TestAddNode(TestID, RuleID, (void*)data); //entender o que o TestAddNode faz
+	return TestAddNode(TestID, RuleID, (void*)data); 
 }
 
 /****************************************
@@ -124,7 +132,7 @@ int InitTestTCPRegExp(){
 		return FALSE;
 	} 
 	
-	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "regexp");
+	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "regex");
 	Globals.Tests[TestID].AddNode=TCPRegExpAddNode;
 	Globals.Tests[TestID].TestFunc=TestTCPRegExp;
 
