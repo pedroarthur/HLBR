@@ -174,8 +174,8 @@ int ParseDecoderLine(char* DecoderLine, int RuleNum){
 		Args=Delim+1;
 	}
 
-	Delim=strchr(Args, ')');
-	if (!Delim){
+	Delim = &Args[strlen(Args)-1];
+	if (*Delim != ')') {
 		printf("Error: Expected )\n");
 		return FALSE;
 	}else{

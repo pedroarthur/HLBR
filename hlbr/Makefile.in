@@ -51,6 +51,7 @@ HLBR_OBJECTS= \
   tests/test_tcp_flags.o \
   tests/test_tcp_offset.o \
   tests/test_tcp_regex.o \
+  tests/test_udp_regex.o \
   tests/test_udp_src.o \
   tests/test_udp_dst.o \
   tests/test_udp_content.o \
