@@ -126,9 +126,8 @@ portuguese:
 	cp hlbr.config.pt_BR /etc/hlbr/hlbr.config
 	cp rules/* /etc/hlbr/rules
 	cp VERSION /etc/hlbr
-	mkdir /var/lib/hlbr 2> /dev/null
-	cp -f hlbr.dump.header /var/lib/hlbr
-	cp hlbr.8.gz /usr/share/man/man8
+	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
+	if [ ! -e "/usr/share/man/man8" ]; then cp hlbr.8.gz /usr/share/man/man8; fi
 	#
 	# ---------------------------------------------------------
 	# HLBR instalado.
@@ -156,9 +155,8 @@ english:
 	cp hlbr.config.en /etc/hlbr/hlbr.config
 	cp rules/* /etc/hlbr/rules
 	cp VERSION /etc/hlbr
-	mkdir /var/lib/hlbr 2> /dev/null
-	cp -f hlbr.dump.header /var/lib/hlbr
-	cp hlbr.8.gz /usr/share/man/man8
+	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
+	if [ ! -e "/usr/share/man/man8" ]; then cp hlbr.8.gz /usr/share/man/man8; fi
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
