@@ -2,14 +2,14 @@
 # name:       bufferoverflow2.rules
 # created by: Joao Eriberto Mota Filho
 # date:       14 Dec 05
-# update:     none
+# update:     15 Feb 06
 # target:     block tcp buffer overflow attempt attempts.
 
 
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA)
 message=(bufferoverflow2-1) buffer overflow attempt
 action=action1
@@ -17,7 +17,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB)
 message=(bufferoverflow2-2) buffer overflow attempt
 action=action1
@@ -25,7 +25,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC)
 message=(bufferoverflow2-3) buffer overflow attempt
 action=action1
@@ -33,7 +33,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(DDDDDDDDDDDDDDDDDDDDDDDDDDDDDD)
 message=(bufferoverflow2-4) buffer overflow attempt
 action=action1
@@ -41,7 +41,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE)
 message=(bufferoverflow2-5) buffer overflow attempt
 action=action1
@@ -49,7 +49,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
 message=(bufferoverflow2-6) buffer overflow attempt
 action=action1
@@ -57,7 +57,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(GGGGGGGGGGGGGGGGGGGGGGGGGGGGGG)
 message=(bufferoverflow2-7) buffer overflow attempt
 action=action1
@@ -65,7 +65,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(HHHHHHHHHHHHHHHHHHHHHHHHHHHHHH)
 message=(bufferoverflow2-8) buffer overflow attempt
 action=action1
@@ -73,7 +73,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(IIIIIIIIIIIIIIIIIIIIIIIIIIIIII)
 message=(bufferoverflow2-9) buffer overflow attempt
 action=action1
@@ -81,7 +81,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ)
 message=(bufferoverflow2-10) buffer overflow attempt
 action=action1
@@ -89,7 +89,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK)
 message=(bufferoverflow2-11) buffer overflow attempt
 action=action1
@@ -97,7 +97,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(LLLLLLLLLLLLLLLLLLLLLLLLLLLLLL)
 message=(bufferoverflow2-12) buffer overflow attempt
 action=action1
@@ -105,7 +105,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM)
 message=(bufferoverflow2-13) buffer overflow attempt
 action=action1
@@ -113,7 +113,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN)
 message=(bufferoverflow2-14) buffer overflow attempt
 action=action1
@@ -121,7 +121,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(OOOOOOOOOOOOOOOOOOOOOOOOOOOOOO)
 message=(bufferoverflow2-15) buffer overflow attempt
 action=action1
@@ -129,7 +129,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(PPPPPPPPPPPPPPPPPPPPPPPPPPPPPP)
 message=(bufferoverflow2-16) buffer overflow attempt
 action=action1
@@ -137,7 +137,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ)
 message=(bufferoverflow2-17) buffer overflow attempt
 action=action1
@@ -145,7 +145,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR)
 message=(bufferoverflow2-18) buffer overflow attempt
 action=action1
@@ -153,7 +153,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS)
 message=(bufferoverflow2-19) buffer overflow attempt
 action=action1
@@ -161,7 +161,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT)
 message=(bufferoverflow2-20) buffer overflow attempt
 action=action1
@@ -169,7 +169,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(UUUUUUUUUUUUUUUUUUUUUUUUUUUUUU)
 message=(bufferoverflow2-21) buffer overflow attempt
 action=action1
@@ -177,7 +177,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(VVVVVVVVVVVVVVVVVVVVVVVVVVVVVV)
 message=(bufferoverflow2-22) buffer overflow attempt
 action=action1
@@ -185,7 +185,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW)
 message=(bufferoverflow2-23) buffer overflow attempt
 action=action1
@@ -193,7 +193,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
 message=(bufferoverflow2-24) buffer overflow attempt
 action=action1
@@ -201,7 +201,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY)
 message=(bufferoverflow2-25) buffer overflow attempt
 action=action1
@@ -209,7 +209,7 @@ action=action1
 
 <rule>
 ip dst(servers)
-tcp dst(20-23,53,80,110,119,220)
+tcp dst(20-23,53,110,119,220)
 tcp nocase(ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ)
 message=(bufferoverflow2-26) buffer overflow attempt
 action=action1

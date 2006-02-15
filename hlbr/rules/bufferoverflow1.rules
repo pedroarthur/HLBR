@@ -1,0 +1,22 @@
+
+# name:       bufferoverflow1.rules
+# created by: Joao Eriberto Mota Filho
+# date:       14 Dec 05
+# update:     none
+# target:     block remote buffer overflows attempts.
+
+<rule>
+ip dst(servers)
+tcp dst(1-1023)
+tcp nocase(|90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90|)
+message=(bufferoverflow-1) nop sended
+action=action1
+</rule>
+
+<rule>
+ip dst(servers)
+udp dst(1-1023)
+udp nocase(|90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90 90|)
+message=(bufferoverflow-2) nop sended
+action=action1
+</rule>

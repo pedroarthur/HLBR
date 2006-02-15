@@ -2,7 +2,7 @@
 # name:       bufferoverflow3.rules
 # created by: Joao Eriberto Mota Filho
 # date:       14 Dec 05
-# update:     none
+# update:     15 Feb 06
 # target:     block udp buffer overflow attempt attempts.
 
 
