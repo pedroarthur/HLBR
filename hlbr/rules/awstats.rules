@@ -1,16 +1,15 @@
 
-# nome / name:             awstats.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             26 Dez 05 / 26 Dez 05
-# atualizacao / update:    nenhuma / none
-
-# Objetivo / Target: Bloquear requisicoes invalidas / Block invalid requests.
+# name:       awstats.rules
+# created by: Joao Eriberto Mota Filho
+# date:       26 Dec 05
+# update:     15 Feb 06
+# target:     block invalid requests.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(awstats.pl?configdir=|echo;echo%20YYY;)
-message=(awstats-1) Ataque ao awstats / Awstats attack
+tcp nocase(awstats.pl?configdir=|echo;echo%20YYY;)
+message=(awstats-1) awstats attack
 action=action1
 </rule>
 

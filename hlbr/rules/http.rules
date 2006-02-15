@@ -1,81 +1,74 @@
 
-# nome / name:             http.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             29 Nov 05 / 29 Nov 05
-# atualizacao / update:    13 Dez 05 / 13 Dec 05
+# name:       http.rules
+# created by: Joao Eriberto Mota Filho
+# date:       29 Nov 05
+# update:     13 Dec 05
+# target:     block http methods (rfc 1945 and 2616).
 
-# Objetivo / Target: Bloqueio de metodos HTTP (Vide RFCs 1945 e 2616) / Block HTTP methods.
-
-# Para a sua seguranca, os metodos SEARCH e CONNECT devem ser bloqueados.
 # For your security SEARCH and CONNECT methods must be blocked.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(SEARCH)
-message=(http-1) Tentativa de buffer overflow / Buffer overflow attempt
+tcp nocase(SEARCH)
+message=(http-1) buffer overflow attempt
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(CONNECT)
-message=(http-2) Busca de open proxy / Open proxy search
+tcp nocase(CONNECT)
+message=(http-2) open proxy search
 action=action1
 </rule>
 
-# Comente a regra a seguir se nao quiser bloquear POST. Por acaso, voce precisa de POST?
 # Comment the following rule if you don't want to block POST. By the way, do you need POST?
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(POST)
+tcp nocase(POST)
 message=(http-3) Uso de POST / POST use
 action=action1
 </rule>
 
-# Comente a regra a seguir se nao quiser bloquear PUT. Por acaso, voce precisa de PUT?
 # Comment the following rule if you don't want to block PUT. By the way, do you need PUT?
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(PUT)
+tcp nocase(PUT)
 message=(http-4) Uso de PUT / PUT use
 action=action1
 </rule>
 
-# Comente a regra a seguir se nao quiser bloquear OPTIONS. Por acaso, voce precisa de OPTIONS?
 # Comment the following rule if you don't want to block OPTIONS. By the way, do you need OPTIONS?
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(OPTIONS)
+tcp nocase(OPTIONS)
 message=(http-5) Uso de OPTIONS / OPTIONS use
 action=action1
 </rule>
 
-# Comente a regra a seguir se nao quiser bloquear TRACE. Por acaso, voce precisa de TRACE?
 # Comment the following rule if you don't want to block TRACE. By the way, do you need TRACE?
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(TRACE)
+tcp nocase(TRACE)
 message=(http-6) Uso de TRACE / TRACE use
 action=action1
 </rule>
 
-# Comente a regra a seguir se nao quiser bloquear DELETE. Por acaso, voce precisa de DELETE?
 # Comment the following rule if you don't want to block DELETE. By the way, do you need DELETE?
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(DELETE)
+tcp nocase(DELETE)
 message=(http-7) Uso de DELETE / DELETE use
 action=action1
 </rule>

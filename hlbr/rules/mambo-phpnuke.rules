@@ -1,24 +1,23 @@
 
-# nome / name:             mambo-phpnuke.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             26 Dez 05 / 26 Dez 05
-# atualizacao / update:    nenhuma / none
-
-# Objetivo / Target: Bloquear requisicoes invalidas / Block invalid requests.
+# name:       mambo-phpnuke.rules
+# created by: Joao Eriberto Mota Filho
+# date:       26 Dec 05
+# update:     none
+# target:     block invalid requests.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(?_REQUEST[option]=com_content&_REQUEST[Itemid]=1&GLOBALS=&mosConfig_absolute_path=http://)
-message=(mambo-phpnuke-1) Ataque ao mambo / Mambo attack
+tcp nocase(?_REQUEST[option]=com_content&_REQUEST[Itemid]=1&GLOBALS=&mosConfig_absolute_path=http://)
+message=(mambo-phpnuke-1) mambo attack
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(admin_styles.phpadmin_styles.php?phpbb_root_path=http://)
-message=(mambo-phpnuke-2) Ataque ao php-nuke / Php-nuke attack
+tcp nocase(admin_styles.phpadmin_styles.php?phpbb_root_path=http://)
+message=(mambo-phpnuke-2) php-nuke attack
 action=action1
 </rule>
 

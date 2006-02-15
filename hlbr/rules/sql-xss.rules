@@ -1,40 +1,33 @@
 
-# nome / name:             sql-xss.rules
-# criado por / created by: Hardik Shah
-# data / date:             10 jan 06
-# atualizacao / update:    nenhuma / none
-
-# Objetivo / Target: Checar SQL injection e cross site script / SQL injection and xss checks
+# name:       sql-xss.rules
+# created by: Hardik Shah
+# date:       10 jan 06
+# updated by: Joao Eriberto Mota Filho
+# update:     15 Feb 06
+# target: sql injection and xss checks.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(' or 1=1--)
-message=(sql-xss-1) Requisicao / Request sql injection sql server
+tcp regex(' +or +.=.--)
+message=(sql-xss-1-re) sql injection (sql server)
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(--)
-message=(sql-xss-2) Requisicao / Request sql injection sql server
+tcp regex(' +or +'.'='.)
+message=(sql-xss-2-re) sql injection (ms-access, oracle)
 action=action1
 </rule>
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(' or '1'='1)
-message=(sql-xss-3) Requisicao / Request sql injection ms-access, oracle
-action=action1
-</rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp nocase(' or union select)
-message=(sql-xss-4) Requisicao / Request sql injection union 
+message=(sql-xss-3) sql injection (union)
 action=action1
 </rule>
 
@@ -43,6 +36,6 @@ action=action1
 ip dst(www)
 tcp dst(80)
 tcp nocase(<script>)
-message=(sql-xss-5) Requisicao / Request XSS
+message=(sql-xss-4) request XSS
 action=action1
 </rule>

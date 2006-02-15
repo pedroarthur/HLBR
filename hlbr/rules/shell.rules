@@ -1,16 +1,15 @@
 
-# nome / name:             shell.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             14 Dez 05 / 14 Dec 05
-# atualizacao / update:    nenhuma / none
-
-# Objetivo / Target: Bloquear chamadas a shells remotos / Block remote shell calls.
+# name:       shell.rules
+# created by: Joao Eriberto Mota Filho
+# date:       14 Dec 05
+# update:     none
+# target:     block remote shell calls.
 
 <rule>
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/bash)
-message=(shell-1) Chamada a /bin/bash / /bin/bash call
+message=(shell-1) /bin/bash call
 action=action1
 </rule>
 
@@ -18,7 +17,7 @@ action=action1
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/sh)
-message=(shell-2) Chamada a /bin/sh / /bin/sh call
+message=(shell-2) /bin/sh call
 action=action1
 </rule>
 
@@ -26,7 +25,7 @@ action=action1
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/ksh)
-message=(shell-3) Chamada a /bin/ksh / /bin/ksh call
+message=(shell-3) /bin/ksh call
 action=action1
 </rule>
 
@@ -34,7 +33,7 @@ action=action1
 ip dst(servers)
 tcp dst(53,80,110,220)
 tcp nocase(/bin/csh)
-message=(shell-4) Chamada a /bin/csh / /bin/csh call
+message=(shell-4) /bin/csh call
 action=action1
 </rule>
 
@@ -42,7 +41,7 @@ action=action1
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/bash)
-message=(shell-5) Chamada a /bin/bash / /bin/bash call
+message=(shell-5) /bin/bash call
 action=action1
 </rule>
 
@@ -50,7 +49,7 @@ action=action1
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/sh)
-message=(shell-6) Chamada a /bin/sh / /bin/sh call
+message=(shell-6) /bin/sh call
 action=action1
 </rule>
 
@@ -58,7 +57,7 @@ action=action1
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/ksh)
-message=(shell-7) Chamada a /bin/ksh / /bin/ksh call
+message=(shell-7) /bin/ksh call
 action=action1
 </rule>
 
@@ -66,7 +65,7 @@ action=action1
 ip dst(servers)
 udp dst(13,37,53,123)
 udp nocase(/bin/csh)
-message=(shell-8) Chamada a /bin/csh / /bin/csh call
+message=(shell-8) /bin/csh call
 action=action1
 </rule>
 

@@ -1,161 +1,33 @@
 
-# nome / name:             webattacks.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             26 Dez 05 / 26 Dez 05
-# atualizacao / update:    27 Dez 05 / 27 Dec 05
-
-# Objetivo / Target: Bloquear ataques www / Block www attacks.
+# name:       webattacks.rules
+# created by: Joao Eriberto Mota Filho
+# date:       26 Dec 05
+# update:     15 Feb 06
+# target:     block www attacks.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(../../../)
-message=(webattacks-1) Requisicao / Request ../../../ 
+tcp regex((\n|^)(GET|POST|PUT|OPTIONS|TRACE|SEARCH) +(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
+message=(webattacks-1-er) directory change attempt (unicode,asc,plain) 
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(.../.../.../)
-message=(webattacks-2) Requisicao / Request .../.../.../
+tcp regex((\n|^)(GET|POST|PUT|OPTIONS|TRACE|SEARCH) [^\n]+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
+message=(webattacks-2-er) directory change attempt (unicode,asc,plain) 
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(..../..../..../)
-message=(webattacks-3) Requisicao / Request ..../..../..../
+tcp content(\.+:+\.+)
+message=(webattacks-3-re) request ..:..:.. 
 action=action1
 </rule>
 
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(..//..//..//)
-message=(webattacks-4) Requisicao / Request ..//..//..// 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(...//...//...//)
-message=(webattacks-5) Requisicao / Request ...//...//...// 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(....//....//....//)
-message=(webattacks-6) Requisicao / Request ....//....//....// 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(..\\..\\..\\)
-message=(webattacks-7) Requisicao / Request ..\\..\\..\\ 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(...//...//...//)
-message=(webattacks-8) Requisicao / Request ...//...//...// 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(....//....//....//)
-message=(webattacks-9) Requisicao / Request ....//....//....// 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(..\\\\..\\\\..\\\\)
-message=(webattacks-10) Requisicao / Request ..\\\\..\\\\..\\\\ 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(../\\\\../\\\\../\\\\)
-message=(webattacks-11) Requisicao / Request ..\\\\..\\\\..\\\\ 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(/......)
-message=(webattacks-12) Requisicao / Request /...... 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(..:..:..)
-message=(webattacks-13) Requisicao / Request ..:..:.. 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(../\\\\../\\\\../\\\\)
-message=(webattacks-14) Requisicao / Request ..\\\\..\\\\..\\\\ 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(./././)
-message=(webattacks-15) Requisicao / Request ./././ 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(./../.../)
-message=(webattacks-16) Requisicao / Request ./../.../ 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(..%252f..%252f..)
-message=(webattacks-17) Requisicao / Request ..%252f..%252f.. 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(..%255c..%255c..)
-message=(webattacks-18) Requisicao / Request ..%255c..%255c.. 
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(..%2f..%2f..)
-message=(webattacks-19) Requisicao / Request ..%252f..%252f.. 
-action=action1
-</rule>
 

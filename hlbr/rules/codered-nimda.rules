@@ -1,41 +1,24 @@
 
-# nome / name:             codered-nimda.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             14 Dez 05 / 14 Dec 05
-# atualizacao / update:    26 Dez 05 / 26 Dec 05
-
-# Objetivo / Target: Bloquear os Worms Code Red e NIMDA / Block the Code Red and NIMDA Worms.
-
-# Referencia / Reference: http://www.mycert.org.my/advisory/MS-035.102001.html
+# name:       codered-nimda.rules
+# created by: Joao Eriberto Mota Filho
+# date:       14 Dec 05
+# update:     15 Feb 06
+# target:     block the Code Red and NIMDA Worms.
+# reference:  http://www.mycert.org.my/advisory/MS-035.102001.html
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(default.ida)
-message=(codered_nimda-1) Requisicao default.ida / default.ida request
+tcp nocase(default.ida)
+message=(codered_nimda-1) default.ida request
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(root.exe)
-message=(codered_nimda-2) Requisicao root.exe / root.exe request
+tcp regex((root|cmd|explorer).exe)
+message=(codered_nimda-2-re) (root|cmd|explorer) request
 action=action1
 </rule>
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(cmd.exe)
-message=(codered_nimda-3) Requisicao cmd.exe / cmd.exe request
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(explorer.exe)
-message=(codered_nimda-4) Requisicao explorer.exe / explorer.exe request
-action=action1
-</rule>

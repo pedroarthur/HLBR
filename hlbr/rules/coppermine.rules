@@ -1,57 +1,32 @@
 
-# nome / name:             coppermine.rules
-# criado por / created by: Joao Eriberto Mota Filho
-# data / date:             22 Dez 05 / 22 Dec 05
-# atualizacao / update:    nenhuma / none
-
-# Objetivo / Target: Bloquear ataques ao Coppermine Photo Gallery / Block Coppermine Photo Gallery attacks.
-
-# Referencia / Reference: http://securitytracker.com/alerts/2004/Apr1010001.html
+# name:       coppermine.rules
+# created by: Joao Eriberto Mota Filho
+# date:       22 Dec 05
+# update:     15 Feb 06
+# target:     block Coppermine Photo Gallery attacks.
+# reference:  http://securitytracker.com/alerts/2004/Apr1010001.html
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(/coppermine/themes/default/theme.php)
-message=(coppermine-1) Ataque theme.php / theme.php attack
+tcp regex(/coppermine/themes/.*/theme.php)
+message=(coppermine-1-re) theme.php attack
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(/coppermine/themes/coppercop/theme.php)
-message=(coppermine-2) Ataque theme.php / theme.php attack
+tcp nocase(http://attacker.com)
+message=(coppermine-2) attacker.com attack
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(/coppermine/themes/ma ze/theme.php)
-message=(coppermine-3) Ataque theme.php / theme.php attack
+tcp regex((phptheme|theme.php)?THEME_DIR=http://)
+message=(coppermine-3-re) (phptheme|theme.php) attack
 action=action1
 </rule>
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(http://attacker.com)
-message=(coppermine-4) Ataque attacker.com / attacker.com attack
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(phptheme?THEME_DIR=http://)
-message=(coppermine-5) Ataque attacker.com / attacker.com attack
-action=action1
-</rule>
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp content(theme.php?THEME_DIR=http://)
-message=(coppermine-6) Ataque attacker.com / attacker.com attack
-action=action1
-</rule>

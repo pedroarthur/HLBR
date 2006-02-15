@@ -1,5 +1,5 @@
 <include rules/awstats.rules>
-<include rules/bufferoverflow.rules>
+<include rules/bufferoverflow1.rules>
 <include rules/bufferoverflow2.rules>
 <include rules/bufferoverflow3.rules>
 <include rules/codered-nimda.rules>
