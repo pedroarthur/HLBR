@@ -237,8 +237,10 @@ echo
 #check cvs presence
 if [ -d "./CVS" ]; then
 echo
+echo -----------------------------------
 echo 'ATENÇÃO: Estrutura do CVS presente!'
 echo 'WARNING: CVS structure present!'
+echo -----------------------------------
 echo
 echo 'Para remover / To remove: "# find|grep CVS|xargs rm -rf"'
 echo
