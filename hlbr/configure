@@ -8,18 +8,6 @@ echo "***********************************"
 echo ""
 echo ""
 
-#check cvs presence
-if [ -d "./CVS" ]; then
-echo 'Usando CVS? Por favor, remova os diretorios CVS.'
-echo 'Using CVS? Please, remove the CVS directories.'
-echo
-echo 'Dica / Tip: "# find|grep CVS|xargs rm -rf"'
-echo
-echo 'Saindo... / Exiting...'
-echo
-exit 0
-fi
-
 #remove the old Makefile and config.h
 if [ -f "Makefile" ]; then
 mv -f Makefile Makefile.old
@@ -246,4 +234,15 @@ echo 'Run "# make" to compile.'
 echo "-------------------------------"
 echo
 
+#check cvs presence
+if [ -d "./CVS" ]; then
+echo
+echo 'ATENÇÃO: Estrutura do CVS presente!'
+echo 'WARNING: CVS structure present!'
+echo
+echo 'Para remover / To remove: "# find|grep CVS|xargs rm -rf"'
+echo
+echo 'Saindo... / Exiting...'
+echo
+fi
 
