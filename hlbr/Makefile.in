@@ -124,7 +124,7 @@ portuguese:
 	cp hlbr /usr/sbin
 	cp empty.rules hlbr.rules /etc/hlbr
 	cp hlbr.config.pt_BR /etc/hlbr/hlbr.config
-	cp rules/* /etc/hlbr/rules
+	cp rules/*.rules /etc/hlbr/rules
 	cp VERSION /etc/hlbr
 	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
 	if [ ! -e "/usr/share/man/man8" ]; then cp man/hlbr.8.gz /usr/share/man/man8; fi
@@ -153,7 +153,7 @@ english:
 	cp hlbr /usr/sbin
 	cp empty.rules hlbr.rules /etc/hlbr
 	cp hlbr.config.en /etc/hlbr/hlbr.config
-	cp rules/* /etc/hlbr/rules
+	cp rules/*.rules /etc/hlbr/rules
 	cp VERSION /etc/hlbr
 	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
 	if [ ! -e "/usr/share/man/man8" ]; then cp man/hlbr.8.gz /usr/share/man/man8; fi
