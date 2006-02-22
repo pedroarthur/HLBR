@@ -13,8 +13,8 @@
 # utilizadas. Isso porque elas poderao interromper parte do trafego legitimo
 # da rede.
 #
-# The rules of the files below shall be analysed before being used. That
-# because they be able interrupt part of the legitimate traffic from net.
+# The rules of the files below must be analysed before being used. That is
+# because they are able to interrupt part of the legitimate network traffic.
 # 
 #<include rules/http.rules>
 #<include rules/php.rules>
