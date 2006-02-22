@@ -10,36 +10,36 @@
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(SEARCH)
-message=(http-1) buffer overflow attempt
+tcp regex(^SEARCH )
+message=(http-1-re) buffer overflow attempt
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(CONNECT)
-message=(http-2) open proxy search
+tcp regex(^CONNECT )
+message=(http-2-re) open proxy search
 action=action1
 </rule>
 
 # Comment the following rule if you don't want to block POST. By the way, do you need POST?
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(POST)
-message=(http-3) Uso de POST / POST use
-action=action1
-</rule>
+#<rule>
+#ip dst(www)
+#tcp dst(80)
+#tcp regex(^POST )
+#message=(http-3) Uso de POST / POST use
+#action=action1
+#</rule>
 
 # Comment the following rule if you don't want to block PUT. By the way, do you need PUT?
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(PUT)
-message=(http-4) Uso de PUT / PUT use
+tcp regex(^PUT )
+message=(http-4-re) Uso de PUT / PUT use
 action=action1
 </rule>
 
@@ -48,8 +48,8 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(OPTIONS)
-message=(http-5) Uso de OPTIONS / OPTIONS use
+tcp regex(^OPTIONS )
+message=(http-5-re) Uso de OPTIONS / OPTIONS use
 action=action1
 </rule>
 
@@ -58,8 +58,8 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(TRACE)
-message=(http-6) Uso de TRACE / TRACE use
+tcp regex(^TRACE )
+message=(http-6-re) Uso de TRACE / TRACE use
 action=action1
 </rule>
 
@@ -68,7 +68,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(DELETE)
-message=(http-7) Uso de DELETE / DELETE use
+tcp regex(^DELETE )
+message=(http-7-re) Uso de DELETE / DELETE use
 action=action1
 </rule>

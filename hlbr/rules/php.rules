@@ -12,3 +12,4 @@ tcp nocase(/xmlrpc.php)
 message=(php-1) xmlrpc request
 action=action1
 </rule>
+

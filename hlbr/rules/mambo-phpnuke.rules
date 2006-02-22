@@ -8,16 +8,16 @@
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(?_REQUEST[option]=com_content&_REQUEST[Itemid]=1&GLOBALS=&mosConfig_absolute_path=http://)
-message=(mambo-phpnuke-1) mambo attack
+tcp regex(._REQUEST.option..com_content._REQUEST.Itemid..1.GLOBALS..mosConfig_absolute_path.http)
+message=(mambo-phpnuke-1-re) mambo attack
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(admin_styles.phpadmin_styles.php?phpbb_root_path=http://)
-message=(mambo-phpnuke-2) php-nuke attack
+tcp regex(admin_styles\.phpadmin_styles\.php.phpbb_root_path.http)
+message=(mambo-phpnuke-2-re) php-nuke attack
 action=action1
 </rule>
 

@@ -32,7 +32,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename=".*\.com")
+tcp regex(filename="[a-zA-Z0-9-.+_.*]\.com")
 message=(mailvirus-4-re) Anexo .com / .com attach
 action=virus
 </rule>
@@ -58,7 +58,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename=".*\..*.exe")
+tcp regex(filename=".*\....\.exe")
 message=(mailvirus-7-re) Anexo .*.exe / .*.exe attach
 action=virus
 </rule>

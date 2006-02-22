@@ -8,16 +8,16 @@
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex((\n|^)(GET|POST|PUT|OPTIONS|TRACE|SEARCH) +(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
-message=(webattacks-1-er) directory change attempt (unicode,asc,plain) 
+tcp regex((\n|^)(GET|POST|PUT) +(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
+message=(webattacks-1-re) directory change attempt (unicode,asc,plain) 
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex((\n|^)(GET|POST|PUT|OPTIONS|TRACE|SEARCH) [^\n]+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
-message=(webattacks-2-er) directory change attempt (unicode,asc,plain) 
+tcp regex((\n|^)(GET|POST|PUT) [^\n]+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
+message=(webattacks-2-re) directory change attempt (unicode,asc,plain) 
 action=action1
 </rule>
 
