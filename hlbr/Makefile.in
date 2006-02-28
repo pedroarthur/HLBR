@@ -48,6 +48,8 @@ HLBR_OBJECTS= \
   tests/test_tcp_dst.o \
   tests/test_tcp_content.o \
   tests/test_tcp_nocase.o \
+  tests/test_tcp_listcontent.o \
+  tests/test_tcp_listnocase.o \
   tests/test_tcp_flags.o \
   tests/test_tcp_offset.o \
   tests/test_tcp_regex.o \

@@ -98,12 +98,11 @@ int TCPNoCaseAddNode(int TestID, int RuleID, char* Args){
 ****************************************/
 int TestTCPNoCaseFinishedSetup(){
 #ifdef DEBUGPATH
-	printf("In TestTCPContentFinishedSetup\n");
+	printf("In TestTCPNocaseFinishedSetup\n");
 #endif
 
 	return FinalizeJTree(&TCPNoCaseTree);
 }
-
 
 /****************************************
 * Set up the test of the TCP NoCase

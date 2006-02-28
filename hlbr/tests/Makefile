@@ -20,6 +20,8 @@ all: test.o \
   test_udp_dst.o \
   test_tcp_content.o \
   test_tcp_nocase.o \
+  test_tcp_listcontent.o \
+  test_tcp_listnocase.o \
   test_tcp_flags.o \
   test_udp_content.o \
   test_udp_nocase.o \
@@ -47,6 +49,12 @@ test_tcp_nocase.o: test_tcp_nocase.c test_tcp_nocase.h ../config.h ../engine/hlb
 
 test_tcp_content.o: test_tcp_content.c test_tcp_content.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o test_tcp_content.o test_tcp_content.c $(DEBUG)
+
+test_tcp_listnocase.o: test_tcp_listnocase.c test_tcp_listnocase.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o test_tcp_listnocase.o test_tcp_listnocase.c $(DEBUG)
+
+test_tcp_listcontent.o: test_tcp_listcontent.c test_tcp_listcontent.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o test_tcp_listcontent.o test_tcp_listcontent.c $(DEBUG)
 
 test_tcp_flags.o: test_tcp_flags.c test_tcp_flags.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o test_tcp_flags.o test_tcp_flags.c $(DEBUG)

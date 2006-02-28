@@ -23,6 +23,8 @@
 #include "test_tcp_dst.h"
 #include "test_tcp_content.h"
 #include "test_tcp_nocase.h"
+#include "test_tcp_listcontent.h"
+#include "test_tcp_listnocase.h"
 #include "test_tcp_flags.h"
 #include "test_tcp_offset.h"
 #include "test_tcp_regex.h"
@@ -61,6 +63,8 @@ int InitTests(){
 	if (!InitTestTCPDst()) return FALSE;
 	if (!InitTestTCPContent()) return FALSE;
 	if (!InitTestTCPNoCase()) return FALSE;	
+	if (!InitTestTCPListContent()) return FALSE;	
+	if (!InitTestTCPListNoCase()) return FALSE;	
 	if (!InitTestTCPFlags()) return FALSE;	
 	if (!InitTestTCPOffset()) return FALSE;
 	if (!InitTestTCPRegExp()) return FALSE;
