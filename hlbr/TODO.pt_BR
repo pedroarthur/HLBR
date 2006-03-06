@@ -1,15 +1,8 @@
-Para a versao 1.0: 
+Para a versao 1.1:
 
-- implementacao de expressoes regulares
-- novas regras usando expressoes regulares
-- adaptacao de algumas regras antigas (expressoes regulares)
 - checagem de sites baseando-se em listas
 - finalizar a documentacao no site
 - criar faq
-
-
-Para a versao 1.1:
-
 - checagem de virus com clamav
 - deteccao em trafego uuencode
 - inserir not, and, or

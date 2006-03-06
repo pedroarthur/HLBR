@@ -1,3 +1,10 @@
+de 0.2 para 1.0:
+
+- novos testes: implementacao de expressoes regulares com tcp regex e udp regex
+- novos testes: tcp listcontent e tcp listnocase (para ler listas de arquivos)
+- novas regras usando expressoes regulares
+- bug corrigido: nocase e content tinha falhas na deteccao
+
 de 0.1-final para 0.2:
 
 - bug corrigido: HLBR nao iniciava corretamente fora do diretorio de configuracoes e regras
