@@ -4,6 +4,7 @@
 <include rules/bufferoverflow3.rules>
 <include rules/codered-nimda.rules>
 <include rules/coppermine.rules>
+<include rules/dnsattacks.rules>
 <include rules/mailvirus.rules>
 <include rules/mambo-phpnuke.rules>
 <include rules/webattacks.rules>

@@ -8,7 +8,7 @@
 <rule>
 ip dst(servers)
 tcp dst(53,80,110,220)
-tcp nocase(/etc/passwd)
+tcp content(/etc/passwd)
 message=(passwd-1) /etc/passwd call
 action=action1
 </rule>
@@ -16,7 +16,7 @@ action=action1
 <rule>
 ip dst(servers)
 tcp dst(53,80,110,220)
-tcp nocase(/etc/shadow)
+tcp content(/etc/shadow)
 message=(passwd-2) /etc/shadow call
 action=action1
 </rule>
@@ -24,7 +24,7 @@ action=action1
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
-udp nocase(/etc/passwd)
+udp content(/etc/passwd)
 message=(passwd-3) /etc/passwd call
 action=action1
 </rule>
@@ -32,7 +32,7 @@ action=action1
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
-udp nocase(/etc/shadow)
+udp content(/etc/shadow)
 message=(passwd-4) /etc/shadow call
 action=action1
 </rule>

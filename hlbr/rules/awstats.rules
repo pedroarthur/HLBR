@@ -8,7 +8,7 @@
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(awstats.pl?configdir=|echo;echo%20YYY;)
+tcp content(awstats.pl?configdir=|echo;echo%20YYY;)
 message=(awstats-1) awstats attack
 action=action1
 </rule>

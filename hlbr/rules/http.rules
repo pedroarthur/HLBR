@@ -2,7 +2,7 @@
 # name:       http.rules
 # created by: Joao Eriberto Mota Filho
 # date:       29 Nov 05
-# update:     13 Dec 05
+# update:     05 Mar 06
 # target:     block http methods (rfc 1945 and 2616).
 
 # For your security SEARCH and CONNECT methods must be blocked.
@@ -23,13 +23,13 @@ message=(http-2-re) open proxy search
 action=action1
 </rule>
 
-# Comment the following rule if you don't want to block POST. By the way, do you need POST?
+# Uncomment the following rule if you want to block POST.
 
 #<rule>
 #ip dst(www)
 #tcp dst(80)
 #tcp regex(^POST )
-#message=(http-3) Uso de POST / POST use
+#message=(http-3) POST method
 #action=action1
 #</rule>
 
@@ -39,19 +39,19 @@ action=action1
 ip dst(www)
 tcp dst(80)
 tcp regex(^PUT )
-message=(http-4-re) Uso de PUT / PUT use
+message=(http-4-re) PUT method
 action=action1
 </rule>
 
-# Comment the following rule if you don't want to block OPTIONS. By the way, do you need OPTIONS?
+# Uncomment the following rule if you want to block OPTIONS.
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp regex(^OPTIONS )
-message=(http-5-re) Uso de OPTIONS / OPTIONS use
-action=action1
-</rule>
+#<rule>
+#ip dst(www)
+#tcp dst(80)
+#tcp regex(^OPTIONS )
+#message=(http-5-re) OPTIONS method
+#action=action1
+#</rule>
 
 # Comment the following rule if you don't want to block TRACE. By the way, do you need TRACE?
 
@@ -59,7 +59,7 @@ action=action1
 ip dst(www)
 tcp dst(80)
 tcp regex(^TRACE )
-message=(http-6-re) Uso de TRACE / TRACE use
+message=(http-6-re) TRACE method
 action=action1
 </rule>
 
@@ -69,6 +69,6 @@ action=action1
 ip dst(www)
 tcp dst(80)
 tcp regex(^DELETE )
-message=(http-7-re) Uso de DELETE / DELETE use
+message=(http-7-re) DELETE method
 action=action1
 </rule>

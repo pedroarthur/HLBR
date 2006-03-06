@@ -24,7 +24,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(\.+:+\.+)
+tcp regex(\.+:+\.+)
 message=(webattacks-3-re) request ..:..:.. 
 action=action1
 </rule>

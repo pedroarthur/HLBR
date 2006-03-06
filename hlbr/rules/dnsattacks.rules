@@ -1,0 +1,32 @@
+
+# name:       dnsattacks.rules
+# created by: Joao Eriberto Mota Filho
+# date:       25 Feb 06
+# update:     05 Mar 06
+# target:     block dns attacks.
+
+<rule>
+ip dst(dns)
+udp dst(53)
+udp nocase(|41cd 80c7 062f 6269 6ec7 4604 2f73 6800  89f0 83c0 0889 4608|)
+message=(dnsattacks-1) tsl bind attack 
+action=action1
+</rule>
+
+# This rules aren't checked yet.
+
+#<rule>
+#ip dst(dns)
+#udp dst(53)
+#udp nocase(|04|bind|00|)
+#message=(dnsattacks-2) get version attempt 
+#action=action1
+#</rule>
+
+#<rule>
+#ip dst(dns)
+#tcp dst(53)
+#tcp nocase(|04|bind|00|)
+#message=(dnsattacks-3) get version attempt 
+#action=action1
+#</rule>
