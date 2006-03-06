@@ -200,14 +200,14 @@ tcp nocase(default.ida? XXXXXXX)
     Idem a tcp content, com a diferenca de que desconsidera a caixa dos
     caracteres.
 
-tcp listcontent(arquivo)
+tcp listcontent(/path/arquivo)
 
     Similar ao tcp content, mas o parametro deve ser o nome de um arquivo
     texto que contem uma lista de palavras, uma por linha. Se apenas uma das
     palavras desta lista for encontrada em um pacote, considera-se este teste
-    inteiro como verdadeiro.
+    inteiro como verdadeiro (o pacote será bloqueado).
     
-tcp listnocase(arquivo)
+tcp listnocase(/path/arquivo)
 
     Idem a tcp listcontent, com a diferenca de que desconsidera a caixa dos
     caracteres.

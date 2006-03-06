@@ -190,13 +190,14 @@ tcp nocase(default.ida? XXXXXXX)
 
     Similar to tcp content, but it DOES ignore case.
 
-tcp listcontent(file)
+tcp listcontent(/path/file)
 
     Similar to tcp content, but the parameter must be the name of a text file
     that contains a list of words, one per line. If only one of these words
-    is found in a packet, this test is considered true.
+    is found in a packet, this test is considered true (the packet will be
+    blocked).
     
-tcp listnocase(file)
+tcp listnocase(/path/file)
 
     Similar to tcp listcontent, but it DOES ignore case.
     
