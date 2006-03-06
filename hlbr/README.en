@@ -69,11 +69,8 @@ To install HLBR, follow these steps:
 UPGRADE
 -------
 
-If you're upgrading from version 0.1-rc1 to 0.1-rc2, we recommend you do a
-complete removal of version 0.1-rc1 before installing rc2. That's because
-there were too much changes between the two versions. 0.1-rc2 is a more
-mature version, and this procedure won't be necessary when the 0.1 final
-version is released.
+Please, stop the previous version of the daemon (# killall hlbr) before run
+# make install.
 
 
 
@@ -89,7 +86,7 @@ The rules files can have several rules and include other files, using an
 Any rules files can be loaded directly by HLBR with the -r option. However,
 we consider /etc/hlbr/hlbr.rules as the main rules file.
 
-Some <include>s in /etc/hlbr/hlbr.rules can be commented out.
+Some <includes> in /etc/hlbr/hlbr.rules can be commented out.
 That means the rules files indicated by these <include>s must be analysed
 before being activated and used in production. These files can have rules
 that can, potentially, paralise your network, depending of what you use in
@@ -192,6 +189,10 @@ tcp content(/etc/passwd)
 tcp nocase(default.ida? XXXXXXX)
 
     Similar to tcp content, but it DOES ignore case.
+    
+tcp regex((root|cmd|explore)\.exe)
+
+    Uses regular expressions to filter irregular traffic.    
 
 udp content(bind|90 90 90|)
 
@@ -200,7 +201,11 @@ udp content(bind|90 90 90|)
 udp nocase(|90 90 90 90 90 90 90 90|)
 
     Similar to tcp nocase, but for UDP packets.
-    
+
+udp regex(version AAA+)
+
+    Similar to tcp regex, but for UDP packets.    
+
 tcp flags(Sfr)
 
     Test the TCP connection flags. Letters S, F, R, P, A, U, E, and C mean,
@@ -224,7 +229,7 @@ nicely. We recommend DEBIAN!
 
 
 
-REFERENCIES
+REFERENCES
 -----------
 
 [1] http://www.iana.org/assignments/ethernet-numbers

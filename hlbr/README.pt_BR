@@ -69,10 +69,8 @@ Para instalar o HLBR, siga os seguintes procedimentos:
 UPGRADE
 -------
 
-Se voce estiver fazendo upgrade da versao 0.1-rc1 para 0.1-rc2, sugerimos que
-remova completamente a versao 0.1-rc1 antes de instalar a rc2. Ocorre que
-houve varias mudancas entre as duas versoes. A rc2 jah eh uma versao mais
-madura e, dela para a 0.1-final, esse procedimento nao serah mais necessario.
+Por favor, pare a versao anterior do daemon (# killall hlbr) antes de exe-
+cutar o # make install.
 
 
 
@@ -90,11 +88,10 @@ opcao -r. No entanto, consideramos o /etc/hlbr/hlbr.rules como sendo o
 principal.
 
 Alguns "includes" existentes em /etc/hlbr/hlbr.rules poderao estar
-comentados.
-Isso significa que o conteudo dos arquivos de regras chamados por esses
-includes deverao ser analisados antes de serem colocados em producao. Esses
-arquivos contem regras que poderao paralisar a rede, dependendo do que voce
-usa tal rede.
+comentados. Isso significa que o conteudo dos arquivos de regras chamados por
+esses includes deverao ser analisados antes de serem colocados em producao.
+Esses arquivos contem regras que poderao paralisar a rede, dependendo do que
+voce usa tal rede.
 
 
 
@@ -203,6 +200,10 @@ tcp nocase(default.ida? XXXXXXX)
     Idem a tcp content, com a diferenca de que desconsidera a caixa dos
     caracteres.
 
+tcp regex((root|cmd|explore)\.exe)
+
+    Usa expressoes regulares para filtrar tráfego irregular.
+
 udp content(bind|90 90 90|)
 
     Idem a tcp content, referindo-se ao trafego UDP.
@@ -210,6 +211,10 @@ udp content(bind|90 90 90|)
 udp nocase(|90 90 90 90 90 90 90 90|)
 
     Idem a tcp nocase, referindo-se ao trafego UDP.    
+
+udp regex(version AAA+)
+
+    Idem a tcp regex, referindo-se ao trafego UDP.
     
 tcp flags(Sfr)
 
