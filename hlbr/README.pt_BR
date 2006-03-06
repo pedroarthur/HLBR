@@ -200,6 +200,18 @@ tcp nocase(default.ida? XXXXXXX)
     Idem a tcp content, com a diferenca de que desconsidera a caixa dos
     caracteres.
 
+tcp listcontent(arquivo)
+
+    Similar ao tcp content, mas o parametro deve ser o nome de um arquivo
+    texto que contem uma lista de palavras, uma por linha. Se apenas uma das
+    palavras desta lista for encontrada em um pacote, considera-se este teste
+    inteiro como verdadeiro.
+    
+tcp listnocase(arquivo)
+
+    Idem a tcp listcontent, com a diferenca de que desconsidera a caixa dos
+    caracteres.
+
 tcp regex((root|cmd|explore)\.exe)
 
     Usa expressoes regulares para filtrar tráfego irregular.
