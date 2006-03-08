@@ -2,7 +2,7 @@
 # name:       webattacks.rules
 # created by: Joao Eriberto Mota Filho
 # date:       26 Dec 05
-# update:     15 Feb 06
+# update:     08 Mar 06
 # target:     block www attacks.
 
 <rule>
@@ -24,7 +24,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex(\.+:+\.+)
+tcp regex(\.+:+\.+:+\.+)
 message=(webattacks-3-re) request ..:..:.. 
 action=action1
 </rule>
