@@ -93,7 +93,7 @@ int main() {
    l=0x01020304;
    c=(unsigned char*)&l;
    
-   if (c[0]==0x04){
+   if (c[0]==0x04) {
    	printf("LITTLE\n");
    }
    else {
