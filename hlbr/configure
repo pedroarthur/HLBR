@@ -83,8 +83,10 @@ fi
 #check the endian
 echo -n "Buscando endianness / Checking endianness.........."
 ENDIAN=""
-cat >conftest.endian.c <<EOF
-int main(){
+cat << EOF > conftest.endian.c
+#include <stdio.h>
+
+int main() {
    long           l;
    unsigned char* c;
    
@@ -93,7 +95,8 @@ int main(){
    
    if (c[0]==0x04){
    	printf("LITTLE\n");
-   }else{
+   }
+   else {
    	printf("BIG\n");
    }
 }
