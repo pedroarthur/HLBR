@@ -2,7 +2,7 @@
 # name:       mailvirus.rules
 # created by: Joao Eriberto Mota Filho
 # date:       14 Dec 05
-# update:     05 Mar 06
+# update:     23 Mar 06
 # target:     block mail virus attachments.
 
 # bad extensions
@@ -10,7 +10,7 @@
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.scr")
+tcp regex(filename="[^[:cntrl:]]+\.scr")
 message=(mailvirus-1-re) .scr attach
 action=virus
 </rule>
@@ -18,7 +18,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.pif")
+tcp regex(filename="[^[:cntrl:]]+\.pif")
 message=(mailvirus-2-re) .pif attach
 action=virus
 </rule>
@@ -26,7 +26,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.bat")
+tcp regex(filename="[^[:cntrl:]]+\.bat")
 message=(mailvirus-3-re) .bat attach
 action=virus
 </rule>
@@ -34,7 +34,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.com")
+tcp regex(filename="[^[:cntrl:]]+\.com")
 message=(mailvirus-4-re) .com attach
 action=virus
 </rule>
@@ -43,7 +43,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.exe")
+tcp regex(filename="[^[:cntrl:]]+\.exe")
 message=(mailvirus-5-re) .exe attach
 action=virus
 </rule>
@@ -51,7 +51,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.vb.)
+tcp regex(filename="[^[:cntrl:]]+\.vb.)
 message=(mailvirus-6-re) .vb* attach
 action=virus
 </rule>
@@ -59,7 +59,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\....\.exe")
+tcp regex(filename="[^[:cntrl:]]+\....\.exe")
 message=(mailvirus-7-re) .*.exe attach
 action=virus
 </rule>
@@ -67,7 +67,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.mim")
+tcp regex(filename="[^[:cntrl:]]+\.mim")
 message=(mailvirus-8-re) .mim attach
 action=virus
 </rule>
@@ -75,7 +75,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.(bhx|BHX)")
+tcp regex(filename="[^[:cntrl:]]+\.(bhx|BHX)")
 message=(mailvirus-9-re) .bhx attach
 action=virus
 </rule>
@@ -83,18 +83,33 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(filename="[^\n]+\.(hqx|HQX)")
+tcp regex(filename="[^[:cntrl:]]+\.(hqx|HQX)")
 message=(mailvirus-10-re) .hqx attach
 action=virus
 </rule>
 
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp regex(filename="[^[:cntrl:]]+\.HQX")
+message=(mailvirus-10a-re-test) .hqx attach
+action=virus
+</rule>
+
+<rule>
+ip dst(email)
+tcp dst(25)
+tcp regex(filename="[^[:cntrl:]]+\.BHX")
+message=(mailvirus-10b-re-test) .bhx attach
+action=virus
+</rule>
 
 # web links into mail
 
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(href="[^\n]+\.scr")
+tcp regex(href="[^[:cntrl:]]+\.scr")
 message=(mailvirus-20-re) .src link
 action=virus
 </rule>
@@ -102,7 +117,7 @@ action=virus
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(href="[^\n]+(cartao|cartoes|carteiro|card|cards|voce|foto|fotos|veja|amor|paixao|sexo|coracao|video|videos|spc|serasa|tabela|debito|debitos|divida|dividas|veja|player|Player|mamonas|festa|festas|confira|bmp)\.exe")
+tcp regex(href="[^[:cntrl:]]+(cartao|cartoes|carteiro|card|cards|voce|foto|fotos|veja|amor|paixao|sexo|coracao|video|videos|spc|serasa|tabela|debito|debitos|divida|dividas|veja|player|Player|mamonas|festa|festas|confira|bmp)\.exe")
 message=(mailvirus-21-re) malicious .exe link
 action=virus
 </rule>

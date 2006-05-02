@@ -8,6 +8,7 @@
 <include rules/mailvirus.rules>
 <include rules/mambo-phpnuke.rules>
 <include rules/passwd.rules>
+<include rules/shell.rules>
 <include rules/webattacks.rules>
 
 

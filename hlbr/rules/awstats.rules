@@ -2,14 +2,22 @@
 # name:       awstats.rules
 # created by: Joao Eriberto Mota Filho
 # date:       26 Dec 05
-# update:     15 Feb 06
+# update:     18 Mar 06
 # target:     block invalid requests.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(awstats.pl?configdir=|echo;echo%20YYY;)
+tcp regex(awstats\.pl.configdir..echo.echo.20YYY.)
 message=(awstats-1) awstats attack
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp regex(GET +//[^\n]awstats.pl)
+message=(awstats-2) awstats attack
 action=action1
 </rule>
 

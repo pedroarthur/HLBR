@@ -2,7 +2,7 @@
 # name:       http.rules
 # created by: Joao Eriberto Mota Filho
 # date:       29 Nov 05
-# update:     05 Mar 06
+# update:     16 Mar 06
 # target:     block http methods (rfc 1945 and 2616).
 
 # For your security SEARCH and CONNECT methods must be blocked.
@@ -11,7 +11,7 @@
 ip dst(www)
 tcp dst(80)
 tcp regex(^SEARCH )
-message=(http-1-re) buffer overflow attempt
+message=(http-1-re) buffer overflow with search
 action=action1
 </rule>
 

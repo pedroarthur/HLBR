@@ -2,13 +2,13 @@
 # name:       webattacks.rules
 # created by: Joao Eriberto Mota Filho
 # date:       26 Dec 05
-# update:     08 Mar 06
+# update:     23 Mar 06
 # target:     block www attacks.
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex((\n|^)(GET|POST|PUT) +(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
+tcp regex((GET|POST|PUT)[^[:cntrl:]]+(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
 message=(webattacks-1-re) directory change attempt (unicode,asc,plain) 
 action=action1
 </rule>
@@ -16,7 +16,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex((\n|^)(GET|POST|PUT) [^\n]+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
+tcp regex((GET|POST|PUT)[^[:cntrl:]]+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))(\.|%252(e|E)|%2(e|E))+(/|%252(f|F)|%2(f|F)|\\|%255(c|C)|%5(c|C))+)
 message=(webattacks-2-re) directory change attempt (unicode,asc,plain) 
 action=action1
 </rule>
@@ -29,5 +29,66 @@ message=(webattacks-3-re) request ..:..:..
 action=action1
 </rule>
 
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp regex(/cgi-bin/textenv[0-9]*\.pl)
+message=(webattacks-4-re) http discover attempt 
+action=action1
+</rule>
 
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(GET /NULL.printer)
+message=(webattacks-5) iis null printer attack 
+action=action1
+</rule>
 
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp regex(GET [^[:cntrl:]]+.http://)
+message=(webattacks-6-re) forced redirection to external link 
+action=action1
+</rule>
+
+#<rule>
+#ip dst(www)
+#tcp dst(80)
+#tcp content(phpbb_root_path=http://)
+#message=(webattacks-7-re) forced redirection to external link 
+#action=action1
+#</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp regex(GET [^[:cntrl:]]*/(phpMyAdmin|phpmyadmin)[^[:cntrl:]]*/main.php)
+message=(webattacks-7-re) phpmyadmin access attempt 
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp regex(GET [^[:cntrl:]]*/mysql[^[:cntrl:]]*/main.php)
+message=(webattacks-8-re) mysqladmin access attempt 
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(GET http://)
+message=(webattacks-9) open proxy use attempt 
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(GET /http://)
+message=(webattacks-10) open proxy use attempt 
+action=action1
+</rule>

@@ -3,22 +3,22 @@
 # created by: Hardik Shah
 # date:       10 jan 06
 # updated by: Joao Eriberto Mota Filho
-# update:     15 Feb 06
+# update:     13 Abr 06
 # target: sql injection and xss checks.
 
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp regex(' +or +.=.--)
-message=(sql-xss-1-re) sql injection (sql server)
+message=(sql-xss-1-re) sql injection
 action=action1
 </rule>
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex(' +or +'.'='.)
-message=(sql-xss-2-re) sql injection (ms-access, oracle)
+tcp regex(' +or +'.'=')
+message=(sql-xss-2-re) sql injection
 action=action1
 </rule>
 
