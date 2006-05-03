@@ -17,7 +17,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex((root|cmd|explorer).exe)
+tcp regex((root|cmd|explorer)\.exe)
 message=(codered-nimda-2-re) (root|cmd|explorer) request
 action=action1
 </rule>
