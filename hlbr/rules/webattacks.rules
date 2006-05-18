@@ -92,3 +92,19 @@ tcp content(GET /http://)
 message=(webattacks-10) open proxy use attempt 
 action=action1
 </rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(GET //)
+message=(webattacks-11) invalid http call 
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(/_vti_bin/)
+message=(webattacks-12) fp call attempt 
+action=action1
+</rule>

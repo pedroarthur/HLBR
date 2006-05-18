@@ -88,22 +88,6 @@ message=(mailvirus-10-re) .hqx attach
 action=virus
 </rule>
 
-<rule>
-ip dst(email)
-tcp dst(25)
-tcp regex(filename="[^[:cntrl:]]+\.HQX")
-message=(mailvirus-10a-re-test) .hqx attach
-action=virus
-</rule>
-
-<rule>
-ip dst(email)
-tcp dst(25)
-tcp regex(filename="[^[:cntrl:]]+\.BHX")
-message=(mailvirus-10b-re-test) .bhx attach
-action=virus
-</rule>
-
 # web links into mail
 
 <rule>
