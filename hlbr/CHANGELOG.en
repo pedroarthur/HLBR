@@ -1,3 +1,7 @@
+from 1.0 to 1.1:
+
+- new rules
+
 from 0.2 to 1.0:
 
 - new tests: implementation of regular expressions with tcp regex and udp regex
