@@ -1024,10 +1024,18 @@ int InitSession(){
 }
 
 
-void RemountTCPStream(int PacketSlot, PP* Port)
+int RemountTCPStream(int PacketSlot, PP* Port)
 {
-	
+	TCPData*	TData;
 
+	GetDataByID(PacketSlot, IPDecoderID, (void**)&TData);
+	if (!TData) {
+		PrintPacketSummary(stderr, PacketSlot, NULL, TData, false);
+		fprintf(stderr, "This was supposed to be a TCP packet\n");
+		return FALSE;
+	}
+
+	// Allocate struct fake_tcp_window for the first time
 	if (!PP->Seqs) {
 		PP->Seqs = calloc(sizeof(struct fake_tcp_window), 1);
 		PP->Seqs.num_pieces = 0;
@@ -1037,13 +1045,41 @@ void RemountTCPStream(int PacketSlot, PP* Port)
 		PP->Seqs.pieces = NULL;
 	}
 
-	// First piece
+	// Allocates first 'piece'
 	if (!PP->Seqs.pieces) {
 		if (PP->Seqs.num_pieces != 0) {
 			fprintf(stderr, "Error remounting TCP stream - num_pieces should be 0\n");
 			return;
 		}
 		PP->Seqs.pieces = calloc(sizeof(struct tcp_piece), 1);
-		PP->Seqs.Top
+		PP->Seqs.TopSeq = TData->Header->seq + 
+			(TData->Header->syn ? 1 : 0);
+		PP->Seqs.LastSeq = PP->Seqs.TopSeq + TData->DataLen - 1;
+	} else {
+		/*
+		if (TData->Header->seq == PP->Sets.LastSeq + 1) {
+			// next packet in the sequence
+
+			armazena_payload_no_buffer();
+			
+
+			LastSeq = LastSeq + packet.size();
+			tenta_acrescentar_pacotes_enfileirados_no_buffer;
+			if (testa_regras_no_buffer)
+				libera_pacotes_enfileirados(que foram usados);
+			else
+				dropa_pacotes_enfileirados(que foram usados);
+		} else if (packet.seq < LastSeq - 1) {
+			// pacote sobrescreve contedo de pacote anterior!
+			// dropa por default
+		} else {
+			// marca pacote para que no seja usado por enquanto,
+			// struct sesso tem uma lista de pacotes, enfileira ele la'
+			marca_pacote_para_no_ser_processado;
+			enfileira_pacote(na struct da sessao);
+		}
+		*/
 	}
+
+	return TRUE;
 }
