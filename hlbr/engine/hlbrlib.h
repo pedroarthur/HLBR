@@ -1,5 +1,5 @@
-#ifndef _HLBR_HOGLIB_H_
-#define _HLBR_HOGLIB_H_
+#ifndef _HLBR_LIB_H_
+#define _HLBR_LIB_H_
 
 
 /* Used to queue a lot of things */
@@ -29,12 +29,12 @@ void ListClear(QueueList *);
 #define DBG(a)  /* do nothing! */
 #endif          /* DEBUG */
 
-#ifdef DEBUGPATH
+/*#ifdef DEBUGPATH
 #undef DEBUGPATH
 #define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)
 #else
 #define DEBUGPATH ;
-#endif /* DEBUGPATH */
+#endif*/ /* DEBUGPATH */
 
 #define ARRAYSIZE(array) (sizeof(array)/sizeof(array[0]))
 
@@ -55,4 +55,10 @@ void ListClear(QueueList *);
 }
 
 
-#endif /* _HLBR_HOGLIB_H_ */
+#ifdef HLBR_LITTLE_ENDIAN
+#define IP_BYTES(IP)	(IP & 0x000000ff), (IP & 0x0000ff00)>>8, (IP & 0x00ff0000)>>16, IP>>24
+#else
+#define IP_BYTES(IP)	IP>>24, (IP & 0x00ff0000)>>16, (IP & 0x0000ff00)>>8, (IP & 0x000000ff)
+#endif
+
+#endif /* _HLBR_LIB_H_ */

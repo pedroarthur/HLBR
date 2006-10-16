@@ -66,35 +66,46 @@ void PrintVersion() {
 	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
 //	printf("by Andre Bertelli Araujo and\n   Joao Eriberto Mota Filho\n\n");
 	printf("http://hlbr.sourceforge.net\n\n");
-	printf("(Jason Larsen's Hogwash based)\n\n");
+	printf("(based in Jason Larsen's Hogwash)\n\n");
 }
 
-/*************************************
-* Tell the user about the command line
-**************************************/
-void PrintUsage(){
+/**
+ * Tell the user about the command line
+ */
+void PrintUsage(char op)
+{
 
 #ifdef DEBUGPATH
 	printf("In PrintUsage\n");
 #endif
 	PrintVersion();
 
-	printf("Utilizacao / Usage:\n");
-	printf("------------------\n");
-	printf("hlbr <args>\n");
-	printf("  -c  <Arquivo de configuracao / Config file>\n");
-	printf("  -r  <Arquivo de regras / Rules file>\n");
-	printf("  -l  <Diretorio de log / Log directory>\n");
-	printf("  -t  Analisa regras e sai / Parse rules and exit\n");
-	printf("  -n  Processa n pacotes e sai / Process n packets and exit\n");
-	printf("  -d  Executa em modo daemon / Enter Daemon Mode (Background Execution)\n");
-	printf("  -v  Mostra versao e sai / Print version and exit\n");
-	printf("------------------\n");
-	printf("Exemplo / Example:\n");
-	printf("  hlbr -c hlbr.config -r hlbr.rules &\n");
-	printf("------------------\n");
-	printf("Os arquivos de configuracao e regras estao em /etc/hlbr/.\n");
-	printf("The configuration files and rules are in /etc/hlbr/.\n\n\n");	
+	switch (op) {
+	case 0:
+		printf("Utilizacao / Usage:\n");
+		printf("------------------\n");
+		printf("hlbr <args>\n");
+		printf("  -c  <Arquivo de configuracao / Config file>\n");
+		printf("  -r  <Arquivo de regras / Rules file>\n");
+		printf("  -l  <Diretorio de log / Log directory>\n");
+		printf("  -L  <Opcoes de log / Log options> (-L help)\n");
+		printf("  -t  Analisa regras e sai / Parse rules and exit\n");
+		printf("  -n  Processa n pacotes e sai / Process n packets and exit\n");
+		printf("  -d  Executa em modo daemon / Enter Daemon Mode (Background Execution)\n");
+		printf("  -v  Mostra versao e sai / Print version and exit\n");
+		printf("------------------\n");
+		printf("Exemplo / Example:\n");
+		printf("  hlbr -c hlbr.config -r hlbr.rules &\n");
+		printf("------------------\n");
+		printf("Os arquivos de configuracao e regras estao em /etc/hlbr/.\n");
+		printf("The configuration files and rules are in /etc/hlbr/.\n\n\n");	
+		break;
+	case 1:
+		printf("Opcoes para a chave -L / Options for -L flag\n");
+		printf("  S  Inicio e fim de sessao TCP / Begin and end of a TCP session\n");
+		printf("Ex: hlbr -L S\n");
+		break;
+	}
 }
 
 /******************************************
@@ -142,17 +153,20 @@ int hlbr_daemon(int nochdir, int noclose){
 	return TRUE;
 }
 
-/***********************************
-* Make sense of the command line
-************************************/
-int ParseArgs(int argc, char **argv){
+/**
+ * Make sense of the command line
+ * Parse the parameters received by the main() function
+ */
+int ParseArgs(int argc, char **argv)
+{
 	int 	c;
+	char* 	l;
 	
 #ifdef DEBUGPATH
 	printf("In ParseArgs\n");
 #endif
 
-#define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhv"
+#define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhvL:"
 
 	while (1) {
 #ifndef HAS_OPT_LONG
@@ -168,6 +182,7 @@ int ParseArgs(int argc, char **argv){
 			{"daemon", 0, 0, 'd'},
 			{"help", 0, 0, 'h'},
 			{"version", 0, 0, 'v'},
+			{"log-options", 1, 0, 'L'},
 			{0, 0, 0, 0}
 		};
 
@@ -191,6 +206,23 @@ int ParseArgs(int argc, char **argv){
 			}
 			printf("Log directory is %s\n",Globals.LogDir);			
 			break;			
+		case 'L':
+			if ((!optarg) || (strncmp("help", optarg, 4) == 0)) {
+				PrintUsage(1);
+				exit(0);
+			}
+			l = optarg;
+			while (*l)
+				switch (*(l++)) {
+				case 'S':
+					printf("Logging sessions: begin and end of sessions\n");
+					Globals.logSession_BeginEnd = 1;
+					break;
+				default:
+					PrintUsage(1);
+					exit(0);
+				}
+			break;	
 		case 'r':
 			printf("Rules file is %s\n",optarg);
 
@@ -207,7 +239,7 @@ int ParseArgs(int argc, char **argv){
 			hlbr_daemon(0,0);
 			break;
 		case 'h':
-			PrintUsage();
+			PrintUsage(0);
 			exit(0);
 		case 'v':
 			PrintVersion();
@@ -302,54 +334,57 @@ int main(int argc, char**argv){
 	Globals.IdleCount=MAX_PACKETS;
 	Globals.PacketLimit=-1;
 
+	// TODO ...
+	Globals.logSession_BeginEnd = 1;
+
 	if (argc==1){
-		PrintUsage();
+		PrintUsage(0);
 		return FALSE;
 	}	
 	
 	if (!ParseArgs(argc, argv)){
 		printf("Couldn't understand command line, quitting\n\n");
-		PrintUsage();
+		PrintUsage(0);
 		return FALSE;
 	}
 
-	if (!InitDecoders()){
+	if (!InitDecoders()) {
 		printf("Error initializing decoders\n");
 		return FALSE;
 	}
 
-	if (!InitTests()){
+	if (!InitTests()) {
 		printf("Error initializing tests\n");
 		return FALSE;
 	}
 
-	if (!InitActions()){
+	if (!InitActions()) {
 		printf("Error initializing actions\n");
 		return FALSE;
 	}
 
-	if (!InitSession()){
+	if (!InitSession()) {
 		printf("Error initializing session tracker\n");
 		return FALSE;
 	}
 		
-	if (!InitRoutes()){
+	if (!InitRoutes()) {
 		printf("Error initializing route handlers\n");
 		return FALSE;
 	}
 
-	if (!ParseConfig()){
+	if (!ParseConfig()) {
 		printf("Error loading config file\n");
 		return FALSE;
 	}
 
-	if (!ParseRules(Globals.RulesFilename)){
+	if (!ParseRules(Globals.RulesFilename)) {
 		printf("Error loading rules file\n");
 		return FALSE;
 	}
 	printf("Loaded %i rules\n",Globals.NumRules);
 
-	if (!TestsFinishSetup()){
+	if (!TestsFinishSetup()) {
 		printf("Tests failed finish setup\n");
 		return FALSE;
 	}
@@ -375,7 +410,10 @@ int main(int argc, char**argv){
 #endif	
 #endif
 
-	MainLoop();
+	if (Globals.UseThreads)
+		MainLoopThreaded();
+	else
+		MainLoop();
 
 	printf("HLBR is all done.  Calling shutdown handlers\n");
 	CallShutdownHandlers();

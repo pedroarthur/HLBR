@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#define DEBUG
+#define DEBUG
 //#define DEBUGPACKETS
 //#define DEBUG1
 
@@ -58,7 +58,7 @@ int RouteAndSend(int PacketSlot){
 #endif
 
 #ifdef DEBUG
-	printf("Routing the packet\n");
+	printf("- Routing the packet\n");
 #endif
 	
 	p=&Globals.Packets[PacketSlot];
@@ -89,21 +89,21 @@ int RouteAndSend(int PacketSlot){
 	
 	if (!Route(PacketSlot)){
 #ifdef DEBUG	
-		printf("Routing rules dropped the packet\n");
+		printf("- Routing rules dropped the packet\n");
 #endif		
 		return TRUE;
 	}
 
 	if (p->TargetInterface==-1){
 #ifdef DEBUG
-		printf("No Packet Handler set a route. Dropping.\n");
+		printf("- No Packet Handler set a route. Dropping.\n");
 #endif	
 		return FALSE;
 	}
 
 #ifdef DEBUG1
 	if (p->InterfaceNum==2)
-	printf("Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
+	printf("- Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
 #endif	
 	return WritePacket(PacketSlot);	
 }
@@ -150,9 +150,15 @@ int HandleTimers(int Now){
 	return TRUE;	
 }
 
-/************************************
-* Check the packet for rules matches
-************************************/
+/**
+ * Check the packet for rules matches.
+ * This is the main function responsible for everything HLBR does - by calling
+ * the 'root' packet decoder, all registered decoders (TCP, UDP, etc.) will 
+ * be called, with all their respective registered tests (according to the
+ * rules defined by the user). After this, the RuleBits filed of the packet 
+ * structure is tested to see if any rule matched, and the necessary actions
+ * performed. Then finally the packet is 'routed' and sent.
+ */
 int ProcessPacket(int PacketSlot){
 	PacketRec*	p;
 	static int	PacketSec=0;
@@ -176,7 +182,7 @@ int ProcessPacket(int PacketSlot){
 	p=&Globals.Packets[PacketSlot];
 
 #ifdef DEBUG
-	printf("++++++++++++++++++++++++++++++++%u\n",p->PacketNum);
+	printf("P:%u\n",p->PacketNum);
 #endif
 
 	if (p->tv.tv_sec) HandleTimers(p->tv.tv_sec);
@@ -338,6 +344,10 @@ int MainLoopThreaded(){
 			printf("Couldn't start thread for interface\n");
 			return FALSE;
 		}
+#ifdef DEBUG
+		else
+			printf("Starting thread for interface %i\n", i);
+#endif
 	
 	/*start up the first process packet thread*/
 	//pthread_create(&test_thread, NULL, ProcessPacketThread, NULL);

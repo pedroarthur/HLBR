@@ -36,7 +36,8 @@ extern GlobalVars	Globals;
 /*********************************************
 * Open an interface to read from a tcpdump file
 **********************************************/
-int OpenInterfaceTCPDump(int InterfaceID){
+int OpenInterfaceTCPDump(int InterfaceID)
+{
 	int						fd;
 	InterfaceRec*			Interface;
 	struct dump_pcap_file_header	Header;

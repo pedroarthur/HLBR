@@ -18,10 +18,10 @@
 #define MAX_PACKET_SIZE			65536+14+1
 #define TYPICAL_PACKET_SIZE		16000
 #define MAX_NAME_LEN			20
-#define MAX_RULES				10240
+#define MAX_RULES			10240
 #define MAX_INTERFACES			8
 #define MAX_DECODERS			128
-#define MAX_TESTS				1024
+#define MAX_TESTS			1024
 #ifdef _OBSD_
 #define IDLE_TIMEOUT			100000
 #else
@@ -29,7 +29,7 @@
 #endif
 #define MAX_DECODER_DEPTH		16
 #define MAX_MESSAGE_LEN			256
-#define MAX_ACTIONS				16
+#define MAX_ACTIONS			16
 #define MAX_ACTION_ITEMS		64
 #define MAX_ITEMS_PER_ACTION	16
 #define MAX_ROUTES				16
@@ -58,31 +58,31 @@ typedef struct decoder_data{
 } DecoderData;
 
 typedef struct packet_rec{
-	int					PacketSlot; /*position in the packet array*/
+	int			PacketSlot; /*position in the packet array*/
 	unsigned int		PacketNum;  /*used to track the packet through the system*/
 	
-	int					InterfaceNum;
-	int					TargetInterface;
+	int			InterfaceNum;
+	int			TargetInterface;
 	
 	unsigned char*		RawPacket;
-	char				Pad[2];  /*to make word aligment work out on Solaris*/
+	char			Pad[2];  /*to make word aligment work out on Solaris*/
 	unsigned char		TypicalPacket[TYPICAL_PACKET_SIZE];
-	char				LargePacket;
-	int					PacketLen;
+	char			LargePacket;
+	int			PacketLen;
 	
 	unsigned char		RuleBits[MAX_RULES/8];
 	struct timeval		tv;
 	
-	DecoderData			DecoderInfo[MAX_DECODER_DEPTH];
-	int					NumDecoderData;
-	int					BeginData;	/*first byte not decoded yet*/
+	DecoderData		DecoderInfo[MAX_DECODER_DEPTH];
+	int			NumDecoderData;
+	int			BeginData;	/*first byte not decoded yet*/
 	
-	char				PassRawPacket; /*true if we pass this one as is*/	
-	int					SaveCount;
-	char				Status;     /*where the packet is in the processing loop*/
+	char			PassRawPacket; /*true if we pass this one as is*/	
+	int			SaveCount;
+	char			Status;     /*where the packet is in the processing loop*/
 	
 	pthread_mutex_t		Mutex;
-	int					LockID;	
+	int			LockID;	
 	
 	struct port_pair*	Stream;
 } PacketRec;
@@ -284,6 +284,10 @@ typedef struct global_vars{
 	int				PacketsPerSec;
 	int				TCPPerSec;
 	int				UDPPerSec;
+
+	/* logging flags */
+	unsigned char			logSession;
+	unsigned char			logSession_BeginEnd;
 } GlobalVars;
 
 

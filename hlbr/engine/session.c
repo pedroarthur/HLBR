@@ -1,4 +1,5 @@
 #include "session.h"
+#include "hlbrlib.h"
 #include "../decoders/decode_ip.h"
 #include "../decoders/decode_tcp.h"
 #include <stdio.h>
@@ -8,20 +9,45 @@
 #include <netinet/in.h>
 
 /*+++++++++++++++++++Globals+++++++++++++++++*/
-IPB*				Sessions[65536+1];
-int					TCPDecoderID;
-int					IPDecoderID;
+IPB*			Sessions[65536+1]; /**< All identified sessions. @see InitSession() */
+int			TCPDecoderID;
+int			IPDecoderID;
 unsigned int		SessionCount=0;
-SFunc*				CreateFuncs;
-SFunc*				DestroyFuncs;
+SFunc*			CreateFuncs;
+SFunc*			DestroyFuncs;
 extern	GlobalVars	Globals;
 
-PP*					TimeHead;
-PP*					TimeTail;
+PP*			TimeHead;
+PP*			TimeTail;
 
 //#define DEBUG
 //#define DEBUG_TIME
 //#define DEBUG_DIRECTION
+
+/**
+ * Prints a one-line summary of the packet
+ * Inspects packet's IP and TCP structure (if any)
+ */
+void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TData, char newline)
+{
+	if (!IData) {
+		fprintf(stream, "P:%u -%c", PacketSlot,
+		       (newline ? '\n' : ' '));
+		return;
+	}
+	if (!TData) {
+		fprintf(stream, "P:%u IP %d.%d.%d.%d->%d.%d.%d.%d%c", PacketSlot,
+		       IP_BYTES(IData->Header->saddr), IP_BYTES(IData->Header->daddr),
+		       (newline ? '\n' : ' '));
+		return;
+	}
+	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d%c", PacketSlot,
+	       IP_BYTES(IData->Header->saddr), TData->Header->source,
+	       IP_BYTES(IData->Header->daddr), TData->Header->dest,
+	       (newline ? '\n' : ' '));
+	return;
+}
+
 
 /****************************************
 * Add function that gets called whenever a
@@ -143,11 +169,12 @@ unsigned short GetHash(unsigned int ip1, unsigned int ip2){
 * Find the IP Pair, if it doesn't 
 * exist, create it
 ************************************/
-IPP* FindIPPair(unsigned int IP1, unsigned int IP2){
+IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
+{
 	unsigned short	Hash;
-	IPB*			Bin;
-	IPP*			Pair;
-	int				i;
+	IPB*		Bin;
+	IPP*		Pair;
+	int		i;
 	unsigned int	Top, Bottom, Middle;
 	
 #ifdef DEBUGPATH
@@ -183,6 +210,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2){
 		Pair->IP2=IP2;
 		Pair->NumAllocated=0;
 		Pair->NumPorts=0;
+		Pair->RefuseFromThisIP = 0;
 		Pair->Parent=Bin;
 		
 		return Pair;
@@ -257,6 +285,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2){
 	Pair->IP2=IP2;
 	Pair->NumAllocated=0;
 	Pair->NumPorts=0;
+	Pair->RefuseFromThisIP = 0;
 	Pair->Parent=Bin;
 	
 	return Pair;
@@ -490,10 +519,6 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	printf("In FindPortPair\n");
 #endif
 
-#ifdef DEBUG
-	printf("%u-%u",Port1, Port2);
-#endif
-
 	if (!Pair->Ports){
 #ifdef DEBUG
 		printf("First Port Pair in this bin with sessionID %u\n", SessionCount);
@@ -519,6 +544,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 			printf("SessionID was not 0\n");
 		}
 		Port->SessionID=SessionCount;
+		Port->TheOtherPortPair = NULL;
 				
 		SessionCount++;
 #ifdef DEBUG1
@@ -526,6 +552,14 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 #endif		
 
 		AddToTime(Port);
+
+		if (Globals.logSession_BeginEnd)
+			printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
+			       Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
+			       IP_BYTES(Pair->IP2), Port->Port2,
+//		       (TData->Header->syn ? 's' : '.'),
+//     		       (TData->Header->ack ? 'a' : '.'),
+			       Port->Direction, Port->TCPCount);
 
 		/*Tell everyone this session exists*/
 		CallCreateFuncs(Port);
@@ -610,6 +644,22 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		printf("SessionID was not NULL\n");
 	}	
 	Port->SessionID=SessionCount;
+	Port->TheOtherPortPair = NULL;
+
+
+	if (Globals.logSession_BeginEnd)
+		printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
+		       Port->SessionID,
+#ifdef HLBR_LITTLE_ENDIAN
+		       (Pair->IP1 & 0x000000ff), (Pair->IP1 & 0x0000ff00)>>8, (Pair->IP1 & 0x00ff0000)>>16, Pair->IP1>>24, Port->Port1,
+		       (Pair->IP2 & 0x000000ff), (Pair->IP2 & 0x0000ff00)>>8, (Pair->IP2 & 0x00ff0000)>>16, Pair->IP2>>24, Port->Port2,
+#else
+		       Pair->IP1>>24, (Pair->IP1 & 0x00ff0000)>>16, (Pair->IP1 & 0x0000ff00)>>8, (Pair->IP1 & 0x000000ff), Port->Port1, 
+		       Pair->IP2>>24, (Pair->IP2 & 0x00ff0000)>>16, (Pair->IP2 & 0x0000ff00)>>8, (Pair->IP2 & 0x000000ff), Port->Port2, 
+#endif
+//		       (TData->Header->syn ? 's' : '.'),
+//     		       (TData->Header->ack ? 'a' : '.'),
+		       Port->Direction, Port->TCPCount);
 
 	AddToTime(Port);
 	
@@ -644,34 +694,37 @@ int TimeoutSessions(long int Now){
 }
 
 
-/***********************************
-* Find the session for this TCP
-* packet
-***********************************/
-int AssignSessionTCP(int PacketSlot, void* Data){
-	IPData*			IData;
-	TCPData*		TData;
+/**
+ * Find the session for this TCP packet.
+ * @see FindIPPair()
+ */
+int AssignSessionTCP(int PacketSlot, void* Data)
+{
+	IPData*		IData;
+	TCPData*	TData;
 	unsigned int	IP1,IP2;
 	unsigned short	Port1, Port2;
-	IPP*			Pair;
-	PP*				Port;
-	
+	IPP*		Pair;
+	PP*		Port;
 #ifdef DEBUGPATH
 	printf("In AssignSessionTCP\n");
 #endif
 
 	GetDataByID(PacketSlot, IPDecoderID, (void**)&IData);
 	if (!IData){
-		printf("This was supposed to be a TCP packet\n");
+		PrintPacketSummary(stderr, PacketSlot, IData, NULL, false);
+		fprintf(stderr, "This was supposed to be a TCP packet\n");
 		return FALSE;
 	}
 
 	TData=(TCPData*)Data;
 	if (!TData){
-		printf("TCP Data was NULL\n");
+		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
+		fprintf(stderr, "TCP Data was NULL\n");
 		return FALSE;
 	}
 
+	// Assigns IP1 & IP2: IP1 is the lesser of the src & dst IPs
 	if (IData->Header->saddr < IData->Header->daddr){
 		IP1=IData->Header->saddr;
 		IP2=IData->Header->daddr;
@@ -684,20 +737,20 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 		Port2=ntohs(TData->Header->source);
 	}
 
-#ifdef DEBUG	
-	printf("--------------------------------\n");
-#endif	
-
-	Pair=FindIPPair(IP1, IP2);
+	Pair = FindIPPair(IP1, IP2);
 	if (!Pair){
-		printf("Failed to assign session pair\n");
+		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
+		fprintf(stderr, "Failed to assign session pair\n");
 		return FALSE;
 	}	
-	Port=FindPortPair(Port1, Port2, Pair, Globals.Packets[PacketSlot].tv.tv_sec);
+	Port = FindPortPair(Port1, Port2, Pair, Globals.Packets[PacketSlot].tv.tv_sec);
 	if (!Port){
-		printf("Failed to assign session port\n");
+		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
+		fprintf(stderr, "Failed to assign session port\n");
 		return FALSE;
 	}
+
+	RemountTCPStream(PacketSlot, Port);
 
 	if ( (Port->ServerState==TCP_STATE_NEW) && (Port->ClientState==TCP_STATE_NEW) ){
 		/***************************************************/
@@ -862,13 +915,13 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 					Port->ServerAck=ntohl(TData->Header->ack_seq);				
 				}else{
 #ifdef DEBUG_DIRECTION
-					printf("Error:  This packet was unexpected\n");
+					printf("Error:  This packet was unexpected (1)\n");
 #endif			
 					Port->Error=TRUE;
 				}
 			}
 		}else{
-#ifdef DEBGU		
+#ifdef DEBUG		
 			printf("This packet came from the client\n");
 #endif			
 			/*this packet came from the client*/
@@ -901,7 +954,7 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 					Port->ClientAck=ntohl(TData->Header->ack_seq);
 				}else{
 #ifdef DEBUG_DIRECTION
-					printf("Error:  This packet was unexpected\n");
+					printf("Error:  This packet was unexpected (2)\n");
 #endif							
 				}
 			}else if (TData->Header->rst){
@@ -916,7 +969,7 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 				Port->ClientState=TCP_STATE_FIN;
 			}else{
 #ifdef DEBUG_DIRECTION
-				printf("Error:  This packet was unexpected\n");
+				printf("Error:  This packet was unexpected (3)\n");
 #endif										
 			}
 		}
@@ -926,15 +979,33 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 	/*update stats and pointers*/
 	Port->TCPCount++;
 	Globals.Packets[PacketSlot].Stream=Port;
-
+/*
+	if (Globals.logSession_BeginEnd)
+		printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d %c%c dir:%d pcount:%d\n", 
+		       Port->SessionID,
+#ifdef HLBR_LITTLE_ENDIAN
+		       (IP1 & 0x000000ff), (IP1 & 0x0000ff00)>>8, (IP1 & 0x00ff0000)>>16, IP1>>24, Port->Port1,
+		       (IP2 & 0x000000ff), (IP2 & 0x0000ff00)>>8, (IP2 & 0x00ff0000)>>16, IP2>>24, Port->Port2,
+#else
+		       IP1>>24, (IP1 & 0x00ff0000)>>16, (IP1 & 0x0000ff00)>>8, (IP1 & 0x000000ff), Port->Port1, 
+		       IP2>>24, (IP2 & 0x00ff0000)>>16, (IP2 & 0x0000ff00)>>8, (IP2 & 0x000000ff), Port->Port2, 
+#endif
+		       (TData->Header->syn ? 's' : '.'),
+		       (TData->Header->ack ? 'a' : '.'),
+		       Port->Direction, Port->TCPCount);
+*/
 	TimeoutSessions(Globals.Packets[PacketSlot].tv.tv_sec);
 
 	return TRUE;
 }
 
-/**********************************
-* Set up the session handler
-**********************************/
+/**
+ * Sets up the session handler.
+ * Global variable IPB holds all info about identified sessions.
+ * @see ip_bin
+ * @see ip_pair
+ * @see port_pair
+ */
 int InitSession(){
 
 #ifdef DEBUGPATH
@@ -950,4 +1021,29 @@ int InitSession(){
 	TCPDecoderID=GetDecoderByName("TCP");
 
 	return TRUE;
+}
+
+
+void RemountTCPStream(int PacketSlot, PP* Port)
+{
+	
+
+	if (!PP->Seqs) {
+		PP->Seqs = calloc(sizeof(struct fake_tcp_window), 1);
+		PP->Seqs.num_pieces = 0;
+		PP->Seqs.TopSeq = 0;
+		PP->Seqs.LastSeq = 0;
+		memset(PP->Seqs.RuleBits, 0xFF, MAX_RULES/8);
+		PP->Seqs.pieces = NULL;
+	}
+
+	// First piece
+	if (!PP->Seqs.pieces) {
+		if (PP->Seqs.num_pieces != 0) {
+			fprintf(stderr, "Error remounting TCP stream - num_pieces should be 0\n");
+			return;
+		}
+		PP->Seqs.pieces = calloc(sizeof(struct tcp_piece), 1);
+		PP->Seqs.Top
+	}
 }

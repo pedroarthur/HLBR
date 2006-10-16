@@ -27,7 +27,8 @@ extern GlobalVars	Globals;
 /**************************************
 * Give a Decoder's name, return it's ID
 **************************************/
-int GetDecoderByName(char* Name){
+int GetDecoderByName(char* Name)
+{
 	int 	i;
 	
 #ifdef DEBUGPATH
@@ -43,7 +44,8 @@ int GetDecoderByName(char* Name){
 /*************************************
 * Set up the initial decoder tree
 *************************************/
-int InitDecoders(){
+int InitDecoders()
+{
 	int	RootDecoder;
 
 #ifdef DEBUGPATH
@@ -81,7 +83,8 @@ int InitDecoders(){
 /*************************************
 * Allocate a decoder
 **************************************/
-int CreateDecoder(char* Name){
+int CreateDecoder(char* Name)
+{
 	int DecoderID;
 	
 #ifdef DEBUGPATH
@@ -112,7 +115,8 @@ int CreateDecoder(char* Name){
 /************************************************
 * Add a new test to a decoder
 ************************************************/
-int DecoderAddTest(int DecoderID, int TestID){
+int DecoderAddTest(int DecoderID, int TestID)
+{
 	TestRec*	Test;
 	DecoderRec*	Decoder;
 	TestRec*	This;
@@ -150,7 +154,8 @@ int DecoderAddTest(int DecoderID, int TestID){
 /************************************************
 * Add a decoder to another decoder
 ************************************************/
-int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID){
+int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID)
+{
 	DecoderRec*	Child;
 	DecoderRec*	Parent;
 	DecoderRec*	This;
@@ -188,7 +193,8 @@ int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID){
 /************************************************
 * Add a new module to a decoder
 ************************************************/
-int DecoderAddModule(int DecoderID, int ModuleID){
+int DecoderAddModule(int DecoderID, int ModuleID)
+{
 	ModuleRec*	Module;
 	DecoderRec*	Decoder;
 	ModuleRec*	This;
@@ -227,7 +233,8 @@ int DecoderAddModule(int DecoderID, int ModuleID){
 /*******************************************
 * Apply a decoder to a packet
 *******************************************/
-int Decode(int DecoderID, int PacketSlot){
+int Decode(int DecoderID, int PacketSlot)
+{
 	TestRec*	test;
 	ModuleRec*	module;
 	DecoderRec*	child;
@@ -311,7 +318,8 @@ int Decode(int DecoderID, int PacketSlot){
 * If a decoder fails, all the dependencies fail also
 * Used for fast pruning
 ****************************************************/
-int DecoderSetDependency(int DecoderID, int TestID){
+int DecoderSetDependency(int DecoderID, int TestID)
+{
 #ifdef DEBUGPATH
 	printf("In DecoderSetDependency\n");
 #endif
@@ -325,7 +333,8 @@ int DecoderSetDependency(int DecoderID, int TestID){
 /******************************************
 * Get a particular decoder's data record
 *******************************************/
-int GetDataByID(int PacketSlot, int DecoderID, void** data){
+int GetDataByID(int PacketSlot, int DecoderID, void** data)
+{
 	int 		i;
 	PacketRec*	p;
 #ifdef DEBUGPATH

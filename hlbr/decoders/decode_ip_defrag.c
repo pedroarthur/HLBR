@@ -117,7 +117,7 @@ int RebuildPacket(struct defrag_item* Frags, int NumFrags){
 	
 	for (i=0;i<NumFrags;i++){
 		if (!GetDataByID(Frags[i].PacketSlot, IPDecoderID, (void**)&idata)){
-			printf("1Failed to get IP data in slot %i\n",PacketSlot);
+			printf("Failed to get IP data in slot %i\n",PacketSlot);
 			return FALSE;
 		}
 	
