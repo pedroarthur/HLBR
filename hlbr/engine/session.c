@@ -1024,6 +1024,8 @@ int InitSession(){
 }
 
 
+inline int add_packet_tcp_buffer(struct fake_tcp_window*, TCPData*);
+
 int RemountTCPStream(int PacketSlot, PP* Port)
 {
 	TCPData*	TData;
@@ -1059,12 +1061,10 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		/*
 		if (TData->Header->seq == PP->Sets.LastSeq + 1) {
 			// next packet in the sequence
+			add_packet_tcp_buffer(&(PP->Seqs), TData);
 
-			armazena_payload_no_buffer();
-			
-
-			LastSeq = LastSeq + packet.size();
-			tenta_acrescentar_pacotes_enfileirados_no_buffer;
+			PP->Seqs.LastSeq = PP->Seqs.LastSeq + TData->DataLen;
+			tenta_acrescentar_pacotes_enfileirados_no_buffer();
 			if (testa_regras_no_buffer)
 				libera_pacotes_enfileirados(que foram usados);
 			else
@@ -1080,6 +1080,31 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		}
 		*/
 	}
+
+	return TRUE;
+}
+
+/**
+ * Adds packet to TCP buffer (the 'fake TCP window')
+ * Helper function for RemountTCPStream()
+ * @see RemountTCPStream
+ */
+inline int add_packet_tcp_buffer(struct fake_tcp_window* Seqs, TCPData* TData)
+{
+	if (TData->Header->seq == Seqs->LastSeq + 1) {
+		if (Seqs->LastSeq - Seqs->TopSeq + 1 >= TCP_CACHE_SIZE) {
+			PrintPacketSummary(stderr, NULL, NULL, TData, false);
+			fprintf(stderr, "out of space in TCP cache\n");
+			return FALSE;
+		}
+		memcpy(TData->Data, 
+		       &(Seqs->TCPWindow) + (Seqs->LastSeq - Seqs->TopSeq), 
+		       TData->DataLen);
+	} else {
+		PrintPacketSummary(stderr, NULL, NULL, TData, false);
+		fprintf(stderr, "packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", Seqs->LastSeq, TData->Header->seq);
+		return FALSE;
+	}	
 
 	return TRUE;
 }
