@@ -1024,87 +1024,101 @@ int InitSession(){
 }
 
 
-inline int add_packet_tcp_buffer(struct fake_tcp_window*, TCPData*);
-
+/**
+ * Remounts packets in a TCP stream and check them together for signatures
+ * @see tcp_stream_buffer
+ */
 int RemountTCPStream(int PacketSlot, PP* Port)
 {
 	TCPData*	TData;
+	int		i;
+
+	if (PP->Seqs->num_pieces == TCP_QUEUE_SIZE)
+		return FALSE;
 
 	GetDataByID(PacketSlot, IPDecoderID, (void**)&TData);
 	if (!TData) {
 		PrintPacketSummary(stderr, PacketSlot, NULL, TData, false);
-		fprintf(stderr, "This was supposed to be a TCP packet\n");
+		PRINTERROR("This was supposed to be a TCP packet\n");
 		return FALSE;
 	}
 
-	// Allocate struct fake_tcp_window for the first time
-	if (!PP->Seqs) {
-		PP->Seqs = calloc(sizeof(struct fake_tcp_window), 1);
-		PP->Seqs.num_pieces = 0;
-		PP->Seqs.TopSeq = 0;
-		PP->Seqs.LastSeq = 0;
-		memset(PP->Seqs.RuleBits, 0xFF, MAX_RULES/8);
-		PP->Seqs.pieces = NULL;
-	}
-
-	// Allocates first 'piece'
-	if (!PP->Seqs.pieces) {
-		if (PP->Seqs.num_pieces != 0) {
-			fprintf(stderr, "Error remounting TCP stream - num_pieces should be 0\n");
-			return;
-		}
-		PP->Seqs.pieces = calloc(sizeof(struct tcp_piece), 1);
-		PP->Seqs.TopSeq = TData->Header->seq + 
-			(TData->Header->syn ? 1 : 0);
-		PP->Seqs.LastSeq = PP->Seqs.TopSeq + TData->DataLen - 1;
-	} else {
-		/*
-		if (TData->Header->seq == PP->Sets.LastSeq + 1) {
-			// next packet in the sequence
-			add_packet_tcp_buffer(&(PP->Seqs), TData);
-
-			PP->Seqs.LastSeq = PP->Seqs.LastSeq + TData->DataLen;
-			tenta_acrescentar_pacotes_enfileirados_no_buffer();
-			if (testa_regras_no_buffer)
-				libera_pacotes_enfileirados(que foram usados);
-			else
-				dropa_pacotes_enfileirados(que foram usados);
-		} else if (packet.seq < LastSeq - 1) {
-			// pacote sobrescreve contedo de pacote anterior!
-			// dropa por default
-		} else {
-			// marca pacote para que no seja usado por enquanto,
-			// struct sesso tem uma lista de pacotes, enfileira ele la'
-			marca_pacote_para_no_ser_processado;
-			enfileira_pacote(na struct da sessao);
-		}
-		*/
-	}
-
-	return TRUE;
-}
-
-/**
- * Adds packet to TCP buffer (the 'fake TCP window')
- * Helper function for RemountTCPStream()
- * @see RemountTCPStream
- */
-inline int add_packet_tcp_buffer(struct fake_tcp_window* Seqs, TCPData* TData)
-{
-	if (TData->Header->seq == Seqs->LastSeq + 1) {
-		if (Seqs->LastSeq - Seqs->TopSeq + 1 >= TCP_CACHE_SIZE) {
-			PrintPacketSummary(stderr, NULL, NULL, TData, false);
-			fprintf(stderr, "out of space in TCP cache\n");
+	if (TData->Header->seq == PP->Seqs.LastSeq + 1) {
+		if (PP->Seqs.LastSeq - PP->Seqs.TopSeq + 1 >= TCP_CACHE_SIZE) {
+			PRINTPKTERROR(NULL, NULL, TData, false);
+			PRINTERROR("out of space in TCP cache\n");
 			return FALSE;
 		}
 		memcpy(TData->Data, 
-		       &(Seqs->TCPWindow) + (Seqs->LastSeq - Seqs->TopSeq), 
+		       &(PP->Seqs.buffer) + (PP->Seqs.LastSeq - PP->Seqs.TopSeq), 
 		       TData->DataLen);
+		// finds position for the packet in pieces[]
+		for (i = 0; PP->Seqs.pieces[i].piece_end < PP->Seqs.LastSeq; i++);
+		if (i + 1 == TCP_QUEUE_SIZE) {
+			PRINTERROR("pieces[] out of space?\n");
+			return FALSE;
+		}
+		// move other pieces[] forward, to make space
+		if (i < TCP_QUEUE_SIZE - 1)
+			memmove(&(PP->Seqs.pieces[i+1]), &(PP->Seqs.pieces[i]), 
+				size_of(struct tcp_piece)*(TCP_QUEUE_SIZE-i));
+		PP->Seqs.pieces[i].piece_start = TData->Header->seq;
+		PP->Seqs.pieces[i].piece_end = TData->Header->seq + TData->DataLen-1;
+		PP->Seqs.pieces[i].PacketSlot = PacketSlot;
+		PP->Seqs.num_pieces++;
+
+		// Try to unqueue more packets
+		// Also, tests if packet boundaries overwrite packets
+		// already in the buffer
+		for (i = 0; i < PP->Seqs.num_pieces; i++)
+			if (PP->Seqs.pieces[i].piece_start == 
+			    PP->Seqs.LastSeq + 1) {
+				put_this_piece_after();
+				unqueue_it();
+			} else if (PP->Seqs.pieces[i].piece_end ==
+				   PP->Seqs.TopSeq - 1) {
+				put_this_piece_before();
+				unqueue_it();
+			} else if (
+				((TData->Header->seq < PP->Seqs.pieces[i].piece_end) &&
+				 (TData->Header->seq > PP->Seqs.pieces[i].piece_start)) ||
+			      ((PP->Seqs.pieces[i].piece_start > TData->Header->seq) &&
+			       (PP->Seqs.pieces[i].piece_start < TData->Header->seq + TData->DataLen - 1)) ) {
+				// packet boundaries overwrite! drop the packet
+				drop_packet();
+			}
+
+		roda_testes_no_buffer();
+
 	} else {
-		PrintPacketSummary(stderr, NULL, NULL, TData, false);
-		fprintf(stderr, "packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", Seqs->LastSeq, TData->Header->seq);
-		return FALSE;
-	}	
+		// This packet doesn't follow the previous one. So we queue it
+		DBG(PRINTPKTERROR(NULL, NULL, TData, false));
+		DBG(PRINTERROR2("packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", PP->Seqs.LastSeq, TData->Header->seq));
+		if (PP->Seqs.queue_size < TCP_QUEUE_SIZE) 
+			PP->Seqs.queue[i++] = PacketSlot;
+		block_a_packet(PacketSlot);
+	}
+	/*
+	if (TData->Header->seq == PP->Sets.LastSeq + 1) {
+		// next packet in the sequence
+		add_packet_tcp_buffer(&(PP->Seqs), TData);
+		
+		PP->Seqs.LastSeq = PP->Seqs.LastSeq + TData->DataLen;
+		tenta_acrescentar_pacotes_enfileirados_no_buffer();
+		if (testa_regras_no_buffer)
+			libera_pacotes_enfileirados(que foram usados);
+		else
+			dropa_pacotes_enfileirados(que foram usados);
+	} else if (packet.seq < LastSeq - 1) {
+		// pacote sobrescreve 	contedo de pacote anterior!
+		// dropa por default	
+	} else {
+		// marca pacote para que no seja usado por enquanto,
+		// struct sessao tem uma lista de pacotes, enfileira ele la'
+		marca_pacote_para_no_ser_processado;
+		enfileira_pacote(na struct da sessao);
+	}
+	*/
 
 	return TRUE;
 }

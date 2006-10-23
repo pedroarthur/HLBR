@@ -31,31 +31,33 @@ struct ip_pair;
 struct ip_bin;
 
 #define TCP_CACHE_SIZE		4*1460
-/**
- * Holds info about the bytes in the TCP buffer (fake window)
- * @see Fake_TCP_Window
- */
-struct tcp_piece {
+#define TCP_QUEUE_SIZE		16	// max number of TCP packets to 'queue'
+
+
+#ifdef TCP_STREAM
+struct tcp_stream_piece {
 	unsigned int		piece_start;	// seq number
 	unsigned int		piece_end;
-	struct tcp_piece*	next;
+	int			PacketSlot;
 };
 /**
- * 'Fake TCP Window'
+ * TCP stream buffer
  * Buffer to hold the last packets received in a TCP session, to make it 
- * possible to detect signatures across different packets. In a way it 
- * mimic the TCP sliding window, hence the name.
+ * possible to detect signatures across different packets.
  */
-struct fake_tcp_window {
+struct tcp_stream_buffer {
 	unsigned char		num_pieces;
-	struct tcp_piece*	pieces;
-	unsigned char		TCPWindow[TCP_CACHE_SIZE];
+	struct tcp_stream_piece	pieces[TCP_QUEUE_SIZE];
+	unsigned char		buffer[TCP_CACHE_SIZE];
+	unsigned char		queue_size;
+	int			queue[TCP_QUEUE_SIZE];	// packets waiting to enter TCPWindow
 	/* TopSeq holds the sequence number of the first byte in the window, while
 	   LastSeq holds the seq. number of the highest byte stored in the window. */
 	unsigned int		TopSeq;
 	unsigned int		LastSeq;
 	unsigned char		RuleBits[MAX_RULES/8];
 };
+#endif
 
 /**
  * Struct that represents the actual session.
@@ -95,7 +97,7 @@ typedef struct port_pair{
 	   the other is clnt->srv) */
 	struct port_pair*	TheOtherPortPair;
 #ifdef TCP_STREAM
-	struct fake_tcp_window*	Seqs;
+	struct tcp_stream_buffer	Seqs;
 #endif
 } PP;
 

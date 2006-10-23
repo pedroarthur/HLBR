@@ -1,6 +1,12 @@
 #ifndef _HLBR_LIB_H_
 #define _HLBR_LIB_H_
 
+/* printfs */
+#define PRINTERROR(msg)			fprintf(stderr, msg)
+#define PRINTERROR1(msg, p1)		fprintf(stderr, msg, p1)
+#define PRINTERROR2(msg, p1, p2)	fprintf(stderr, msg, p1, p2)
+#define PRINTERROR3(msg, p1, p2, p3)	fprintf(stderr, msg, p1, p2, p3)
+#define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
 
 /* Used to queue a lot of things */
 struct queue_t {
