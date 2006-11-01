@@ -142,7 +142,8 @@ int OpenInterface(int InterfaceID){
 /******************************************
 * Open up all the interfaces
 ******************************************/
-int OpenInterfaces(){
+int OpenInterfaces()
+{
 	int 	i;
 
 #ifdef DEBUGPATH
@@ -159,7 +160,8 @@ int OpenInterfaces(){
 * Read packet(s) from an interface
 * Packets will be put on the pending queue
 ******************************************/
-int ReadPacket(int InterfaceID){
+int ReadPacket(int InterfaceID)
+{
 	InterfaceRec*	Interface;
 
 #ifdef DEBUGPATH
@@ -198,7 +200,8 @@ int ReadPacket(int InterfaceID){
 /*****************************************************
 * Send off the packet
 *****************************************************/
-int WritePacket(int PacketSlot){
+int WritePacket(int PacketSlot)
+{
 	InterfaceRec*	Interface;
 	int				i;
 	int				InterfaceID;
@@ -332,13 +335,15 @@ int WritePacket(int PacketSlot){
 	return FALSE;
 }
 
-/******************************************
-* Gets called every time a packet gets
-* put on the pending list.
-* This may be called more than once per
-* ReadPacket request.
-******************************************/
-int AddPacketToPending(int PacketSlot){
+/**
+ * Marks a packet as 'pending' (thread safe, called from ReadPacket)
+ * Gets called every time a packet gets put on the pending list. Uses a 
+ * mutex lock (to avoid problems with threads).
+ * This may be called more than once per ReadPacket request.
+ * @see ReadPacket
+ */
+int AddPacketToPending(int PacketSlot)
+{
 #ifdef DEBUGPATH
 	printf("In AddPacketToPending\n");
 #endif
@@ -355,11 +360,32 @@ int AddPacketToPending(int PacketSlot){
 	return TRUE;
 }
 
-/*****************************************
-* Give the caller a packet off the pending
-* Queue
-******************************************/
-int PopFromPending(){
+#ifdef TCP_STREAM
+
+/**
+ * Marks a packet as 'blocked' (thread safe)
+ * Blocked packets can't be processed until are unblocked. Usually they're
+ * blocked by session handling functions
+ * @see RemountTCPStream
+ */
+int BlockPacket(int PacketSlot)
+{
+	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
+	Globals.Packets[PacketSlot].Status=PACKET_STATUS_BLOCKED;
+	hlbr_mutex_unlock(&PacketMutex);
+
+	return TRUE;
+}
+
+#endif	// TCP_STREAM
+
+/**
+ * Pops a packet off the pending queue
+ * Give the caller a packet off the pending queue (marked as 
+ * PACKET_STATUS_PENDING
+ */
+int PopFromPending()
+{
 	int		PacketSlot;
 	int		i;
 #ifdef DEBUGPATH

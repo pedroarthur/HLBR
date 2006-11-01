@@ -107,19 +107,26 @@ typedef struct test_node{
 	struct test_node*	Next;
 } TestNode;
 
+/**
+ * Structure for a test (like 'tcp nocase', for example)
+ * @see InitTests()
+ */
 typedef struct test_rec{
-	char				Name[MAX_NAME_LEN];
-	char				ShortName[MAX_NAME_LEN];
-	int					ID;
-	int					DecoderID;
-	char				Active; /*true if anything actually uses it*/
-	TestNode*			TestNodes;
+	char			Name[MAX_NAME_LEN];
+	char			ShortName[MAX_NAME_LEN];
+	int			ID;
+	int			DecoderID;
+	char			Active; /*true if anything actually uses it*/
+	TestNode*		TestNodes;
 	struct test_rec*	Next;   /*next test for the decoder*/
 	unsigned char		DependencyMask[MAX_RULES/8];
 	
 	int (*AddNode)(int TestID, int RuleID, char* Args);
 	int (*FinishedSetup)();
 	int (*TestFunc)(int PacketSlot, TestNode* Nodes);
+#ifdef TCP_STREAM
+	int (*TestStreamFunc)(struct port_pair* PP, TestNode* Nodes);
+#endif
 } TestRec;
 
 typedef struct module_rec{

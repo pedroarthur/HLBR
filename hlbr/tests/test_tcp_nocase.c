@@ -19,10 +19,11 @@ typedef struct tcp_nocase_data{
 int 			TCPDecoderID;
 JTree			TCPNoCaseTree;
 
-/******************************************
-* Apply the Test
-******************************************/
-int TestTCPNoCase(int PacketSlot, TestNode* Nodes){
+/**
+ * Apply the Test TCP NoCase
+ */
+int TestTCPNoCase(int PacketSlot, TestNode* Nodes)
+{
 	PacketRec*			p;
 	TCPNoCaseData* data;
 #ifdef DEBUGMATCH	
@@ -93,10 +94,11 @@ int TCPNoCaseAddNode(int TestID, int RuleID, char* Args){
 	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
-/****************************************
-* Called when we're all done adding rules
-****************************************/
-int TestTCPNoCaseFinishedSetup(){
+/**
+ * Called when we're all done adding TCP NoCase rules
+ */
+int TestTCPNoCaseFinishedSetup()
+{
 #ifdef DEBUGPATH
 	printf("In TestTCPNocaseFinishedSetup\n");
 #endif
@@ -104,10 +106,11 @@ int TestTCPNoCaseFinishedSetup(){
 	return FinalizeJTree(&TCPNoCaseTree);
 }
 
-/****************************************
-* Set up the test of the TCP NoCase
-*****************************************/
-int InitTestTCPNoCase(){
+/**
+ * Set up the test of the TCP NoCase
+ */
+int InitTestTCPNoCase()
+{
 	int	TestID;
 
 #ifdef DEBUGPATH

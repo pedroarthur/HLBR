@@ -1024,6 +1024,8 @@ int InitSession(){
 }
 
 
+#ifdef TCP_STREAM
+
 /**
  * Remounts packets in a TCP stream and check them together for signatures
  * @see tcp_stream_buffer
@@ -1084,7 +1086,7 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		DBG(PRINTERROR2("packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", Port->Seqs.LastSeq, TData->Header->seq));
 		if (Port->Seqs.queue_size < TCP_QUEUE_SIZE) 
 			Port->Seqs.queue[i++] = PacketSlot;
-		block_a_packet(PacketSlot);
+		BlockPacket(PacketSlot);
 	}
 
 	return TRUE;
@@ -1165,3 +1167,5 @@ int TCPStream_Unqueue(PP* Port)
 		}
 	return FALSE;
 }
+
+#endif	// TCP_STREAM

@@ -45,13 +45,14 @@ int MatchString(char* Candidate, int CLen, char* Packet, int PLen){
 }
 #endif
 
-/******************************************
-* Apply the Test
-******************************************/
-int TestTCPContent(int PacketSlot, TestNode* Nodes){
-	PacketRec*			p;
+/**
+ * Apply the Test TCP Content
+ */
+int TestTCPContent(int PacketSlot, TestNode* Nodes)
+{
+	PacketRec*		p;
 #ifdef DEBUGMATCH	
-	int					i;
+	int			i;
 #endif	
 
 #ifdef DEBUGPATH
@@ -91,6 +92,24 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes){
 		
 	return TRUE;
 }
+
+
+#ifdef TCP_STREAM
+/**
+ * Apply the Test TCP Content, for a TCP stream buffer
+ */
+int TestTCPContent_Stream(struct port_pair* PP, TestNode* Nodes)
+{
+	PacketRec*	p;
+
+	if (!Nodes) return FALSE;
+	
+	MatchStrings(&TCPContentTree, PP->Seqs.RuleBits, PP->Seqs.buffer, PP->Seqs.LastSeq - PP->Seqs.TopSeq + 1);
+	
+	return TRUE;
+}
+#endif	// TCP_STREAM
+
 
 /******************************************
 * Add a rule node to this test
@@ -153,6 +172,7 @@ int InitTestTCPContent(){
 	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "content");
 	Globals.Tests[TestID].AddNode=TCPContentAddNode;
 	Globals.Tests[TestID].TestFunc=TestTCPContent;
+	Globals.Tests[TestID].TestStreamFunc=TestTCPContent_Stream;
 	Globals.Tests[TestID].FinishedSetup=TestTCPContentFinishedSetup;
 	
 	TCPDecoderID=GetDecoderByName("TCP");

@@ -211,8 +211,7 @@ int ProcessPacket(int PacketSlot){
 		LastTime=Globals.Packets[PacketSlot].tv.tv_sec;
 	}
 
-	
-	
+		
 	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
 #ifdef DEBUG
 		printf("There are rule matches\n");
