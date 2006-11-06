@@ -1,12 +1,33 @@
 #ifndef _HLBR_LIB_H_
 #define _HLBR_LIB_H_
 
-/* printfs */
+/*
+ * printfs
+ * Use these instead of directly using printf/fprintf
+ */
 #define PRINTERROR(msg)			fprintf(stderr, msg)
 #define PRINTERROR1(msg, p1)		fprintf(stderr, msg, p1)
 #define PRINTERROR2(msg, p1, p2)	fprintf(stderr, msg, p1, p2)
 #define PRINTERROR3(msg, p1, p2, p3)	fprintf(stderr, msg, p1, p2, p3)
 #define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
+
+/*
+ * Debugging defines
+ */
+#ifdef DEBUG
+#define DBG(a)  a
+#else           /* !DEBUG */
+#define DBG(a)  /* do nothing! */
+#endif          /* DEBUG */
+
+/*#ifdef DEBUGPATH
+#undef DEBUGPATH
+#define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)
+#else
+#define DEBUGPATH ;
+#endif*/ /* DEBUGPATH */
+
+
 
 /* Used to queue a lot of things */
 struct queue_t {
@@ -28,19 +49,6 @@ void ListClear(QueueList *);
 /**********/
 /* MACROS */
 /**********/
-
-#ifdef DEBUG
-#define DBG(a)  a
-#else           /* !DEBUG */
-#define DBG(a)  /* do nothing! */
-#endif          /* DEBUG */
-
-/*#ifdef DEBUGPATH
-#undef DEBUGPATH
-#define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)
-#else
-#define DEBUGPATH ;
-#endif*/ /* DEBUGPATH */
 
 #define ARRAYSIZE(array) (sizeof(array)/sizeof(array[0]))
 

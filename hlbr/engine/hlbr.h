@@ -7,6 +7,9 @@
 #include <pthread.h>
 #endif
 
+/** Should remount TCP streams to check for signatures splitted in more than one packet */
+#define TCP_STREAM
+
 #define DEBUGLOCKS
 
 #include "num_list.h"
@@ -51,13 +54,17 @@
 
 #define USER_RULE_START		50000
 
-/*Holds the data from all the decoders already applied*/
-typedef struct decoder_data{
-	int						DecoderID;
-	void*					Data;
+/**
+ * Holds the data from a decoder already applied
+ * Each packet struct holds an array of this struct; here every decoder applied
+ * to a packet store its own data
+ */
+typedef struct decoder_data {
+	int			DecoderID;
+	void*			Data;
 } DecoderData;
 
-typedef struct packet_rec{
+typedef struct packet_rec {
 	int			PacketSlot; /*position in the packet array*/
 	unsigned int		PacketNum;  /*used to track the packet through the system*/
 	

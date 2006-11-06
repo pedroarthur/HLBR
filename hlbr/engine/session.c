@@ -12,7 +12,7 @@
 IPB*			Sessions[65536+1]; /**< All identified sessions. @see InitSession() */
 int			TCPDecoderID;
 int			IPDecoderID;
-unsigned int		SessionCount=0;
+unsigned int		SessionCount = 0;
 SFunc*			CreateFuncs;
 SFunc*			DestroyFuncs;
 extern	GlobalVars	Globals;
@@ -217,37 +217,37 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 	}
 	
 	/*replace this with a binary search after stable*/
-	Bin=Sessions[Hash];
+	Bin = Sessions[Hash];
 	
-	Top=Bin->NumIPs-1;
-	Bottom=0;
-	Middle=Bottom+((Top-Bottom)/2);
+	Top = Bin->NumIPs-1;
+	Bottom = 0;
+	Middle = Bottom + ((Top-Bottom)/2);
 	
-	do{
+	do {
 		Pair=Bin->Pairs[Middle];
 		
-		if (!Pair){
+		if (!Pair) {
 			printf("Pair was NULL. Tree corrupt\n");
 			return NULL;
 		}
 		
-		if ((Pair->IP1==IP1) && (Pair->IP2==IP2)){
+		if ((Pair->IP1==IP1) && (Pair->IP2==IP2)) {
 #ifdef DEBUG
 			printf("Found Pair in Bin %i Slot %i\n",Hash, Middle);
 #endif				
 			return Pair;
 		}
 		
-		if ( (IP1<Pair->IP1) || ( (IP1==Pair->IP1) && (IP2<Pair->IP2)) ){
-			if (Top==Bottom) break;
+		if ( (IP1<Pair->IP1) || ( (IP1==Pair->IP1) && (IP2<Pair->IP2)) ) {
+			if (Top == Bottom) break;
 			
-			Top=Middle;
-			Middle=Bottom+((Top-Bottom)/2);
+			Top = Middle;
+			Middle = Bottom + ((Top-Bottom)/2);
 		}else{
-			if (Top==Bottom) break;
+			if (Top == Bottom) break;
 			
-			Bottom=Middle+1;
-			Middle=Bottom+((Top-Bottom)/2);
+			Bottom = Middle+1;
+			Middle = Bottom + ((Top-Bottom)/2);
 		}
 	} while (1);
 	
@@ -256,7 +256,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 	printf("Creating new pair\n");
 #endif
 	
-	if (Bin->NumIPs==Bin->NumAllocated){
+	if (Bin->NumIPs == Bin->NumAllocated) {
 		/*Not found, create a new one*/
 		Bin->Pairs=realloc(Bin->Pairs, sizeof(IPP*)*(Bin->NumAllocated+IP_GROW+2));
 		if (!Bin->Pairs){
@@ -265,7 +265,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 		}
 	
 		/*Null out the new pointers*/
-		for (i=Bin->NumIPs;i<(Bin->NumAllocated+IP_GROW+1);i++){
+		for (i = Bin->NumIPs; i < (Bin->NumAllocated+IP_GROW+1); i++) {
 			Bin->Pairs[i]=NULL;
 		}
 	
@@ -706,45 +706,44 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	unsigned short	Port1, Port2;
 	IPP*		Pair;
 	PP*		Port;
-#ifdef DEBUGPATH
-	printf("In AssignSessionTCP\n");
-#endif
+
+	DEBUGPATH;
 
 	GetDataByID(PacketSlot, IPDecoderID, (void**)&IData);
-	if (!IData){
-		PrintPacketSummary(stderr, PacketSlot, IData, NULL, false);
-		fprintf(stderr, "This was supposed to be a TCP packet\n");
+	if (!IData) {
+		PRINTPKTERROR(PacketSlot, IData, NULL, FALSE);
+		PRINTERROR("This was supposed to be a TCP packet\n");
 		return FALSE;
 	}
 
 	TData=(TCPData*)Data;
-	if (!TData){
-		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
-		fprintf(stderr, "TCP Data was NULL\n");
+	if (!TData) {
+		PRINTPKTERROR(PacketSlot, IData, TData, FALSE);
+		PRINTERROR("TCP Data was NULL\n");
 		return FALSE;
 	}
 
 	// Assigns IP1 & IP2: IP1 is the lesser of the src & dst IPs
-	if (IData->Header->saddr < IData->Header->daddr){
-		IP1=IData->Header->saddr;
-		IP2=IData->Header->daddr;
-		Port1=ntohs(TData->Header->source);
-		Port2=ntohs(TData->Header->dest);
-	}else{
-		IP1=IData->Header->daddr;
-		IP2=IData->Header->saddr;
-		Port1=ntohs(TData->Header->dest);
-		Port2=ntohs(TData->Header->source);
+	if (IData->Header->saddr < IData->Header->daddr) {
+		IP1 = IData->Header->saddr;
+		IP2 = IData->Header->daddr;
+		Port1 = ntohs(TData->Header->source);
+		Port2 = ntohs(TData->Header->dest);
+	} else {
+		IP1 = IData->Header->daddr;
+		IP2 = IData->Header->saddr;
+		Port1 = ntohs(TData->Header->dest);
+		Port2 = ntohs(TData->Header->source);
 	}
 
 	Pair = FindIPPair(IP1, IP2);
-	if (!Pair){
-		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
-		fprintf(stderr, "Failed to assign session pair\n");
+	if (!Pair) {
+		PRINTPKTERROR(PacketSlot, IData, TData, FALSE);
+		PRINTERROR("Failed to assign session pair\n");
 		return FALSE;
 	}	
 	Port = FindPortPair(Port1, Port2, Pair, Globals.Packets[PacketSlot].tv.tv_sec);
-	if (!Port){
+	if (!Port) {
 		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
 		fprintf(stderr, "Failed to assign session port\n");
 		return FALSE;
@@ -752,7 +751,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 
 	RemountTCPStream(PacketSlot, Port);
 
-	if ( (Port->ServerState==TCP_STATE_NEW) && (Port->ClientState==TCP_STATE_NEW) ){
+	if ( (Port->ServerState==TCP_STATE_NEW) && (Port->ClientState==TCP_STATE_NEW) ) {
 		/***************************************************/
 		/*we don't know what direction or state this is yet*/
 		/*                                                 */
@@ -1027,7 +1026,7 @@ int InitSession(){
 #ifdef TCP_STREAM
 
 /**
- * Remounts packets in a TCP stream and check them together for signatures
+ * Remounts packets in a TCP stream and check them together for signatures.
  * @see tcp_stream_buffer
  */
 int RemountTCPStream(int PacketSlot, PP* Port)
@@ -1082,8 +1081,8 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		}
 	} else {
 		// This packet doesn't follow the previous one. So we queue it
-		DBG(PRINTPKTERROR(NULL, NULL, TData, false));
-		DBG(PRINTERROR2("packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", Port->Seqs.LastSeq, TData->Header->seq));
+		DBG( PRINTPKTERROR(NULL, NULL, TData, false) );
+		DBG( PRINTERROR2("packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", Port->Seqs.LastSeq, TData->Header->seq) );
 		if (Port->Seqs.queue_size < TCP_QUEUE_SIZE) 
 			Port->Seqs.queue[i++] = PacketSlot;
 		BlockPacket(PacketSlot);
@@ -1093,7 +1092,7 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 }
 
 /**
- * Try to add to the TCP buffer packets previously queued
+ * Try to add to the TCP buffer packets previously queued.
  * @see RemountTCPStream
  * @return TRUE if a packet is unqueued
  */
@@ -1101,6 +1100,9 @@ int TCPStream_Unqueue(PP* Port)
 {
 	TCPData*	TData;
 	int i;
+
+	if (!Port->Seqs.num_pieces)
+		return FALSE;
 
 	for (i = 0; i < Port->Seqs.num_pieces; i++)
 		// put this piece after the others

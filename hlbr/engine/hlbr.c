@@ -1,3 +1,10 @@
+/** @mainpage HLBR Code Documentation
+ * This is the documentation for HLBR's code, generated with Doxygen.\n
+ * HLBR code can be quite a bit hard to grasp at first glance; 
+ * if you want a place to start, I'd suggest you take a look at the 
+ * ProcessPacket() and Decode() functions.
+ */
+
 #include "hlbr.h"
 #include "parse_config.h"
 #include "parse_rules.h"
@@ -59,25 +66,24 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 }
 
 
-/**************************************
-* print out the version number
-***************************************/
-void PrintVersion() {
-	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
+/**
+ * Print out the version number.
+ */
+void PrintVersion()
+{
+	printf("\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
 //	printf("by Andre Bertelli Araujo and\n   Joao Eriberto Mota Filho\n\n");
-	printf("http://hlbr.sourceforge.net\n\n");
-	printf("(based in Jason Larsen's Hogwash)\n\n");
+	printf("http://hlbr.sourceforge.net\n");
+	printf("(based in Jason Larsen's Hogwash)\n");
 }
 
 /**
- * Tell the user about the command line
+ * Tell the user about the command line.
  */
 void PrintUsage(char op)
 {
+	DEBUGPATH;
 
-#ifdef DEBUGPATH
-	printf("In PrintUsage\n");
-#endif
 	PrintVersion();
 
 	switch (op) {
@@ -154,7 +160,7 @@ int hlbr_daemon(int nochdir, int noclose){
 }
 
 /**
- * Make sense of the command line
+ * Make sense of the command line.
  * Parse the parameters received by the main() function
  */
 int ParseArgs(int argc, char **argv)

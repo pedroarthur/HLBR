@@ -102,7 +102,7 @@ typedef struct port_pair{
 } PP;
 
 /**
- * Struct that represents the two IPs in a session.(?)
+ * Struct that represents the two IPs in a session (?).
  * The two IPs are supposed to be server/client IPs. This struct doesn't hold
  * info about the actual session, only about the source/destination. 
  * Info about the session lies in the struct port_pair. 
@@ -116,7 +116,7 @@ typedef struct ip_pair{
 	PP**		Ports;
 	struct ip_bin*	Parent;
 
-	unsigned char	RefuseFromThisIP : 1;	/** < Refuse any sessions from IP1 in the future */
+	unsigned char	RefuseFromThisIP : 1;	/**< Refuse any sessions from IP1 in the future */
 } IPP;
 
 typedef struct ip_bin{
