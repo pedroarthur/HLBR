@@ -20,6 +20,7 @@
 #define DBG(a)  /* do nothing! */
 #endif          /* DEBUG */
 
+#define DEBUGPATH
 /*#ifdef DEBUGPATH
 #undef DEBUGPATH
 #define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)

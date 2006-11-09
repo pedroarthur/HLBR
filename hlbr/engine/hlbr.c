@@ -6,6 +6,7 @@
  */
 
 #include "hlbr.h"
+#include "hlbrlib.h"
 #include "parse_config.h"
 #include "parse_rules.h"
 #include "main_loop.h"

@@ -716,7 +716,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 		return FALSE;
 	}
 
-	TData=(TCPData*)Data;
+	TData = (TCPData*)Data;
 	if (!TData) {
 		PRINTPKTERROR(PacketSlot, IData, TData, FALSE);
 		PRINTERROR("TCP Data was NULL\n");
@@ -1037,9 +1037,9 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 	if (Port->Seqs->num_pieces == TCP_QUEUE_SIZE)
 		return FALSE;
 
-	GetDataByID(PacketSlot, IPDecoderID, (void**)&TData);
+	GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData);
 	if (!TData) {
-		PrintPacketSummary(stderr, PacketSlot, NULL, TData, false);
+ 		PrintPacketSummary(stderr, PacketSlot, NULL, TData, false);
 		PRINTERROR("This was supposed to be a TCP packet\n");
 		return FALSE;
 	}
@@ -1073,11 +1073,11 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		// try to add queued packets to the buffer
 		// try multiple times, because after a packet is popped out,
 		// maybe there's room for another one
-		roda_testes_no_buffer();
-		TODO! delete first queue entry, unblocking the packet;
+		//roda_testes_no_buffer();
+		//TODO! delete first queue entry, unblocking the packet;
 		while (TCPStream_Unqueue(Port)) {
-		       roda_testes_no_buffer();
-		       delete first entry again & unblock the packet;
+			//roda_testes_no_buffer();
+			//delete first entry again & unblock the packet;
 		}
 	} else {
 		// This packet doesn't follow the previous one. So we queue it
@@ -1093,7 +1093,6 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 
 /**
  * Try to add to the TCP buffer packets previously queued.
- * @see RemountTCPStream
  * @return TRUE if a packet is unqueued
  */
 int TCPStream_Unqueue(PP* Port)
@@ -1101,73 +1100,174 @@ int TCPStream_Unqueue(PP* Port)
 	TCPData*	TData;
 	int i;
 
-	if (!Port->Seqs.num_pieces)
+	DEBUGPATH;
+
+	// Nothing to unqueue
+	if (!Port->Seqs.queue_size)
 		return FALSE;
 
-	for (i = 0; i < Port->Seqs.num_pieces; i++)
+	// Even if there's something to unqueue, pieces[] can't hold it
+	if (Port->Seqs.queue_size = TCP_QUEUE_SIZE)
+		return FALSE;
+
+	for (i = 0; i < Port->Seqs.queue_size; i++) {
+		GetDataByID(Port->Seqs.queue[i], TCPDecoderID, (void**)&TData);
+		if (!TData) {
+			PrintPacketSummary(stderr, Port->Seqs.queue[i], NULL, TData, false);
+			PRINTERROR("This was supposed to be a TCP packet\n");
+			return FALSE;
+		}
+
 		// put this piece after the others
-		if (Port->Seqs.pieces[i].piece_start == 
-		    Port->Seqs.LastSeq + 1) {
-			GetDataBtID(Port->Seqs.pieces[i].PacketSlot,
-				    IPDecodedID, (void**)&TData);
-			if (!TData) {
-				PRINTPKTERROR(Port->Seqs.pieces[i].PacketSlot, NULL, TData, false);
-				PRINTERROR("Error reading TCP data (while unqueuing TCP stream buffer\n");
-				return FALSE;
-			}
+		if (TData->Header->seq == Port->Seqs.LastSeq + 1) {
 			if (TData->DataLen > (TCP_CACHE_SIZE - Port->Seqs.LastSeq - Port->Seqs.TopSeq + 1))
 				// buffer can't hold the packet!
 				// then just wait for another time...
 				return FALSE;
+
 			memcpy(&(Port->Seqs.buffer) + Port->Seqs.LastSeq - Port->Seqs.TopSeq + 1,
 			       TData->Data, TData->DataLen);
-			// unqueue it
-			/*
-			  TODO! should unqueue only after checking the rules
-			  in the buffer, because otherwise we don't know
-			  the PacketSlot to unblock it...
-			memmove(&(Port->Seqs.pieces[i]), 
-				&(Port->Seqs.pieces[i+1]),
-				(Port->Seqs.num_pieces-- - i - 1) * sizeof(struct tcp_stream_piece));
-			*/
+
+			// add to pieces (at the end)
+			Port->Seqs.pieces[Port->Seqs.num_pieces].piece_start = TData->Header->seq;
+			Port->Seqs.pieces[Port->Seqs.num_pieces].piece_end = TData->Header->seq + TData->DataLen - 1;
+			Port->Seqs.pieces[Port->Seqs.num_pieces].PacketSlot = Port->Seqs.queue[i];
+
+			// unqueue it (moving subsequent records up)
+			if (Port->Seqs.queue_size == TCP_QUEUE_SIZE)
+				Port->Seqs.queue_size--;
+			else
+				memmove(&(Port->Seqs.queue[i]), 
+					&(Port->Seqs.queue[i+1]),
+					(Port->Seqs.queue_size-- - i - 1) * sizeof(int));
+
 			return TRUE;
 			
 		// put this piece before the others
-		} else if (Port->Seqs.pieces[i].piece_end ==
-			   Port->Seqs.TopSeq - 1) {
-			GetDataBtID(Port->Seqs.pieces[i].PacketSlot,
-				    IPDecodedID, (void**)&TData);
-			if (!TData) {
-				PRINTPKTERROR(Port->Seqs.pieces[i].PacketSlot, NULL, TData, false);
-				PRINTERROR("Error reading TCP data (while unqueuing TCP stream buffer\n");
-				return FALSE;
-			}
-			// buffer can't hold the packet!
-			// then just wait for another time...
+		} else if (TData->Header->seq + TData->DataLen - 1 ==
+			   Port->Seqs.TopSeq) {
 			if (TData->DataLen > (TCP_CACHE_SIZE - Port->Seqs.LastSeq - Port->Seqs.TopSeq + 1))
-			1~	return FALSE;
+				// buffer can't hold the packet!
+				// then just wait for another time...
+				return FALSE;
+
 			// first, move down the buffer to make space...
 			memmove(&(Port->Seqs.buffer) + TData->DataLen,
 				&(Port->Seqs.buffer),
 				Port->Seqs.LastSeq - Port->Seqs.TopSeq + 1);
+			// ...then insert data at beginning of buffer
 			memcpy(&(Port->Seqs.buffer), TData->Data, TData->DataLen);
-	
-			// unqueue it
-			/* TODO (see above)
-			memmove(&(Port->Seqs.pieces[i]), 
-				&(Port->Seqs.pieces[i+1]),
-				(Port->Seqs.num_pieces-- - i - 1) * sizeof(struct tcp_stream_piece));
-			*/
+
+			// add to pieces (at the beginning)
+			memmove(&(Port->Seqs.pieces[1]), &(Port->Seqs.pieces[0]),
+				(Port->Seqs.num_pieces - 1) * sizeof(struct tcp_stream_buffer));
+			Port->Seqs.num_pieces++;
+
+			// unqueue it (moving subsequent records up)
+			if (Port->Seqs.queue_size == TCP_QUEUE_SIZE)
+				Port->Seqs.queue_size--;
+			else
+				memmove(&(Port->Seqs.queue[i]), 
+					&(Port->Seqs.queue[i+1]),
+					(Port->Seqs.queue_size-- - i - 1) * sizeof(int));
+
 			return TRUE;
 		} else if (
-			((TData->Header->seq < Port->Seqs.pieces[i].piece_end) &&
-			 (TData->Header->seq > Port->Seqs.pieces[i].piece_start)) ||
-			((Port->Seqs.pieces[i].piece_start > TData->Header->seq) &&
-			 (Port->Seqs.pieces[i].piece_start < TData->Header->seq + TData->DataLen - 1)) ) {
+			((TData->Header->seq < Port->Seqs.LastSeq) &&
+			 (TData->Header->seq > Port->Seqs.TopSeq)) ||
+			((Port->Seqs.TopSeq > TData->Header->seq) &&
+			 (Port->Seqs.TopSeq < TData->Header->seq + TData->DataLen - 1)) ) {
 			// packet boundaries overwrite! drop the packet
-			drop_packet();
+			// (taken from action_drop.c)
+			Globals.Packets[Port->Seqs.queue[i].PacketSlot].PassRawPacket = FALSE;
+			if (Globals.Packets[Port->Seqs.queue[i].PacketSlot].Status == PACKET_STATUS_BLOCKED)
+				TCPStream_unblock(Port->Seqs.queue[i].PacketSlot, TRUE);
+			return FALSE; // should really continue trying other packets in queue, but array can change after calling TCPStream_unblock
 		}
+	}
+
 	return FALSE;
+}
+
+/** Unblock the first packet in the TCP stream buffer this packet belongs.
+ * The very first packet of the TCP stream buffer will be marked as PENDING,
+ * so that it can be routed at the next opportunity.
+ * If thispacket is TRUE, that means this very packet is being dropped 
+ * (by an action), and so, if this isn't the very first packet of the buffer,
+ * then after unblocking the first one, get the tcp_piece struct of this very
+ * packet and change the pointer to the packet to NULL. So when it's time to
+ * unblock the corresponding piece we don't need to really unblock the packet
+ * because it went away already.
+ * @return FALSE if anything unexpected occured (such as null pointers)
+ */
+int TCPRemount_unblock(int PacketSlot, int thispacket)
+{
+	PacketRec*			p;
+	struct tcp_stream_buffer*	seq;
+	int				nseq;
+	unsigned char			i, piece;
+	int				up;
+	TCPData*			TData;
+
+	DEBUGPATH;
+
+	p = &Globals.Packets[PacketSlot];
+	up = PacketSlot;
+	
+	if (!(p->Stream)) {
+		DBG( PRINTERROR1("Packet %d's Stream pointer is null!\n", PacketSlot) );
+		return FALSE;
+	}
+	if (!(p->Stream->Seqs)) {
+		DBG( PRINTERROR1("Packet %d's Stream doesn't have a Seqs structure!\n", PacketSlot) );
+		return FALSE;
+	}
+	seq = p->Stream->Seqs;
+	if (seq.num_pieces == 0) {
+		DBG( PRINTERROR1("Packet %d's stream doesn't have any pieces to be unblocked\n", PacketSlot) );
+		return FALSE;
+	}
+	/* if there's only one piece in the buffer, it can be unblocked only
+	   if it's the last packet in the TCP session */
+	if (seq.num_pieces == 1) {
+		GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData);
+		if (TData)
+			if (!TData->Header->fin && !TData->Header->rst) {
+				DBG( PRINTERROR1("TCP buffer for packet %d has only one packet and it isn't a FIN or RST one\n", PacketSlot) );
+				return FALSE;
+			}
+	}
+	
+	nseq = seq.piece[0].piece_start + 1;
+	piece = -1;
+	for (i = 0; i < seq.num_pieces; i++)
+		if (seq.piece[i].piece_start < nseq) {
+			nseq = seq.piece[i].piece_start;
+			piece = i;
+		}
+	if (piece > -1) {
+		up = seq.piece[piece].PacketSlot;
+		// if this piece's PacketSlot is valid, finally route this poor packet
+		if (seq.piece[piece].PacketSlot > -1) {
+			Globals.Packets[seq.piece[piece].PacketSlot].Status = PACKET_STATUS_IDLE;
+			RouteAndSend(seq.piece[piece].PacketSlot);
+			ReturnEmptyPacket(seq.piece[piece].PacketSlot);
+		}
+		// remove piece from pieces array
+		if (piece < TCP_QUEUE_SIZE)
+			memmove(&(seq.piece[piece]), 
+				&(seq.piece[piece+1]),
+				(seq.num_pieces - piece - 1) * sizeof(struct tcp_stream_piece));
+		seq.num_pieces--;
+	}
+
+	if ((thispacket) && (PacketSlot != up)) {
+		for (i = 0; i < seq.num_pieces; i++)
+			if (seq.piece[i].PacketSlot == PacketSlot)
+				seq.piece[i].PacketSlot = -1;
+	}
+
+	return TRUE;
 }
 
 #endif	// TCP_STREAM

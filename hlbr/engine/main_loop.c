@@ -3,6 +3,7 @@
 * threads and other factors.
 *******************************************/
 #include "main_loop.h"
+#include "hlbrlib.h"
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -68,7 +69,7 @@ int RouteAndSend(int PacketSlot)
 	p->TargetInterface = -1;
 	
 #ifdef DEBUG1	
-	if (p->InterfaceNum==2)
+	if (p->InterfaceNum == 2)
 	printf("Routing %02X:%02X:%02X:%02X:%02X:%02X->%02X:%02X:%02X:%02X:%02X:%02X\n",
 		p->RawPacket[6],
 		p->RawPacket[7],
@@ -192,9 +193,11 @@ int ProcessPacket(int PacketSlot)
 
 	/* update the packet statistics */
 	PacketSec++;
-	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
+	if (GetDataByID(PacketSlot, TCPDecoderID, &data)) {
 		TCPSec++;
-	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
+		// Unblock first packet from TCP remount buffer
+		TCPRemount_unblock(PacketSlot, FALSE);
+	} else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
 		UDPSec++;
 		
 	if (Globals.Packets[PacketSlot].tv.tv_sec != LastTime) {
@@ -217,10 +220,13 @@ int ProcessPacket(int PacketSlot)
 			PRINTERROR("Failed to execute the actions\n");
 		}
 	}
-	
-	RouteAndSend(PacketSlot);
-	ReturnEmptyPacket(PacketSlot);
-	
+
+	// route the packet only if it isn't blocked by TCP stream remount
+	if (p->Status != PACKET_STATUS_BLOCKED) {
+		RouteAndSend(PacketSlot);
+		ReturnEmptyPacket(PacketSlot);
+	}
+
 	return TRUE;
 }
 

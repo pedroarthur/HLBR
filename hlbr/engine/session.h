@@ -55,7 +55,6 @@ struct tcp_stream_buffer {
 	   LastSeq holds the seq. number of the highest byte stored in the window. */
 	unsigned int		TopSeq;
 	unsigned int		LastSeq;
-	unsigned char		RuleBits[MAX_RULES/8];
 };
 #endif
 

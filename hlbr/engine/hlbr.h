@@ -84,9 +84,12 @@ typedef struct packet_rec {
 	int			NumDecoderData;
 	int			BeginData;	/*first byte not decoded yet*/
 	
-	char			PassRawPacket; /*true if we pass this one as is*/	
+	/** true if we pass this one as is (route it), false to be dropped */
+	char			PassRawPacket; 
 	int			SaveCount;
-	char			Status;     /*where the packet is in the processing loop*/
+
+	/** where the packet is in the processing loop (see packet.h) */
+	char			Status;
 	
 	pthread_mutex_t		Mutex;
 	int			LockID;	
