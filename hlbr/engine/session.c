@@ -2,6 +2,7 @@
 #include "hlbrlib.h"
 #include "../decoders/decode_ip.h"
 #include "../decoders/decode_tcp.h"
+#include "../packets/packet.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -23,6 +24,11 @@ PP*			TimeTail;
 //#define DEBUG
 //#define DEBUG_TIME
 //#define DEBUG_DIRECTION
+
+
+int RemountTCPStream(int, PP*);
+int TCPStream_Unqueue(PP*);
+
 
 /**
  * Prints a one-line summary of the packet
@@ -744,7 +750,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	}	
 	Port = FindPortPair(Port1, Port2, Pair, Globals.Packets[PacketSlot].tv.tv_sec);
 	if (!Port) {
-		PrintPacketSummary(stderr, PacketSlot, IData, TData, false);
+		PrintPacketSummary(stderr, PacketSlot, IData, TData, FALSE);
 		fprintf(stderr, "Failed to assign session port\n");
 		return FALSE;
 	}
@@ -1023,7 +1029,6 @@ int InitSession(){
 }
 
 
-#ifdef TCP_STREAM
 
 /**
  * Remounts packets in a TCP stream and check them together for signatures.
@@ -1034,12 +1039,12 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 	TCPData*	TData;
 	int		i;
 
-	if (Port->Seqs->num_pieces == TCP_QUEUE_SIZE)
+	if (Port->Seqs.num_pieces == TCP_QUEUE_SIZE)
 		return FALSE;
 
 	GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData);
 	if (!TData) {
- 		PrintPacketSummary(stderr, PacketSlot, NULL, TData, false);
+ 		PrintPacketSummary(stderr, PacketSlot, NULL, TData, FALSE);
 		PRINTERROR("This was supposed to be a TCP packet\n");
 		return FALSE;
 	}
@@ -1047,7 +1052,7 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 	// new packet fits exactly after first bunch of packets in buffer
 	if (TData->Header->seq == Port->Seqs.LastSeq + 1) {
 		if (Port->Seqs.LastSeq - Port->Seqs.TopSeq + 1 >= TCP_CACHE_SIZE) {
-			PRINTPKTERROR(NULL, NULL, TData, false);
+			PRINTPKTERROR(-1, NULL, TData, FALSE);
 			PRINTERROR("out of space in TCP cache\n");
 			return FALSE;
 		}
@@ -1063,7 +1068,7 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		// move other pieces[] forward, to make space
 		if (i < TCP_QUEUE_SIZE - 1)
 			memmove(&(Port->Seqs.pieces[i+1]), &(Port->Seqs.pieces[i]), 
-				size_of(struct tcp_piece)*(TCP_QUEUE_SIZE-i));
+				sizeof(struct tcp_stream_piece)*(TCP_QUEUE_SIZE-i));
 		Port->Seqs.pieces[i].piece_start = TData->Header->seq;
 		Port->Seqs.pieces[i].piece_end = TData->Header->seq + TData->DataLen-1;
 		Port->Seqs.pieces[i].PacketSlot = PacketSlot;
@@ -1107,13 +1112,13 @@ int TCPStream_Unqueue(PP* Port)
 		return FALSE;
 
 	// Even if there's something to unqueue, pieces[] can't hold it
-	if (Port->Seqs.queue_size = TCP_QUEUE_SIZE)
+	if (Port->Seqs.queue_size == TCP_QUEUE_SIZE)
 		return FALSE;
 
 	for (i = 0; i < Port->Seqs.queue_size; i++) {
 		GetDataByID(Port->Seqs.queue[i], TCPDecoderID, (void**)&TData);
 		if (!TData) {
-			PrintPacketSummary(stderr, Port->Seqs.queue[i], NULL, TData, false);
+			PrintPacketSummary(stderr, Port->Seqs.queue[i], NULL, TData, FALSE);
 			PRINTERROR("This was supposed to be a TCP packet\n");
 			return FALSE;
 		}
@@ -1179,7 +1184,7 @@ int TCPStream_Unqueue(PP* Port)
 			 (Port->Seqs.TopSeq < TData->Header->seq + TData->DataLen - 1)) ) {
 			// packet boundaries overwrite! drop the packet
 			// (taken from action_drop.c)
-			Globals.Packets[Port->Seqs.queue[i].PacketSlot].PassRawPacket = FALSE;
+			Globals.Packets[(struct tcp_stream_piece)(Port->Seqs.queue[i]).PacketSlot].PassRawPacket = FALSE;
 			if (Globals.Packets[Port->Seqs.queue[i].PacketSlot].Status == PACKET_STATUS_BLOCKED)
 				TCPStream_unblock(Port->Seqs.queue[i].PacketSlot, TRUE);
 			return FALSE; // should really continue trying other packets in queue, but array can change after calling TCPStream_unblock
@@ -1269,5 +1274,3 @@ int TCPRemount_unblock(int PacketSlot, int thispacket)
 
 	return TRUE;
 }
-
-#endif	// TCP_STREAM

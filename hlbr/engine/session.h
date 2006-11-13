@@ -40,6 +40,7 @@ struct tcp_stream_piece {
 	unsigned int		piece_end;
 	int			PacketSlot;
 };
+
 /**
  * TCP stream buffer
  * Buffer to hold the last packets received in a TCP session, to make it 

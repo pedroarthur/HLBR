@@ -360,7 +360,6 @@ int AddPacketToPending(int PacketSlot)
 	return TRUE;
 }
 
-#ifdef TCP_STREAM
 
 /**
  * Marks a packet as 'blocked' (thread safe)
@@ -377,7 +376,6 @@ int BlockPacket(int PacketSlot)
 	return TRUE;
 }
 
-#endif	// TCP_STREAM
 
 /**
  * Pops a packet off the pending queue

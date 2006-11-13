@@ -56,5 +56,6 @@ int StartInterfaceThread(int InterfaceID);
 int RuleIsActive(int PacketSlot, int RuleNum);
 int SetRuleInactive(int PacketSlot, int RuleNum);
 int GetInterfaceByName(char* Name);
+int BlockPacket(int PacketSlot);	// used by TCP session remounting
 
 #endif
