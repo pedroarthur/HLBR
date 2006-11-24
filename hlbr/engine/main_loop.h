@@ -5,5 +5,6 @@
 #include "hlbr.h"
 
 int MainLoop();
+int RouteAndSend(int);
 
 #endif

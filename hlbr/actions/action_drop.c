@@ -1,4 +1,6 @@
 #include "action_drop.h"
+#include "../packets/packet.h"
+#include "../engine/session.h"
 #include <stdio.h>
 
 //#define DEBUG
@@ -22,7 +24,7 @@ int DropAction(int RuleNum, int PacketSlot, void* Data){
 	p=&Globals.Packets[PacketSlot];
 	p->PassRawPacket=FALSE;
 	if (p->Status == PACKET_STATUS_BLOCKED)
-		TCPStream_unblock(PacketSlot, TRUE);
+		TCPRemount_unblock(PacketSlot, TRUE);
 	
 	return TRUE;
 }

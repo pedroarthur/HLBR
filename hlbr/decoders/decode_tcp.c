@@ -1,6 +1,8 @@
 #include "decode_tcp.h"
 #include "decode_ip.h"
 #include "../packets/packet.h"
+#include "../engine/hlbrlib.h"
+#include "../engine/session.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <netinet/in.h>

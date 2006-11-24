@@ -5,6 +5,7 @@
 #include "../decoders/decode_tcp.h"
 #include "../packets/packet.h"
 #include "../engine/jtree.h"
+#include "../engine/hlbrlib.h"
 #include <arpa/inet.h>
 
 extern GlobalVars	Globals;
@@ -55,13 +56,7 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes)
 	int			i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestTCPContent\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Content\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -94,21 +89,21 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes)
 }
 
 
-#ifdef TCP_STREAM
 /**
  * Apply the Test TCP Content, for a TCP stream buffer
  */
-int TestTCPContent_Stream(struct port_pair* PP, TestNode* Nodes)
+int TestTCPContent_Stream(int PacketSlot, TestNode* Nodes)
 {
 	PacketRec*	p;
 
 	if (!Nodes) return FALSE;
+
+	p=&Globals.Packets[PacketSlot];
 	
-	MatchStrings(&TCPContentTree, PP->Seqs.RuleBits, PP->Seqs.buffer, PP->Seqs.LastSeq - PP->Seqs.TopSeq + 1);
+	MatchStrings(&TCPContentTree, p->RuleBits, p->Stream->Seqs.buffer, p->Stream->Seqs.LastSeq - p->Stream->Seqs.TopSeq + 1);
 	
 	return TRUE;
 }
-#endif	// TCP_STREAM
 
 
 /******************************************

@@ -1,5 +1,6 @@
 #include "session.h"
 #include "hlbrlib.h"
+#include "main_loop.h"
 #include "../decoders/decode_ip.h"
 #include "../decoders/decode_tcp.h"
 #include "../packets/packet.h"
@@ -1078,12 +1079,7 @@ int RemountTCPStream(int PacketSlot, PP* Port)
 		// try to add queued packets to the buffer
 		// try multiple times, because after a packet is popped out,
 		// maybe there's room for another one
-		//roda_testes_no_buffer();
-		//TODO! delete first queue entry, unblocking the packet;
-		while (TCPStream_Unqueue(Port)) {
-			//roda_testes_no_buffer();
-			//delete first entry again & unblock the packet;
-		}
+		while (TCPStream_Unqueue(Port));
 	} else {
 		// This packet doesn't follow the previous one. So we queue it
 		DBG( PRINTPKTERROR(NULL, NULL, TData, false) );
@@ -1184,9 +1180,9 @@ int TCPStream_Unqueue(PP* Port)
 			 (Port->Seqs.TopSeq < TData->Header->seq + TData->DataLen - 1)) ) {
 			// packet boundaries overwrite! drop the packet
 			// (taken from action_drop.c)
-			Globals.Packets[(struct tcp_stream_piece)(Port->Seqs.queue[i]).PacketSlot].PassRawPacket = FALSE;
-			if (Globals.Packets[Port->Seqs.queue[i].PacketSlot].Status == PACKET_STATUS_BLOCKED)
-				TCPStream_unblock(Port->Seqs.queue[i].PacketSlot, TRUE);
+			Globals.Packets[Port->Seqs.queue[i]].PassRawPacket = FALSE;
+			if (Globals.Packets[Port->Seqs.queue[i]].Status == PACKET_STATUS_BLOCKED)
+				TCPRemount_unblock(Port->Seqs.queue[i], TRUE);
 			return FALSE; // should really continue trying other packets in queue, but array can change after calling TCPStream_unblock
 		}
 	}
@@ -1210,7 +1206,7 @@ int TCPRemount_unblock(int PacketSlot, int thispacket)
 	PacketRec*			p;
 	struct tcp_stream_buffer*	seq;
 	int				nseq;
-	unsigned char			i, piece;
+	signed char			i, piece;
 	int				up;
 	TCPData*			TData;
 
@@ -1223,18 +1219,14 @@ int TCPRemount_unblock(int PacketSlot, int thispacket)
 		DBG( PRINTERROR1("Packet %d's Stream pointer is null!\n", PacketSlot) );
 		return FALSE;
 	}
-	if (!(p->Stream->Seqs)) {
-		DBG( PRINTERROR1("Packet %d's Stream doesn't have a Seqs structure!\n", PacketSlot) );
-		return FALSE;
-	}
-	seq = p->Stream->Seqs;
-	if (seq.num_pieces == 0) {
+	seq = &(p->Stream->Seqs);
+	if (seq->num_pieces == 0) {
 		DBG( PRINTERROR1("Packet %d's stream doesn't have any pieces to be unblocked\n", PacketSlot) );
 		return FALSE;
 	}
 	/* if there's only one piece in the buffer, it can be unblocked only
 	   if it's the last packet in the TCP session */
-	if (seq.num_pieces == 1) {
+	if (seq->num_pieces == 1) {
 		GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData);
 		if (TData)
 			if (!TData->Header->fin && !TData->Header->rst) {
@@ -1243,33 +1235,33 @@ int TCPRemount_unblock(int PacketSlot, int thispacket)
 			}
 	}
 	
-	nseq = seq.piece[0].piece_start + 1;
+	nseq = seq->pieces[0].piece_start + 1;
 	piece = -1;
-	for (i = 0; i < seq.num_pieces; i++)
-		if (seq.piece[i].piece_start < nseq) {
-			nseq = seq.piece[i].piece_start;
+	for (i = 0; i < seq->num_pieces; i++)
+		if (seq->pieces[i].piece_start < nseq) {
+			nseq = seq->pieces[i].piece_start;
 			piece = i;
 		}
 	if (piece > -1) {
-		up = seq.piece[piece].PacketSlot;
+		up = seq->pieces[piece].PacketSlot;
 		// if this piece's PacketSlot is valid, finally route this poor packet
-		if (seq.piece[piece].PacketSlot > -1) {
-			Globals.Packets[seq.piece[piece].PacketSlot].Status = PACKET_STATUS_IDLE;
-			RouteAndSend(seq.piece[piece].PacketSlot);
-			ReturnEmptyPacket(seq.piece[piece].PacketSlot);
+		if (seq->pieces[piece].PacketSlot > -1) {
+			Globals.Packets[seq->pieces[piece].PacketSlot].Status = PACKET_STATUS_IDLE;
+			RouteAndSend(seq->pieces[piece].PacketSlot);
+			ReturnEmptyPacket(seq->pieces[piece].PacketSlot);
 		}
 		// remove piece from pieces array
 		if (piece < TCP_QUEUE_SIZE)
-			memmove(&(seq.piece[piece]), 
-				&(seq.piece[piece+1]),
-				(seq.num_pieces - piece - 1) * sizeof(struct tcp_stream_piece));
-		seq.num_pieces--;
+			memmove(&(seq->pieces[piece]), 
+				&(seq->pieces[piece+1]),
+				(seq->num_pieces - piece - 1) * sizeof(struct tcp_stream_piece));
+		seq->num_pieces--;
 	}
 
 	if ((thispacket) && (PacketSlot != up)) {
-		for (i = 0; i < seq.num_pieces; i++)
-			if (seq.piece[i].PacketSlot == PacketSlot)
-				seq.piece[i].PacketSlot = -1;
+		for (i = 0; i < seq->num_pieces; i++)
+			if (seq->pieces[i].PacketSlot == PacketSlot)
+				seq->pieces[i].PacketSlot = -1;
 	}
 
 	return TRUE;

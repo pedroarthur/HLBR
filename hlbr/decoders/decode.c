@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../engine/bits.h"
+#include "../engine/hlbrlib.h"
 #include "../packets/packet.h"
 #ifdef _SOLARIS_
 #include <strings.h>

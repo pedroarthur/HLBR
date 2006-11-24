@@ -34,7 +34,6 @@ struct ip_bin;
 #define TCP_QUEUE_SIZE		16	// max number of TCP packets to 'queue'
 
 
-#ifdef TCP_STREAM
 struct tcp_stream_piece {
 	unsigned int		piece_start;	// seq number
 	unsigned int		piece_end;
@@ -57,7 +56,7 @@ struct tcp_stream_buffer {
 	unsigned int		TopSeq;
 	unsigned int		LastSeq;
 };
-#endif
+
 
 /**
  * Struct that represents the actual session.
@@ -96,9 +95,7 @@ typedef struct port_pair{
 	/* Points to the other corresponding port_pair structure (one is srv->clnt,
 	   the other is clnt->srv) */
 	struct port_pair*	TheOtherPortPair;
-#ifdef TCP_STREAM
 	struct tcp_stream_buffer	Seqs;
-#endif
 } PP;
 
 /**
@@ -134,5 +131,8 @@ typedef struct session_func{
 int InitSession();
 int AddSessionCreateHandler(void (*Func) (PP* Port, void* Data), void* Data);
 int AddSessionDestroyHandler(void (*Func) (PP* Port, void* Data), void* Data);
+int AssignSessionTCP(int, void*);
+int TCPRemount_unblock(int, int);
+
 
 #endif

@@ -135,7 +135,7 @@ typedef struct test_rec{
 	int (*FinishedSetup)();
 	int (*TestFunc)(int PacketSlot, TestNode* Nodes);
 #ifdef TCP_STREAM
-	int (*TestStreamFunc)(struct port_pair* PP, TestNode* Nodes);
+	int (*TestStreamFunc)(int PacketSlot, TestNode* Nodes);
 #endif
 } TestRec;
 
