@@ -2,12 +2,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-
-#if 0
-#define DEBUG
-#define DEBUGPATH 1
-#endif
-
+#include "hlbr.h"
 #include "hlbrlib.h"
 
 /*********************/ 

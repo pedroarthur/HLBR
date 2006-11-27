@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../engine/bits.h"
-#include "../engine/hlbrlib.h"
+#include "../engine/hlbr.h"
 #include "../packets/packet.h"
 #ifdef _SOLARIS_
 #include <strings.h>
@@ -23,7 +23,7 @@
 
 extern GlobalVars	Globals;
 
-//#define DEBUG
+#define DEBUG
 
 /**
  * Given a Decoder's name, return its ID

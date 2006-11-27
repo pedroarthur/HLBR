@@ -20,56 +20,60 @@
 //#define DEBUGESCAPE
 
 #ifdef DEBUGFINAL
-int		node_count=0;
+int	node_count=0;
 #endif
 
-int calloc_count=0;
-int free_count=0;
+#ifdef DEBUGESCAPE
+#define DBGESCAPE(a)	DBG(a)
+#else
+#define DBGESCAPE(a)
+#endif
+
+
+int calloc_count = 0;
+int free_count = 0;
 int FreeNode(JNode* n);
 
 extern GlobalVars	Globals;
 
-/**************************************
-* Set up the tree
-* return NULL on error
-**************************************/
-int InitJTree(JTree* j, char NoCase){
-	
-#ifdef DEBUGPATH
-	printf("In InitJTree\n");
-#endif	
+/**
+ * Set up the tree.
+ * @return NULL on error
+ */
+int InitJTree(JTree* j, char NoCase)
+{
+	DEBUGPATH;
 
 	bzero(j, sizeof(JTree));
 	
-	j->NoCase=NoCase;
+	j->NoCase = NoCase;
 	
 	return TRUE;
 }
 
-/******************************************
-* Add a string to the tree
-******************************************/
-int AddStringJTreeReal(JTree* j, unsigned char* String, int SLen, int RuleID){
+/**
+ * Add a string to the tree.
+ */
+int AddStringJTreeReal(JTree* j, unsigned char* String, int SLen, int RuleID)
+{
 	JNode*	node;
 	int		i;
 
-#ifdef DEBUGPATH
-	printf("In AddStringJTree\n");
-#endif
+	DEBUGPATH;
 
 	if (!j) return FALSE;
 	if (!String) return FALSE;
 	if (SLen>MAX_STRING_LEN) return FALSE;
 
-	j->IsFinalized=FALSE;
+	j->IsFinalized = FALSE;
 	
-	/*if this is the first string in the tree...*/
-	if (!j->Head){
+	/* if this is the first string in the tree... */
+	if (!j->Head) {
 #ifdef DEBUGBUILD
 		printf("First String in tree\n");
 #endif	
-		j->Head=calloc(sizeof(JNode),1);
-		if (!j->Head){
+		j->Head = calloc(sizeof(JNode),1);
+		if (!j->Head) {
 			printf("Out of memory\n");
 			return FALSE;
 		}
@@ -78,16 +82,16 @@ int AddStringJTreeReal(JTree* j, unsigned char* String, int SLen, int RuleID){
 #endif		
 	}
 	
-	node=j->Head;
+	node = j->Head;
 	
-	for (i=0;i<SLen;i++){
-		if (!node->Bytes[String[i]]){
+	for (i=0;i<SLen;i++) {
+		if (!node->Bytes[String[i]]) {
 #ifdef DEBUGBUILD
 			printf("Adding Node for byte %c\n",String[i]);
 #endif			
-			node->Bytes[String[i]]=calloc(sizeof(JNode),1);
+			node->Bytes[String[i]] = calloc(sizeof(JNode),1);
 			calloc_count++;
-			if (!node->Bytes[String[i]]){
+			if (!node->Bytes[String[i]]) {
 				printf("Out of memory\n");
 				return FALSE;
 			}
@@ -96,134 +100,112 @@ int AddStringJTreeReal(JTree* j, unsigned char* String, int SLen, int RuleID){
 #endif			
 			
 			/*in a nocase tree, point both cases to the same node*/
-			if (j->NoCase){
+			if (j->NoCase) {
 				node->Bytes[tolower(String[i])]=node->Bytes[String[i]];
 				node->Bytes[toupper(String[i])]=node->Bytes[String[i]];
 			}
 			
 			node->Count++;
 		}
-		node=node->Bytes[String[i]];
-		node->temp=String[i];
+		node = node->Bytes[String[i]];
+		node->temp = String[i];
 	}
 	
-	node->IsTerminal=TRUE;
+	node->IsTerminal = TRUE;
 	
 	/*set the bit in the mask*/
 	SetBit(j->DependMask, Globals.NumRules, RuleID, 1);
 	//SetBit(node->TerminalMask, Globals.NumRules, RuleID, 1);
-	node->TerminalRuleID=RuleID;
-
+	node->TerminalRuleID = RuleID;
 	
 	return TRUE;
 }
 
-/******************************************
-* Add a string to the tree
-* Decode binary sections
-******************************************/
-int AddStringJTree(JTree* j, unsigned char* String, int SLen, int RuleID){
+/**
+ * Add a string to the tree. Decode binary sections (defined between ||).
+ */
+int AddStringJTree(JTree* j, unsigned char* String, int SLen, int RuleID)
+{
 	unsigned char	Buff[MAX_STRING_LEN+1];
-	int				BuffLen;
-	int				i;
-	int				IsBinary;
+	int		BuffLen;
+	int		i;
+	int		IsBinary;
 	
-	char			BinBuff[6];
-	int				BinChar;
+	char		BinBuff[6];
+	int		BinChar;
 	
-#ifdef DEBUGPATH
-	printf("In AddStringJTree\n");
-#endif
+	DEBUGPATH;
 
-	/*apply the escape decoding*/
-	IsBinary=FALSE;
-	BuffLen=0;
-	for (i=0;i<SLen;i++){
-		if (String[i]==0x00) break;
-		if (String[i]=='|'){
-			if (String[i+1]=='|'){
-#ifdef DEBUGESCAPE
-				printf("Literal Pipe\n");
-#endif			
+	/* apply the escape decoding */
+	IsBinary = FALSE;
+	BuffLen = 0;
+	for (i=0;i<SLen;i++) {
+		if (String[i] == 0x00) break;
+		if (String[i] == '|') {
+			if (String[i+1] == '|') {
+				DBGESCAPE(PRINTERROR("Literal Pipe\n"));
 				Buff[BuffLen]='|';
 				BuffLen++;
-			}else{
-				if (IsBinary){
-#ifdef DEBUGESCAPE
-					printf("Switching to text mode\n");
-#endif
-					IsBinary=FALSE;
-				}else{
-#ifdef DEBUGESCAPE
-					printf("Switching to binary mode\n");
-#endif					
-					IsBinary=TRUE;
+			} else {
+				if (IsBinary) {
+					DBGESCAPE(PRINTERROR("Switching to text mode\n"));
+					IsBinary = FALSE;
+				} else {
+					DBGESCAPE(PRINTERROR("Switching to binary mode\n"));
+					IsBinary = TRUE;
 				}
 			}
-		}else{
-			if (IsBinary){
-				while (String[i]==' ') i++;
-				if (String[i]==0x00){
-					printf("Unexpected end of string. Expected |\n");
+		} else {
+			if (IsBinary) {
+				while (String[i] == ' ') i++;
+				if (String[i] == 0x00) {
+					PRINTERROR("Unexpected end of string. Expected |\n");
 					return FALSE;
 				}
 				
-				BinBuff[0]=String[i];
-				BinBuff[1]=String[i+1];
-				BinBuff[2]=0x00;
+				BinBuff[0] = String[i];
+				BinBuff[1] = String[i+1];
+				BinBuff[2] = 0x00;
 				
-				if ( (BinBuff[0]=='|') || (BinBuff[1]=='|')){
-					printf("Parse Error \"%s\"\n",BinBuff);
+				if ( (BinBuff[0] == '|') || (BinBuff[1] == '|')) {
+					PRINTERROR1("Parse Error \"%s\"\n", BinBuff);
 					return FALSE;
 				}
 				
-								
-				BinChar=strtoul(BinBuff, NULL, 16);
+				BinChar = strtoul(BinBuff, NULL, 16);
 				
-#ifdef DEBUGESCAPE
-				printf("Adding binary character %02X\n",BinChar);
-#endif				
+				DBGESCAPE(PRINTERROR1("Adding binary character %02X\n", BinChar));
 				Buff[BuffLen]=BinChar;
 
 				BuffLen++;
 				i++;
-			}else{
-#ifdef DEBUGESCAPE
-				printf("Adding literal character %c\n",String[i]);
-#endif					
-				Buff[BuffLen]=String[i];
+			} else {
+				DBGESCAPE(PRINTERROR("Adding literal character %c\n",String[i]));
+				Buff[BuffLen] = String[i];
 				BuffLen++;
 			}
 		}
 	}
 
-#ifdef DEBUGESCAPE
-	printf("Buff is %s\n",Buff);
-	printf("BuffLen is %i\n", BuffLen);
-#endif						
+	DBGESCAPE(PRINTERROR1("Buff is %s\n",Buff));
+	DBGESCAPE(PRINTERROR1("BuffLen is %i\n", BuffLen));
 	
-	/*really add it*/
+	/* really add it */
 	return AddStringJTreeReal(j, Buff, BuffLen, RuleID);
 }
 
 
-/******************************************
-* Find the optimal node to continue from
-* for the given string
-******************************************/
-JNode* FindOptimalNode(JTree* j, JNode*	n, unsigned char*	String, int SLen){
-	int				i,k;
+/**
+ * Find the optimal node (jtree) to continue from for the given string.
+ */
+JNode* FindOptimalNode(JTree* j, JNode*	n, unsigned char* String, int SLen)
+{
+	int		i,k;
 	unsigned char*	s;
-	JNode*			optimal;
-	JNode*			node;
+	JNode*		optimal;
+	JNode*		node;
 	
-#ifdef DEBUGPATH
-	printf("In FindOptimalNode\n");
-#endif
-
-#ifdef DEBUGFINAL
-	printf("Finding optimial node for %s\n",String);
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUGBUILD
 	printf("(%s)->",String);
@@ -302,9 +284,7 @@ int ConvertNode(JNode* n, JNode** Parent, int NoCase){
 	static int		SCount=0;
 	static int		LCount=0;
 	
-#ifdef DEBUGPATH
-	printf("In CompressJTree\n");
-#endif
+	DEBUGPATH;
 
 	printf("This node has %i subnodes \"%c\"\n",n->Count,n->temp);
 
@@ -379,9 +359,7 @@ int FreeNode(JNode* n){
 ******************************************/
 int CompressJTree(JTree* j){
 
-#ifdef DEBUGPATH
-	printf("In CompressJTree\n");
-#endif
+	DEBUGPATH;
 
 	return ConvertNode(j->Head, NULL, j->NoCase);
 }
@@ -392,9 +370,7 @@ int CompressJTree(JTree* j){
 *******************************************/
 int FinalizeJTree(JTree* j){
 	
-#ifdef DEBUGPATH
-	printf("In FinalizeJTree\n");
-#endif
+	DEBUGPATH;
 
 	if (!j) return FALSE;
 	if (!j->Head){
@@ -428,9 +404,7 @@ int MatchStrings(JTree* j, unsigned char* PacketRuleBits, unsigned char* String,
 	int				i;
 	unsigned char	LocalDepend[MAX_RULES/8];
 	
-#ifdef DEBUGPATH
-	printf("In MatchStrings\n");
-#endif
+	DEBUGPATH;
 
 	memcpy(LocalDepend, j->DependMask, MAX_RULES/8);
 

@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-//#define DEBUGPATH
+#define DEBUGPATH ;
 #define DEBUG
 #define DEBUGLOCKS
 
@@ -169,9 +169,7 @@ int ParseArgs(int argc, char **argv)
 	int 	c;
 	char* 	l;
 	
-#ifdef DEBUGPATH
-	printf("In ParseArgs\n");
-#endif
+	DEBUGPATH;
 
 #define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhvL:"
 
@@ -314,15 +312,14 @@ int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
 #endif
 }
 
-/*************************************
-* Handle the signals
-*************************************/
-void HandleSignal(int signal){
-#ifdef DEBUGPATH
-	printf("In HandleSignal\n");
-#endif
+/**
+ * Handle the signals (POSIX signals)
+ */
+void HandleSignal(int signal)
+{
+	DEBUGPATH;
 
-	switch (signal){
+	switch (signal) {
 	case SIGINT:
 	case SIGQUIT:
 	case SIGTERM:
@@ -433,9 +430,8 @@ int main(int argc, char**argv){
 ***************************************/
 int GetListByName(char* Name){
 	int	i;
-#ifdef DEBUGPATH
-	printf("In GetListByName\n");
-#endif
+
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumLists;i++){
 		if (strcasecmp(Globals.Lists[i].Name, Name)==0) return i;
@@ -445,49 +441,48 @@ int GetListByName(char* Name){
 
 }
 
-/*****************************************
-* Add a function to be called during
-* shutdown
-****************************************/
-int AddShutdownHandler(int (*func)(void* data), void* data){
+/**
+ * Add a function to be called during shutdown.
+ * Defines a callback function.
+ */
+int AddShutdownHandler(int (*func)(void* data), void* data)
+{
 	FuncList*	f;
 	FuncList*	this;
 	
-#ifdef DEBUGPATH
-	printf("In AddShutdownHandler\n");
-#endif
+	DEBUGPATH;
 
-	f=calloc(sizeof(FuncList),1);
-	f->Func=func;
-	f->Data=data;
+	f = calloc(sizeof(FuncList),1);
+	f->Func = func;
+	f->Data = data;
 
-	if (!Globals.ShutdownFuncs){
-		Globals.ShutdownFuncs=f;
+	if (!Globals.ShutdownFuncs) {
+		Globals.ShutdownFuncs = f;
 		return TRUE;
 	}else{
-		this=Globals.ShutdownFuncs;
-		while (this->Next) this=this->Next;
-		this->Next=f;
+		this = Globals.ShutdownFuncs;
+		while (this->Next) this = this->Next;
+		this->Next = f;
 		return TRUE;
 	}
 }
 
-/****************************************
-* Let everything shutdown gracefully
-****************************************/
-int CallShutdownHandlers(){
+/**
+ * Let everything shutdown gracefully.
+ * Calls callback functions defined for shutdown.
+ */
+int CallShutdownHandlers()
+{
 	FuncList*	this;
 	
-#ifdef DEBUGPATH
-	printf("In CallShutdownHandlers\n");
-#endif
+	DEBUGPATH;
 
-	this=Globals.ShutdownFuncs;
-	while (this){
-		if (!this->Func(this->Data)){
+	this = Globals.ShutdownFuncs;
+	while (this) {
+		if (!this->Func(this->Data)) {
 			printf("Shutdown handler failed\n");
 		}
-		this=this->Next;
+		this = this->Next;
 	}
 	
 	return TRUE;

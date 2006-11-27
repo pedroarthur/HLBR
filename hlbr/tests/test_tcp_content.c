@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../engine/hlbr.h"
 #include "../decoders/decode_tcp.h"
 #include "../packets/packet.h"
 #include "../engine/jtree.h"
-#include "../engine/hlbrlib.h"
 #include <arpa/inet.h>
 
 extern GlobalVars	Globals;
@@ -17,8 +17,8 @@ typedef struct tcp_content_data{
 //#define DEBUG
 //#define DEBUGMATCH
 
-int 			TCPDecoderID;
-JTree			TCPContentTree;
+int	TCPDecoderID;
+JTree	TCPContentTree;
 
 #ifdef OLD_MATCH
 /********************************************
@@ -27,9 +27,8 @@ JTree			TCPContentTree;
 int MatchString(char* Candidate, int CLen, char* Packet, int PLen){
 	int 	i;
 	int		j;
-#ifdef DEBUGPATH
-	printf("In MatchString\n");
-#endif
+
+	DEBUGPATH;
 
 	if (CLen<PLen) return FALSE;
 	
@@ -112,13 +111,7 @@ int TestTCPContent_Stream(int PacketSlot, TestNode* Nodes)
 int TCPContentAddNode(int TestID, int RuleID, char* Args){
 	TCPContentData*		data;
 
-#ifdef DEBUGPATH
-	printf("In TCPContentAddNode\n");
-#endif
-
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DEBUGPATH;
 
 	data=calloc(sizeof(TCPContentData),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, Args);
@@ -133,26 +126,24 @@ int TCPContentAddNode(int TestID, int RuleID, char* Args){
 	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
-/****************************************
-* Called when we're all done adding rules
-****************************************/
-int TestTCPContentFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestTCPContentFinishedSetup\n");
-#endif
+/**
+ * Called when we're all done adding TCP Content rules
+ */
+int TestTCPContentFinishedSetup()
+{
+	DEBUGPATH;
 
 	return FinalizeJTree(&TCPContentTree);
 }
 
-/****************************************
-* Set up the test of the TCP Content
-*****************************************/
-int InitTestTCPContent(){
+/**
+ * Set up the test of the TCP Content
+ */
+int InitTestTCPContent()
+{
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPContent\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&TCPContentTree, FALSE);
 

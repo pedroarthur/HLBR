@@ -1,3 +1,4 @@
+// TODO: add a shutdown handler that frees all allocated memory for sessions
 #include "session.h"
 #include "hlbrlib.h"
 #include "main_loop.h"
@@ -27,7 +28,7 @@ PP*			TimeTail;
 //#define DEBUG_DIRECTION
 
 
-int RemountTCPStream(int, PP*);
+int RemountTCPStream(int, PP*, TCPData*);
 int TCPStream_Unqueue(PP*);
 
 
@@ -37,6 +38,8 @@ int TCPStream_Unqueue(PP*);
  */
 void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TData, char newline)
 {
+	DEBUGPATH;
+
 	if (!IData) {
 		fprintf(stream, "P:%u -%c", PacketSlot,
 		       (newline ? '\n' : ' '));
@@ -62,9 +65,8 @@ void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TD
 *****************************************/
 int AddSessionCreateHandler(void (*Func) (PP* Port, void* Data), void* Data){
 	SFunc*	F;
-#ifdef DEBUGPATH
-	printf("In AddSessionCreateHandler\n");
-#endif
+
+	DEBUGPATH;
 
 	if (!CreateFuncs){
 		CreateFuncs=calloc(sizeof(SFunc),1);
@@ -92,9 +94,7 @@ int AddSessionCreateHandler(void (*Func) (PP* Port, void* Data), void* Data){
 int AddSessionDestroyHandler(void (*Func) (PP* Port, void* Data), void* Data){
 	SFunc*	F;
 	
-#ifdef DEBUGPATH
-	printf("In AddSessionDestroyHandler\n");
-#endif
+	DEBUGPATH;
 
 	if (!DestroyFuncs){
 		DestroyFuncs=calloc(sizeof(SFunc),1);
@@ -115,20 +115,22 @@ int AddSessionDestroyHandler(void (*Func) (PP* Port, void* Data), void* Data){
 	return TRUE;
 }
 
-/***************************************
-* Tell everyone a new session started
-***************************************/
-void CallCreateFuncs(PP* Port){
+/**
+ * Tell everyone a new session started.
+ * Call the defined callback functions, alerting that a new TCP session was
+ * created.
+ */
+void CallCreateFuncs(PP* Port)
+{
 	SFunc*	F;
-#ifdef DEBUGPATH
-	printf("In CallCreateFuncs\n");
-#endif
 
-	F=CreateFuncs;
+	DEBUGPATH;
+
+	F = CreateFuncs;
 	
-	while (F){
+	while (F) {
 		F->Func(Port, F->Data);
-		F=F->Next;
+		F = F->Next;
 	}
 }
 
@@ -137,9 +139,8 @@ void CallCreateFuncs(PP* Port){
 ***************************************/
 void CallDestroyFuncs(PP* Port){
 	SFunc*	F;
-#ifdef DEBUGPATH
-	printf("In CallDestroyFuncs\n");
-#endif
+
+	DEBUGPATH;
 
 	F=DestroyFuncs;
 	
@@ -156,9 +157,7 @@ unsigned short GetHash(unsigned int ip1, unsigned int ip2){
 	unsigned short	hash;
 	unsigned short	v1;
 	
-#ifdef DEBUGPATH
-	printf("In GetHash\n");
-#endif
+	DEBUGPATH;
 
 	hash=ip1/65536;
 	v1=(ip1 & 0x0000FFFF);
@@ -184,9 +183,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 	int		i;
 	unsigned int	Top, Bottom, Middle;
 	
-#ifdef DEBUGPATH
-	printf("In FindIPPair\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("%s-",inet_ntoa(*(struct in_addr*)&IP1));
@@ -301,10 +298,9 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 /************************************
 * Add this to the time list
 ************************************/
-int AddToTime(PP* Port){
-#ifdef DEBUGPATH
-	printf("In AddToTime\n");
-#endif
+int AddToTime(PP* Port)
+{
+	DEBUGPATH;
 
 	if (!TimeHead){
 		TimeHead=Port;
@@ -336,11 +332,9 @@ int AddToTime(PP* Port){
 /************************************
 * move this to the end of the list
 ************************************/
-int UpdateTime(PP* Port){
-
-#ifdef DEBUGPATH
-	printf("In UpdateTime\n");
-#endif
+int UpdateTime(PP* Port)
+{
+	DEBUGPATH;
 
 	if (TimeTail==Port){
 		/*already the last*/
@@ -384,9 +378,7 @@ int RemovePort(PP* Port){
 	int				Top, Bottom, Middle;
 	unsigned short	Hash;
 	
-#ifdef DEBUGPATH
-	printf("In RemovePort\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG_TIME
 	printf("Freeing port with SessionID %u\n", Port->SessionID);
@@ -522,9 +514,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	PP*				Port;
 	int				Top, Bottom, Middle;
 	
-#ifdef DEBUGPATH
-	printf("In FindPortPair\n");
-#endif
+	DEBUGPATH;
 
 	if (!Pair->Ports){
 #ifdef DEBUG
@@ -687,9 +677,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 int TimeoutSessions(long int Now){
 	PP*	TimeNext;
 	
-#ifdef DEBUGPATH
-	printf("In TimeoutSessions\n");
-#endif
+	DEBUGPATH;
 
 	while (TimeHead && 	(TimeHead->LastTime+SESSION_FORCE_TIMEOUT<Now)){
 		TimeNext=TimeHead->TimeNext;	
@@ -756,7 +744,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 		return FALSE;
 	}
 
-	RemountTCPStream(PacketSlot, Port);
+	RemountTCPStream(PacketSlot, Port, TData);
 
 	if ( (Port->ServerState==TCP_STATE_NEW) && (Port->ClientState==TCP_STATE_NEW) ) {
 		/***************************************************/
@@ -1035,20 +1023,21 @@ int InitSession(){
  * Remounts packets in a TCP stream and check them together for signatures.
  * @see tcp_stream_buffer
  */
-int RemountTCPStream(int PacketSlot, PP* Port)
+int RemountTCPStream(int PacketSlot, PP* Port, TCPData* TData)
 {
-	TCPData*	TData;
+//	TCPData*	TData = 0;
 	int		i;
+
+	DEBUGPATH;
 
 	if (Port->Seqs.num_pieces == TCP_QUEUE_SIZE)
 		return FALSE;
 
-	GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData);
-	if (!TData) {
+	/*if (!GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData)) {
  		PrintPacketSummary(stderr, PacketSlot, NULL, TData, FALSE);
 		PRINTERROR("This was supposed to be a TCP packet\n");
 		return FALSE;
-	}
+		}*/
 
 	// new packet fits exactly after first bunch of packets in buffer
 	if (TData->Header->seq == Port->Seqs.LastSeq + 1) {

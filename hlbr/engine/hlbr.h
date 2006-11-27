@@ -7,10 +7,32 @@
 #include <pthread.h>
 #endif
 
-/** Should remount TCP streams to check for signatures splitted in more than one packet */
-#define TCP_STREAM
+/*
+ * Debugging defines
+ */
+#ifdef DEBUG
+#define DBG(a)  a
+#else           /* !DEBUG */
+#define DBG(a)  /* do nothing! */
+#endif          /* DEBUG */
+
+/* must define one of these */
+#define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)
+//#define DEBUGPATH ;
 
 #define DEBUGLOCKS
+
+
+/*
+ * printfs
+ * Use these instead of directly using printf/fprintf
+ */
+#define PRINTERROR(msg)			fprintf(stderr, msg)
+#define PRINTERROR1(msg, p1)		fprintf(stderr, msg, p1)
+#define PRINTERROR2(msg, p1, p2)	fprintf(stderr, msg, p1, p2)
+#define PRINTERROR3(msg, p1, p2, p3)	fprintf(stderr, msg, p1, p2, p3)
+#define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
+
 
 #include "num_list.h"
 #include "session.h"
@@ -134,9 +156,7 @@ typedef struct test_rec{
 	int (*AddNode)(int TestID, int RuleID, char* Args);
 	int (*FinishedSetup)();
 	int (*TestFunc)(int PacketSlot, TestNode* Nodes);
-#ifdef TCP_STREAM
 	int (*TestStreamFunc)(int PacketSlot, TestNode* Nodes);
-#endif
 } TestRec;
 
 typedef struct module_rec{

@@ -16,7 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG
+//#define DEBUG
+#define DEBUGPATH ;
 //#define DEBUGPACKETS
 //#define DEBUG1
 
@@ -112,9 +113,7 @@ int HandleTimers(int Now){
 	int			TimeLeft;
 	TimerRec*	t;
 
-#ifdef DEBUGPATH
-	printf("In HandleTimers\n");
-#endif	
+	DEBUGPATH;
 
 	if ( (NextTimer!=0) && (Now<NextTimer) ) return TRUE;
 		
@@ -239,10 +238,7 @@ void* ProcessPacketThread(void* v)
 {
 	int	PacketSlot;
 	
-#ifdef DEBUGPATH
-	printf("In ProcessPacketThread\n");
-#endif
-	
+	DEBUGPATH;
 
 	while (!Globals.Done){
 		PacketSlot = PopFromPending();		
@@ -268,14 +264,7 @@ int MainLoopPoll(){
 	int				highest;
 	int				PacketSlot;
 	
-#ifdef DEBUGPATH
-	printf("In MainLoopPoll\n");
-#endif
-
-#ifdef DEBUG
-	printf("Starting loop in poll mode\n");
-	printf("--------------------------\n");
-#endif
+	DEBUGPATH;
 
 	Globals.Done=FALSE;
 	while (!Globals.Done){
