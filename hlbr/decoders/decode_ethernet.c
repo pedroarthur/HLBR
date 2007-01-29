@@ -17,15 +17,9 @@ void* DecodeEthernet(int PacketSlot){
 	EthernetData*	data;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeEthernet\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
-
-#ifdef DEBUG
-	printf("Decoding Ethernet Header\n");
-#endif
 
 	/*grab the interface to check the type*/
 	/*The interface record is always the first on the stack*/
@@ -51,9 +45,7 @@ void* DecodeEthernet(int PacketSlot){
 int InitDecoderEthernet(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderEthernet\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("Ethernet"))==DECODER_NONE){
 #ifdef DEBUG

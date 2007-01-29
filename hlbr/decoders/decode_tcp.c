@@ -14,7 +14,7 @@ extern GlobalVars	Globals;
 int	IPDecoderID;
 
 /**
- * Apply the TCP decoding
+ * Apply the TCP decoding.
  */
 void* DecodeTCP(int PacketSlot)
 {
@@ -55,7 +55,7 @@ void* DecodeTCP(int PacketSlot)
 }
 
 /**
- * Set up the TCP decoder
+ * Set up the TCP decoder.
  */
 int InitDecoderTCP()
 {

@@ -1,3 +1,12 @@
+// Debugging defines
+#ifdef DEBUG
+#undef DBG
+#define DBG(a)  a
+#else           /* !DEBUG */
+#undef DBG
+#define DBG(a)  /* do nothing! */
+#endif
+
 #ifndef _HLBR_H_
 #define _HLBR_H_
 
@@ -7,31 +16,34 @@
 #include <pthread.h>
 #endif
 
-/*
- * Debugging defines
- */
-#ifdef DEBUG
-#define DBG(a)  a
-#else           /* !DEBUG */
-#define DBG(a)  /* do nothing! */
-#endif          /* DEBUG */
-
-/* must define one of these */
-#define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)
-//#define DEBUGPATH ;
+// More debugging defines
+// Must define one of these two
+//#define DEBUGPATH printf("In %s() on line %d\n", __FUNCTION__, __LINE__)
+#define DEBUGPATH ;
 
 #define DEBUGLOCKS
 
 
 /*
  * printfs
- * Use these instead of directly using printf/fprintf
+ * Use these instead of directly using printf/fprintf to stdout or stderr
  */
+#define PRINT(msg)			printf(msg)
+#define PRINT1(msg, p1)			printf(msg, p1)
+#define PRINT2(msg, p1, p2)		printf(msg, p1, p2)
+#define PRINT3(msg, p1, p2, p3)		printf(msg, p1, p2, p3)
 #define PRINTERROR(msg)			fprintf(stderr, msg)
 #define PRINTERROR1(msg, p1)		fprintf(stderr, msg, p1)
 #define PRINTERROR2(msg, p1, p2)	fprintf(stderr, msg, p1, p2)
 #define PRINTERROR3(msg, p1, p2, p3)	fprintf(stderr, msg, p1, p2, p3)
+#define PRINTERROR4(msg, p1, p2, p3, p4)		fprintf(stderr, msg, p1, p2, p3, p4)
+#define PRINTERROR6(msg, p1, p2, p3, p4, p5, p6)	fprintf(stderr, msg, p1, p2, p3, p4, p5, p6)
+
+/* This define is for printing packet details in stderr.
+ * Depends on the PrintPacketSummary() function, defined at session.c
+ */
 #define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
+#define PRINTSESERROR(pp, cr)		PrintSessionSummary(stderr, pp, cr)
 
 
 #include "num_list.h"
@@ -75,6 +87,39 @@
 #define LIST_TYPE_IPPORT	4
 
 #define USER_RULE_START		50000
+
+
+/**********/
+/* MACROS */
+/**********/
+
+#define ARRAYSIZE(array) (sizeof(array)/sizeof(array[0]))
+
+#define MALLOC malloc
+
+#define FREE(x) { \
+  if (x != NULL) { \
+    free(x); \
+  } else { \
+    DBG((printf("Attempting to free a NULL pointer at 0x%x\n", x))); \
+  } \
+}
+
+#define FREE_IF(x) { \
+  if (x != NULL) { \
+    free(x); \
+  } \
+}
+
+
+#ifdef HLBR_LITTLE_ENDIAN
+#define IP_BYTES(IP)	(IP & 0x000000ff), (IP & 0x0000ff00)>>8, (IP & 0x00ff0000)>>16, IP>>24
+#else
+#define IP_BYTES(IP)	IP>>24, (IP & 0x00ff0000)>>16, (IP & 0x0000ff00)>>8, (IP & 0x000000ff)
+#endif
+
+
+
 
 /**
  * Holds the data from a decoder already applied
@@ -323,8 +368,8 @@ typedef struct global_vars{
 	int				UDPPerSec;
 
 	/* logging flags */
-	unsigned char			logSession;
-	unsigned char			logSession_BeginEnd;
+	unsigned char			logSession_StartEnd;
+	unsigned char			logSession_All;
 } GlobalVars;
 
 
@@ -357,5 +402,7 @@ int AddShutdownHandler(int (*func)(void* data), void* data);
 
 #define TIMER_NONE	-1
 int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID, int Time, void* user), void* User);
+
+
 
 #endif

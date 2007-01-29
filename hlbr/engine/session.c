@@ -1,3 +1,4 @@
+#define DEBUG
 // TODO: add a shutdown handler that frees all allocated memory for sessions
 #include "session.h"
 #include "hlbrlib.h"
@@ -31,32 +32,6 @@ PP*			TimeTail;
 int RemountTCPStream(int, PP*, TCPData*);
 int TCPStream_Unqueue(PP*);
 
-
-/**
- * Prints a one-line summary of the packet
- * Inspects packet's IP and TCP structure (if any)
- */
-void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TData, char newline)
-{
-	DEBUGPATH;
-
-	if (!IData) {
-		fprintf(stream, "P:%u -%c", PacketSlot,
-		       (newline ? '\n' : ' '));
-		return;
-	}
-	if (!TData) {
-		fprintf(stream, "P:%u IP %d.%d.%d.%d->%d.%d.%d.%d%c", PacketSlot,
-		       IP_BYTES(IData->Header->saddr), IP_BYTES(IData->Header->daddr),
-		       (newline ? '\n' : ' '));
-		return;
-	}
-	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d%c", PacketSlot,
-	       IP_BYTES(IData->Header->saddr), TData->Header->source,
-	       IP_BYTES(IData->Header->daddr), TData->Header->dest,
-	       (newline ? '\n' : ' '));
-	return;
-}
 
 
 /****************************************
@@ -369,13 +344,14 @@ int UpdateTime(PP* Port)
 }
 
 
-/************************************
-* Get rid of this port
-************************************/
-int RemovePort(PP* Port){
-	IPP*			Pair;
-	IPB*			Bin;
-	int				Top, Bottom, Middle;
+/**
+ * Remove the TCP session (PortPair) from the bin.
+ */
+int RemovePort(PP* Port)
+{
+	IPP*		Pair;
+	IPB*		Bin;
+	int		Top, Bottom, Middle;
 	unsigned short	Hash;
 	
 	DEBUGPATH;
@@ -384,173 +360,181 @@ int RemovePort(PP* Port){
 	printf("Freeing port with SessionID %u\n", Port->SessionID);
 #endif
 
-	/*tell everyone this is going away*/
+	/* tell everyone this is going away */
 	CallDestroyFuncs(Port);
 
-	/*get pointers to parents*/
-	Pair=Port->Parent;
-	Bin=Pair->Parent;
+	/* logs session */
+	if (Globals.logSession_StartEnd)
+		printf("LE:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
+		       Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
+		       IP_BYTES(Pair->IP2), Port->Port2,
+		       Port->Direction, Port->TCPCount);
+
+	/* get pointers to parents */
+	Pair = Port->Parent;
+	Bin = Pair->Parent;
 
 	/*remove from the time linked list*/
-	if ( (Port==TimeHead) && (Port==TimeTail) ){
-		/*only item in the list*/
-		if (Port->TimeNext || Port->TimePrev){
-			printf("Error Time chain is corrupt\n");
+	if ( (Port == TimeHead) && (Port == TimeTail) ) {
+		/* only item in the list */
+		if (Port->TimeNext || Port->TimePrev) {
+			PRINTERROR("Error Time chain is corrupt\n");
 			return FALSE;
 		}
 		
-		TimeHead=NULL;
-		TimeTail=NULL;
-	}else if (Port==TimeHead){
-		Port->TimeNext->TimePrev=NULL;
-		TimeHead=Port->TimeNext;
-	}else if (Port==TimeTail){
-		Port->TimePrev->TimeNext=NULL;
-		TimeTail=Port->TimePrev;
-	}else{
-		Port->TimePrev->TimeNext=Port->TimeNext;
-		Port->TimeNext->TimePrev=Port->TimePrev;
+		TimeHead = NULL;
+		TimeTail = NULL;
+	} else if (Port == TimeHead) {
+		Port->TimeNext->TimePrev = NULL;
+		TimeHead = Port->TimeNext;
+	} else if (Port == TimeTail) {
+		Port->TimePrev->TimeNext = NULL;
+		TimeTail = Port->TimePrev;
+	} else {
+		Port->TimePrev->TimeNext = Port->TimeNext;
+		Port->TimeNext->TimePrev = Port->TimePrev;
 	}
-	Port->TimeNext=NULL;
-	Port->TimePrev=NULL;
+	Port->TimeNext = NULL;
+	Port->TimePrev = NULL;
 
-	/*find the entry in the ports list*/
-	Top=Pair->NumPorts-1;
-	Bottom=0;
-	Middle=Bottom+((Top-Bottom)/2);
+	/* find the entry in the ports list */
+	Top = Pair->NumPorts-1;
+	Bottom = 0;
+	Middle = Bottom + ((Top-Bottom)/2);
 	
-	while (1){	
-		if (Pair->Ports[Middle]==Port){
+	while (1) {	
+		if (Pair->Ports[Middle] == Port) {
 			break;
 		}
 		
-		if ( (Port->Port1<Pair->Ports[Middle]->Port1) || ( (Port->Port1==Pair->Ports[Middle]->Port1) && (Port->Port2<Pair->Ports[Middle]->Port2)) ){
-			if (Top==Bottom){
+		if ( (Port->Port1 < Pair->Ports[Middle]->Port1) || ( (Port->Port1 == Pair->Ports[Middle]->Port1) && (Port->Port2 < Pair->Ports[Middle]->Port2)) ){
+			if (Top == Bottom) {
+				PRINTERROR("Error: Port not found in parent\n");
+				return FALSE;
+			}
+			
+			Top = Middle;
+			Middle = Bottom + ((Top-Bottom)/2);
+		} else {
+			if (Top == Bottom) {
 				printf("Error: Port not found in parent\n");
 				return FALSE;
 			}
 			
-			Top=Middle;
-			Middle=Bottom+((Top-Bottom)/2);
-		}else{
-			if (Top==Bottom){
-				printf("Error: Port not found in parent\n");
-				return FALSE;
-			}
-			
-			Bottom=Middle+1;
-			Middle=Bottom+((Top-Bottom)/2);
+			Bottom = Middle + 1;
+			Middle = Bottom + ((Top-Bottom)/2);
 		}
 	}
 	
-	/*remove this port from the ports list*/
-	memmove(&Pair->Ports[Middle], &Pair->Ports[Middle+1], sizeof(PP*)*(Pair->NumPorts-Middle-1));
+	/* remove this port from the ports list */
+	memmove(&Pair->Ports[Middle], &Pair->Ports[Middle+1], sizeof(PP*)*(Pair->NumPorts - Middle - 1));
 	Pair->NumPorts--;
-	Pair->Ports[Pair->NumPorts]=NULL;
+	Pair->Ports[Pair->NumPorts] = NULL;
 	free(Port);
-	Port=NULL;
+	Port = NULL;
 	
-	/*if the pair is empty, remove it as well*/
-	if (Pair->NumPorts>0) return TRUE;
+	/* if the pair is empty, remove it as well */
+	if (Pair->NumPorts > 0) return TRUE;
 	
-	/*find this pair in the pairs list*/
-	Top=Bin->NumIPs-1;
-	Bottom=0;
-	Middle=Bottom+((Top-Bottom)/2);
+	/* find this pair in the pairs list */
+	Top = Bin->NumIPs - 1;
+	Bottom = 0;
+	Middle = Bottom + ((Top-Bottom)/2);
 	
-	while (1){
-		if (Bin->Pairs[Middle]==Pair){
+	while (1) {
+		if (Bin->Pairs[Middle] == Pair) {
 			break;
 		}
 		
-		if ( (Pair->IP1<Bin->Pairs[Middle]->IP1) || ( (Pair->IP1==Bin->Pairs[Middle]->IP1) && (Pair->IP2<Bin->Pairs[Middle]->IP2)) ){
-			if (Top==Bottom){
-				printf("Error: Pair not found in parent\n");
+		if ( (Pair->IP1 < Bin->Pairs[Middle]->IP1) || ( (Pair->IP1 == Bin->Pairs[Middle]->IP1) && (Pair->IP2 < Bin->Pairs[Middle]->IP2)) ) {
+			if (Top == Bottom) {
+				PRINTERROR("Error: Pair not found in parent\n");
 				return FALSE;
 			}
 			
-			Top=Middle;
-			Middle=Bottom+((Top-Bottom)/2);
-		}else{
-			if (Top==Bottom){
-				printf("Error: Pair not found in parent\n");
+			Top = Middle;
+			Middle = Bottom + ((Top-Bottom)/2);
+		} else {
+			if (Top == Bottom) {
+				PRINTERROR("Error: Pair not found in parent\n");
 				return FALSE;
 			}
 			
-			Bottom=Middle+1;
-			Middle=Bottom+((Top-Bottom)/2);
+			Bottom = Middle + 1;
+			Middle = Bottom + ((Top-Bottom)/2);
 		}
 	}
 	
-	/*remove this pair from the bin*/
+	/* remove this pair from the bin */
 	memmove(&Bin->Pairs[Middle], &Bin->Pairs[Middle+1], sizeof(IPP*)*(Bin->NumIPs-Middle-1));
 	Bin->NumIPs--;
-	Bin->Pairs[Bin->NumIPs]=NULL;
+	Bin->Pairs[Bin->NumIPs] = NULL;
 	
-	Hash=GetHash(Pair->IP1, Pair->IP2);
+	Hash = GetHash(Pair->IP1, Pair->IP2);
 	
 	free(Pair->Ports);
-	Pair->Ports=NULL;
+	Pair->Ports = NULL;
 	free(Pair);
-	Pair=NULL;	
+	Pair = NULL;	
 	
-	/*if the bin is empty, remove it*/
+	/* if the bin is empty, remove it */
 	if (Bin->NumIPs>0) return TRUE;
 	
 	free(Bin->Pairs);
-	Bin->Pairs=NULL;
+	Bin->Pairs = NULL;
 	free(Sessions[Hash]);
-	Sessions[Hash]=NULL;
+	Sessions[Hash] = NULL;
 	
 	return TRUE;
 }
 
-/************************************
-* Find the Port Pair, if it doesn't 
-* exist, create it
-************************************/
-PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int Now){
-	int				i;
-	PP*				Port;
-	int				Top, Bottom, Middle;
+
+/**
+ * Find the Port Pair (TCP session), if it doesn't exist, create it.
+ */
+PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int Now)
+{
+	int	i;
+	PP*	Port;
+	int	Top, Bottom, Middle;
 	
 	DEBUGPATH;
 
-	if (!Pair->Ports){
-#ifdef DEBUG
-		printf("First Port Pair in this bin with sessionID %u\n", SessionCount);
-#endif	
-		Pair->Ports=calloc(sizeof(PP*), PORT_START+2);
-		if (!Pair->Ports){
+	if (!Pair->Ports) {
+		DBG( PRINTERROR1("First Port Pair in this bin with sessionID %u\n", SessionCount) );
+		Pair->Ports = calloc(sizeof(PP*), PORT_START+2);
+		if (!Pair->Ports) {
 			printf("Out of memory\n");
 			return NULL;
 		}
 		
-		Pair->NumAllocated=PORT_START;
-		Pair->NumPorts=1;
-		Pair->Ports[0]=calloc(sizeof(PP),1);
+		Pair->NumAllocated = PORT_START;
+		Pair->NumPorts = 1;
+		Pair->Ports[0] = calloc(sizeof(PP), 1);
 		
-		Port=Pair->Ports[0];
+		Port = Pair->Ports[0];
 
-		Port->Port1=Port1;
-		Port->Port2=Port2;		
-		Port->Parent=Pair;
-		Port->LastTime=Now;
-		Port->FirstTime=Now;
-		if (Port->SessionID){
+		Port->Port1 = Port1;
+		Port->Port2 = Port2;		
+		Port->Parent = Pair;
+		Port->LastTime = Now;
+		Port->FirstTime = Now;
+		if (Port->SessionID) {
 			printf("SessionID was not 0\n");
 		}
-		Port->SessionID=SessionCount;
+		Port->SessionID = SessionCount;
 		Port->TheOtherPortPair = NULL;
+		DBG( PRINTERROR1("Filling session %d's struct with 0s...\n", Port->SessionID) );
+		bzero(&(Port->Seqs), sizeof(struct tcp_stream_buffer));
 				
 		SessionCount++;
 #ifdef DEBUG1
-		printf("There are %i sessions\n",SessionCount);
+		PRINT1("There are %i sessions\n", SessionCount);
 #endif		
 
 		AddToTime(Port);
 
-		if (Globals.logSession_BeginEnd)
+		if (Globals.logSession_StartEnd || Globals.logSession_All)
 			printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
 			       Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
 			       IP_BYTES(Pair->IP2), Port->Port2,
@@ -558,93 +542,95 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 //     		       (TData->Header->ack ? 'a' : '.'),
 			       Port->Direction, Port->TCPCount);
 
-		/*Tell everyone this session exists*/
+		/* Tell everyone this session exists */
 		CallCreateFuncs(Port);
 		
 		return Port;
 	}
 	
-	/*Binary search for the port*/
-	Top=Pair->NumPorts-1;
-	Bottom=0;
-	Middle=Bottom+((Top-Bottom)/2);
+	/* Binary search for the port */
+	Top = Pair->NumPorts-1;
+	Bottom = 0;
+	Middle = Bottom + ((Top-Bottom)/2);
 	
 	do {
-		if (Middle>Pair->NumAllocated){
-			printf("Tree is corrupted\n");
+		if (Middle>Pair->NumAllocated) {
+			PRINTERROR("Tree is corrupted\n");
 			exit(1);
 		}
 		
-		Port=Pair->Ports[Middle];
-		if (!Port){
-			printf("Error: Pointer was NULL Port %i\n", Middle);
+		Port = Pair->Ports[Middle];
+		if (!Port) {
+			PRINTERROR1("Error: Pointer was NULL Port %i\n", Middle);
 			return NULL;
 		}
 		
-		if ( (Port->Port1==Port1) && (Port->Port2==Port2) ){
+		if ( (Port->Port1 == Port1) && (Port->Port2 == Port2) ) {
 #ifdef DEBUG
-			printf("Found Port in Slot %i\n",Middle);
+			PRINTERROR1("Found Port in Slot %i\n", Middle);
 #endif		
-			Port->LastTime=Now;
+			Port->LastTime = Now;
 			UpdateTime(Port);
 			return Port;
 		}
 		
-		if ( (Port1<Port->Port1) || ( (Port1==Port->Port1) && (Port2<Port->Port2) ) ){
-			if (Top==Bottom) break;
+		if ( (Port1 < Port->Port1) || ( (Port1 == Port->Port1) && (Port2 < Port->Port2) ) ) {
+			if (Top == Bottom)
+				break;
 			
-			Top=Middle;
-			Middle=Bottom+((Top-Bottom)/2);
-		}else{
-			if (Top==Bottom) break;
+			Top = Middle;
+			Middle = Bottom + ((Top-Bottom)/2);
+		} else {
+			if (Top == Bottom)
+				break;
 			
-			Bottom=Middle+1;
-			Middle=Bottom+((Top-Bottom)/2);
+			Bottom = Middle + 1;
+			Middle = Bottom + ((Top-Bottom)/2);
 		}
 	} while(1);
 	
 #ifdef DEBUG
-	printf("Creating new port with sessionID %u\n", SessionCount);
+	PRINTERROR1("Creating new port with sessionID %u\n", SessionCount);
 #endif
 
-	if (Pair->NumPorts==Pair->NumAllocated){	
-		/*allocate some more ports*/
-		Pair->Ports=realloc(Pair->Ports, sizeof(PP*)*(Pair->NumAllocated+PORT_GROW+2));
-		if (!Pair->Ports){
-			printf("realloc failed\n");
+	if (Pair->NumPorts == Pair->NumAllocated) {
+		/* allocate some more ports */
+		Pair->Ports = realloc(Pair->Ports, sizeof(PP*)*(Pair->NumAllocated+PORT_GROW+2));
+		if (!Pair->Ports) {
+			PRINTERROR("realloc failed\n");
 			exit(1);
 		}
 	
-		/*Null out the new pointers*/
-		for (i=Pair->NumPorts;i<(Pair->NumAllocated+PORT_GROW+1);i++){
-			Pair->Ports[i]=NULL;
+		/* Null out the new pointers */
+		for (i = Pair->NumPorts; i < (Pair->NumAllocated+PORT_GROW+1); i++) {
+			Pair->Ports[i] = NULL;
 		}
 	
-		Pair->NumAllocated+=PORT_GROW;
+		Pair->NumAllocated += PORT_GROW;
 	}
 	
-	if ((Port1>Port->Port1) || ( (Port1==Port->Port1) && (Port2>Port->Port2) ) )
+	if ((Port1 > Port->Port1) || ( (Port1 == Port->Port1) && (Port2 > Port->Port2) ) )
 		Middle++;
 	
 	memmove(&Pair->Ports[Middle+1], &Pair->Ports[Middle], sizeof(PP*)*(Pair->NumPorts-Middle));
 	
-	Pair->Ports[Middle]=calloc(sizeof(PP),1);
-	Port=Pair->Ports[Middle];
+	Pair->Ports[Middle] = calloc(sizeof(PP),1);
+	Port = Pair->Ports[Middle];
 	Pair->NumPorts++;
 
-	Port->Port1=Port1;
-	Port->Port2=Port2;	
-	Port->Parent=Pair;
-	Port->LastTime=Now;
-	Port->FirstTime=Now;
-	if (Port->SessionID){
-		printf("SessionID was not NULL\n");
-	}	
-	Port->SessionID=SessionCount;
+	Port->Port1 = Port1;
+	Port->Port2 = Port2;	
+	Port->Parent = Pair;
+	Port->LastTime = Now;
+	Port->FirstTime = Now;
+	if (Port->SessionID) {
+		PRINTERROR("SessionID was not NULL\n");
+	}
+	Port->SessionID = SessionCount;
 	Port->TheOtherPortPair = NULL;
 
 
-	if (Globals.logSession_BeginEnd)
+	if (Globals.logSession_StartEnd)
 		printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
 		       Port->SessionID,
 #ifdef HLBR_LITTLE_ENDIAN
@@ -662,7 +648,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	
 	SessionCount++;
 #ifdef DEBUG1
-	printf("There are %i sessions\n",SessionCount);
+	PRINTERROR1("There are %i sessions\n", SessionCount);
 #endif	
 
 	/*Tell everyone this session exists*/
@@ -670,6 +656,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	
 	return Port;
 }
+
 
 /***********************************
 * Free up the nodes that are expired
@@ -739,8 +726,9 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	}	
 	Port = FindPortPair(Port1, Port2, Pair, Globals.Packets[PacketSlot].tv.tv_sec);
 	if (!Port) {
-		PrintPacketSummary(stderr, PacketSlot, IData, TData, FALSE);
-		fprintf(stderr, "Failed to assign session port\n");
+		PRINTPKTERROR(PacketSlot, IData, TData, FALSE);
+		PRINTSESERROR(Port, FALSE);
+		PRINTERROR("Failed to assign session port\n");
 		return FALSE;
 	}
 
@@ -780,9 +768,9 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 			printf("Started with a SYN|ACK\n");
 #endif		
 			if (IP1==IData->Header->saddr){
-				Port->Direction=SESSION_IP1_SERVER;
+				Port->Direction = SESSION_IP1_SERVER;
 			}else{
-				Port->Direction=SESSION_IP2_SERVER;
+				Port->Direction = SESSION_IP2_SERVER;
 			}
 			
 			Port->ServerState=TCP_STATE_SYNACK;
@@ -995,24 +983,22 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 
 /**
  * Sets up the session handler.
- * Global variable IPB holds all info about identified sessions.
+ * Global variable IPB holds info about all identified sessions.
  * @see ip_bin
  * @see ip_pair
  * @see port_pair
  */
-int InitSession(){
-
-#ifdef DEBUGPATH
-	printf("In InitSession\n");
-#endif
+int InitSession()
+{
+	DEBUGPATH;
 
 	bzero(Sessions, sizeof(IPB*)*65536);
-	TimeHead=NULL;
-	CreateFuncs=NULL;
-	DestroyFuncs=NULL;
+	TimeHead = NULL;
+	CreateFuncs = NULL;
+	DestroyFuncs = NULL;
 
-	IPDecoderID=GetDecoderByName("IP");
-	TCPDecoderID=GetDecoderByName("TCP");
+	IPDecoderID = GetDecoderByName("IP");
+	TCPDecoderID = GetDecoderByName("TCP");
 
 	return TRUE;
 }
@@ -1021,6 +1007,7 @@ int InitSession(){
 
 /**
  * Remounts packets in a TCP stream and check them together for signatures.
+ * @return FALSE if the packet couldn't be queued due to lack of space
  * @see tcp_stream_buffer
  */
 int RemountTCPStream(int PacketSlot, PP* Port, TCPData* TData)
@@ -1029,7 +1016,20 @@ int RemountTCPStream(int PacketSlot, PP* Port, TCPData* TData)
 	int		i;
 
 	DEBUGPATH;
-
+	DBG( PRINTERROR4("RemountTCPStream: Session:%d TCPCount:%d [%d,%d]\n",
+			Port->SessionID, Port->TCPCount,
+			TData->Header->seq, TData->Header->ack_seq) );
+#ifdef DEBUG
+	// dumping contents of this session's buffers...
+	PRINTERROR3("	--- TCP stream buffer ---\n	%d pieces, TopSeq: %d, LastSeq: %d\n",
+		    Port->Seqs.num_pieces, Port->Seqs.TopSeq, Port->Seqs.LastSeq);
+	for (i = 0; i < Port->Seqs.num_pieces; i++)
+		PRINTERROR4("	[%d] %d -> %d		PacketSlot:%d\n",
+			   i, Port->Seqs.pieces[i].piece_start,
+			   Port->Seqs.pieces[i].piece_end,
+			   Port->Seqs.pieces[i].PacketSlot);
+#endif	/* DEBUG */
+	
 	if (Port->Seqs.num_pieces == TCP_QUEUE_SIZE)
 		return FALSE;
 
@@ -1039,31 +1039,57 @@ int RemountTCPStream(int PacketSlot, PP* Port, TCPData* TData)
 		return FALSE;
 		}*/
 
-	// new packet fits exactly after first bunch of packets in buffer
+	// packets with no payload aren't queued
+	if (TData->DataLen == 0)
+		return TRUE;
+
+	// this is the very first packet of this session
+	if (Port->Seqs.LastSeq == 0 && Port->Seqs.TopSeq == 0) {
+		DBG( PRINTERROR2("Very first packet of session %d with payload (# of packets: %d)\n", Port->SessionID, Port->TCPCount) );
+		Port->Seqs.TopSeq = TData->Header->seq - 1;
+		Port->Seqs.LastSeq = TData->Header->seq - 1;
+	}
+
+	// new packet fits right after first bunch of packets in buffer
 	if (TData->Header->seq == Port->Seqs.LastSeq + 1) {
+		if (Globals.logSession_All)
+			PRINT2("Session %d: packet %d fits right at buffer's end\n", Port->SessionID, PacketSlot);
+
 		if (Port->Seqs.LastSeq - Port->Seqs.TopSeq + 1 >= TCP_CACHE_SIZE) {
 			PRINTPKTERROR(-1, NULL, TData, FALSE);
+			PRINTSESERROR(Port, FALSE);
 			PRINTERROR("out of space in TCP cache\n");
 			return FALSE;
 		}
 		memcpy(TData->Data, 
 		       &(Port->Seqs.buffer) + (Port->Seqs.LastSeq - Port->Seqs.TopSeq), 
 		       TData->DataLen);
+
 		// finds position for the packet in pieces[]
-		for (i = 0; Port->Seqs.pieces[i].piece_end < Port->Seqs.LastSeq; i++);
-		if (i + 1 == TCP_QUEUE_SIZE) {
+		for (i = 0; Port->Seqs.pieces[i].piece_end < Port->Seqs.LastSeq && i < TCP_QUEUE_SIZE; i++);
+		if (i == TCP_QUEUE_SIZE) {
 			PRINTERROR("pieces[] out of space?\n");
 			return FALSE;
 		}
+		DBG( PRINTERROR1("\tUsing pieces[%d]...", i) );
+
 		// move other pieces[] forward, to make space
-		if (i < TCP_QUEUE_SIZE - 1)
+		if (i < TCP_QUEUE_SIZE - 1) {
+			DBG( PRINTERROR("\n\tNeed to move other pieces[] forward, to make space\n") );
 			memmove(&(Port->Seqs.pieces[i+1]), &(Port->Seqs.pieces[i]), 
 				sizeof(struct tcp_stream_piece)*(TCP_QUEUE_SIZE-i));
+		}
 		Port->Seqs.pieces[i].piece_start = TData->Header->seq;
 		Port->Seqs.pieces[i].piece_end = TData->Header->seq + TData->DataLen-1;
 		Port->Seqs.pieces[i].PacketSlot = PacketSlot;
 		Port->Seqs.num_pieces++;
 		Port->Seqs.LastSeq = TData->Header->seq + TData->DataLen - 1;
+		DBG( PRINTERROR6(" Used: %d->%d, ps:%d, num_pieces:%d, Top/Last:%d/%d\n",
+				Port->Seqs.pieces[i].piece_start,
+				Port->Seqs.pieces[i].piece_end,
+				Port->Seqs.pieces[i].PacketSlot,
+				Port->Seqs.num_pieces,
+				Port->Seqs.TopSeq, Port->Seqs.LastSeq) );
 
 		// try to add queued packets to the buffer
 		// try multiple times, because after a packet is popped out,
@@ -1071,7 +1097,11 @@ int RemountTCPStream(int PacketSlot, PP* Port, TCPData* TData)
 		while (TCPStream_Unqueue(Port));
 	} else {
 		// This packet doesn't follow the previous one. So we queue it
-		DBG( PRINTPKTERROR(NULL, NULL, TData, false) );
+		if (Globals.logSession_All)
+			PRINT2("Session %d: packet %d doesn't fits at buffer's end, queuing it\n", Port->SessionID, PacketSlot);
+
+		DBG( PRINTPKTERROR(-1, NULL, TData, FALSE) );
+		DBG( PRINTSESERROR(Port, FALSE) );
 		DBG( PRINTERROR2("packet doesn't follows previous one (LastSeq:%d this packet's seq:%d)\n", Port->Seqs.LastSeq, TData->Header->seq) );
 		if (Port->Seqs.queue_size < TCP_QUEUE_SIZE) 
 			Port->Seqs.queue[i++] = PacketSlot;

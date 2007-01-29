@@ -38,7 +38,6 @@ extern GlobalVars	Globals;
 
 /**
  * Set up the tree.
- * @return NULL on error
  */
 int InitJTree(JTree* j, char NoCase)
 {

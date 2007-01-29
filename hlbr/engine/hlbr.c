@@ -12,6 +12,8 @@
 #include "main_loop.h"
 #include "session.h"
 #include "../decoders/decode.h"
+#include "../decoders/decode_ip.h"
+#include "../decoders/decode_tcp.h"
 #include "../tests/test.h"
 #include "../packets/packet.h"
 #include "../packets/packet_cache.h"
@@ -32,9 +34,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define DEBUGPATH ;
-#define DEBUG
-#define DEBUGLOCKS
+//#define DEBUGPATH ;
+//#define DEBUG
+//#define DEBUGLOCKS
 
 GlobalVars Globals;
 
@@ -109,8 +111,9 @@ void PrintUsage(char op)
 		break;
 	case 1:
 		printf("Opcoes para a chave -L / Options for -L flag\n");
-		printf("  S  Inicio e fim de sessao TCP / Begin and end of a TCP session\n");
-		printf("Ex: hlbr -L S\n");
+		printf("  s  Loga inicio e fim de sessao TCP / Logs start and end of a TCP session\n");
+		printf("  S  Loga todos os detalhes sobre uma sessao TCP (gera MUITA saida)\n     Logs all details about a TCP session (generates TOO MUCH output)\n");
+		printf("Ex: hlbr -L s\n");
 		break;
 	}
 }
@@ -219,9 +222,13 @@ int ParseArgs(int argc, char **argv)
 			l = optarg;
 			while (*l)
 				switch (*(l++)) {
+				case 's':
+					PRINT("Logging sessions: start and end of sessions\n");
+					Globals.logSession_StartEnd = 1;
+					break;
 				case 'S':
-					printf("Logging sessions: begin and end of sessions\n");
-					Globals.logSession_BeginEnd = 1;
+					PRINT("Logging sessions: all details\n");
+					Globals.logSession_All = 1;
 					break;
 				default:
 					PrintUsage(1);
@@ -338,10 +345,7 @@ int main(int argc, char**argv){
 	Globals.IdleCount=MAX_PACKETS;
 	Globals.PacketLimit=-1;
 
-	// TODO ...
-	Globals.logSession_BeginEnd = 1;
-
-	if (argc==1){
+	if (argc==1) {
 		PrintUsage(0);
 		return FALSE;
 	}	
@@ -486,4 +490,47 @@ int CallShutdownHandlers()
 	}
 	
 	return TRUE;
+}
+
+
+
+/**
+ * Prints a one-line summary of the packet.
+ * Inspects packet's IP and TCP structure (if any)
+ */
+void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TData, char newline)
+{
+	if (!IData) {
+		if (PacketSlot != -1)
+			fprintf(stream, "P:%u -%c", PacketSlot,
+				(newline ? '\n' : ' '));
+		return;
+	}
+	if (!TData) {
+		if (PacketSlot != -1)
+			fprintf(stream, "P:%u IP %d.%d.%d.%d->%d.%d.%d.%d%c", PacketSlot,
+				IP_BYTES(IData->Header->saddr), IP_BYTES(IData->Header->daddr),
+				(newline ? '\n' : ' '));
+		return;
+	}
+	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d [%u,%u]%c",
+		PacketSlot,
+		IP_BYTES(IData->Header->saddr), TData->Header->source,
+		IP_BYTES(IData->Header->daddr), TData->Header->dest,
+		TData->Header->seq, TData->Header->ack_seq,
+		(newline ? '\n' : ' '));
+	return;
+}
+
+/**
+ * Prints a one-line summary of the session.
+ * Can be called right after PrintPacketSummary, and continue printing in the
+ * same line.
+ */
+void PrintSessionSummary(FILE* stream, PP* Port, char newline)
+{
+	fprintf(stream, "S:%d, %d packets%c", Port->SessionID, Port->TCPCount,
+		(newline ? '\n' : ' '));
+	
+	return;
 }

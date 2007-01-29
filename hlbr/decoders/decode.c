@@ -23,7 +23,7 @@
 
 extern GlobalVars	Globals;
 
-#define DEBUG
+//#define DEBUG
 
 /**
  * Given a Decoder's name, return its ID

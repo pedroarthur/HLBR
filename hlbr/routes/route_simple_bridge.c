@@ -7,7 +7,7 @@
 
 int			EthernetDecoderID;
 
-#define DEBUG
+//#define DEBUG
 
 extern GlobalVars	Globals;
 

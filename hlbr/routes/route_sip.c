@@ -23,7 +23,7 @@ int			IPDecoderID;
 int			ARPDecoderID;
 NumList*	SInterfaces[MAX_INTERFACES];
 
-#define DEBUG
+//#define DEBUG
 
 extern GlobalVars	Globals;
 

@@ -21,9 +21,7 @@ void* DecodeIP(int PacketSlot){
 	unsigned short	etype;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeEthernetIP\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Decoding IP Header\n");
@@ -63,9 +61,7 @@ void* DecodeIP(int PacketSlot){
 int InitDecoderIP(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderIP\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("IP"))==DECODER_NONE){
 #ifdef DEBUG

@@ -13,15 +13,10 @@ void* DecodeInterface(int PacketSlot){
 	InterfaceData*	data;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeInterface\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
-#ifdef DEBUG
-	printf("Decoding the interface\n");
-#endif
 	/*do the decoding*/
 
 	data=(InterfaceData*)malloc(sizeof(InterfaceData));
