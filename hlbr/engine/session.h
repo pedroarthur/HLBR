@@ -12,9 +12,10 @@
 /* Timeout for a (TCP) session */
 #define SESSION_FORCE_TIMEOUT	60
 
-#define SESSION_UNKNOWN				0
-#define SESSION_IP1_SERVER			1
-#define SESSION_IP2_SERVER			2
+/* TCP session direction */
+#define SESSION_UNKNOWN			0
+#define SESSION_IP1_SERVER		1
+#define SESSION_IP2_SERVER		2
 #define SESSION_IP1_SERVER_MAYBE	3
 #define SESSION_IP2_SERVER_MAYBE	4
 
@@ -41,18 +42,31 @@ struct tcp_stream_piece {
 };
 
 /**
- * TCP stream buffer
- * Buffer to hold the last packets received in a TCP session, to make it 
- * possible to detect signatures across different packets.
+ * TCP stream.
+ * This struct represents a TCP stream; the concept is that in a TCP session
+ * there are two streams, from the client to the server and from the server to
+ * the client.
+ * There are a buffer to hold the last packets received in a TCP session, 
+ * to make it possible to detect signatures across different packets.
+ * Details:
+ * - Pieces[] holds the references to each packet stored in Payloads (the
+ * PacketSlot number and the start/end sequence numbers). Note that the packets
+ * may not be ordered by their sequence numbers here!
+ * - Payloads is a mere buffer for copying the packets' payloads all together.
+ * Note: only sequential payloads are stored here; packets that arrive out of
+ * order are put in the Queue[].
+ * - Queue[] holds the packets (the PacketSlots) that arrived out of sequence,
+ * until they can be mounted in Payloads and put in Pieces[].
+ * -TopSeq holds the sequence number of the first byte in Payloads - the seq
+ * number of the 'oldest' packet in Pieces[]
+ * - LastSeq holds the sequence number of the highest byte stored in Payloads.
  */
-struct tcp_stream_buffer {
-	unsigned char		num_pieces;
-	struct tcp_stream_piece	pieces[TCP_QUEUE_SIZE];
-	unsigned char		buffer[TCP_CACHE_SIZE];
-	unsigned char		queue_size;
-	int			queue[TCP_QUEUE_SIZE];	// packets waiting to enter TCPWindow
-	/* TopSeq holds the sequence number of the first byte in the window, while
-	   LastSeq holds the seq. number of the highest byte stored in the window. */
+struct tcp_stream {
+	unsigned char		NumPieces;
+	struct tcp_stream_piece	Pieces[TCP_QUEUE_SIZE];
+	unsigned char*		Payloads;
+	unsigned char		QueueSize;
+	int			Queue[TCP_QUEUE_SIZE];
 	unsigned int		TopSeq;
 	unsigned int		LastSeq;
 };
@@ -64,7 +78,7 @@ struct tcp_stream_buffer {
  * info about the session (packet counts, connection state etc.)
  * @see ip_pair
  */
-typedef struct port_pair{
+typedef struct port_pair {
 	unsigned int		SessionID;
 	unsigned short		Port1;
 	unsigned short		Port2;
@@ -73,7 +87,15 @@ typedef struct port_pair{
 	long int		FirstTime;
 	long int		LastTime;
 	unsigned char		Direction;
-	unsigned char		Error;
+
+	unsigned char		Error; 
+	/* Notes: this (Error) is being used to flag:
+	   - srv->cli:ServerAck doesn't match ClientSeq+1 during handshake1
+	   - srv->cli:ServerAck/ClientSeq don't match stored ones in handshake2
+	   - srv->cli:any unexpected packet order
+	   - cli->srv:any unexpected packet order (both with no fin/rst and
+	     with any of them)
+	*/
 	
 	unsigned short		TCPCount;
 	unsigned short		UDPCount;
@@ -92,10 +114,10 @@ typedef struct port_pair{
 	struct port_pair*	TimeNext;
 	struct port_pair*	TimePrev;
 
-	/* Points to the other corresponding port_pair structure (one is srv->clnt,
-	   the other is clnt->srv) */
-	struct port_pair*	TheOtherPortPair;
-	struct tcp_stream_buffer	Seqs;
+	/* The two streams in a TCP session (cli->srv and srv->cli) */
+	struct tcp_stream	Stream0;
+	struct tcp_stream	Stream1;
+	char			noremount;
 } PP;
 
 /**
@@ -105,7 +127,7 @@ typedef struct port_pair{
  * Info about the session lies in the struct port_pair. 
  * @see port_pair
  */
-typedef struct ip_pair{
+typedef struct ip_pair {
 	unsigned int	IP1;
 	unsigned int	IP2;
 	unsigned int	NumAllocated;
@@ -116,7 +138,7 @@ typedef struct ip_pair{
 	unsigned char	RefuseFromThisIP : 1;	/**< Refuse any sessions from IP1 in the future */
 } IPP;
 
-typedef struct ip_bin{
+typedef struct ip_bin {
 	unsigned int	NumAllocated;
 	unsigned int	NumIPs;
 	IPP**		Pairs;

@@ -122,7 +122,7 @@
 
 
 /**
- * Holds the data from a decoder already applied
+ * Holds the data from a decoder already applied.
  * Each packet struct holds an array of this struct; here every decoder applied
  * to a packet store its own data
  */
@@ -131,15 +131,18 @@ typedef struct decoder_data {
 	void*			Data;
 } DecoderData;
 
+/**
+ * The packet, as it is stored in memory.
+ */
 typedef struct packet_rec {
-	int			PacketSlot; /*position in the packet array*/
-	unsigned int		PacketNum;  /*used to track the packet through the system*/
+	int			PacketSlot; /* position in the packet array */
+	unsigned int		PacketNum;  /* used to track the packet through the system */
 	
 	int			InterfaceNum;
 	int			TargetInterface;
 	
 	unsigned char*		RawPacket;
-	char			Pad[2];  /*to make word aligment work out on Solaris*/
+	char			Pad[2];  /* to make word aligment work out on Solaris */
 	unsigned char		TypicalPacket[TYPICAL_PACKET_SIZE];
 	char			LargePacket;
 	int			PacketLen;
@@ -149,7 +152,7 @@ typedef struct packet_rec {
 	
 	DecoderData		DecoderInfo[MAX_DECODER_DEPTH];
 	int			NumDecoderData;
-	int			BeginData;	/*first byte not decoded yet*/
+	int			BeginData;	/* first byte not decoded yet */
 	
 	/** true if we pass this one as is (route it), false to be dropped */
 	char			PassRawPacket; 
