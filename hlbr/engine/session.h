@@ -64,7 +64,7 @@ struct tcp_stream_piece {
 struct tcp_stream {
 	unsigned char		NumPieces;
 	struct tcp_stream_piece	Pieces[TCP_QUEUE_SIZE];
-	unsigned char*		Payloads;
+	unsigned char		Payloads[TCP_CACHE_SIZE];
 	unsigned char		QueueSize;
 	int			Queue[TCP_QUEUE_SIZE];
 	unsigned int		TopSeq;
@@ -111,12 +111,18 @@ typedef struct port_pair {
 	unsigned int		ClientAck;
 	unsigned char		ClientFin;
 
+	/** These two fields (TimeNext and TimePrev) are used to track
+	 * port_pair structs that are in the "time list".
+	 * @see AddToTime
+	 * @see UpdateTime
+	 * @see TimeoutSessions
+	 */
 	struct port_pair*	TimeNext;
 	struct port_pair*	TimePrev;
 
 	/* The two streams in a TCP session (cli->srv and srv->cli) */
-	struct tcp_stream	Stream0;
-	struct tcp_stream	Stream1;
+	struct tcp_stream*	Stream0;
+	struct tcp_stream*	Stream1;
 	char			noremount;
 } PP;
 

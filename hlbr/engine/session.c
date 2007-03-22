@@ -275,75 +275,83 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 	return Pair;
 }
 
-/************************************
-* Add this to the time list
-************************************/
+/**
+ * Add this session (port pair) to the "time list".
+ * The "time list" is a linked list with the current sessions, meant to track
+ * the time between the next packet in a session and the last one, to timeout
+ * TCP sessions properly.
+ * @see UpdateTime
+ */
 int AddToTime(PP* Port)
 {
 	DEBUGPATH;
 
-	if (!TimeHead){
-		TimeHead=Port;
-		TimeTail=Port;
-		Port->TimeNext=NULL;
-		Port->TimePrev=NULL;
+	if (!TimeHead) {
+		TimeHead = Port;
+		TimeTail = Port;
+		Port->TimeNext = NULL;
+		Port->TimePrev = NULL;
 		
 		return TRUE;
 	}
 	
-	if (!TimeTail){
-		printf("Error: TimeTail was NULL.  Time chain is corrupted\n");
+	if (!TimeTail) {
+		PRINTERROR("TimeTail was NULL.  Time chain is corrupted!\n");
 		return FALSE;
 	}
 	
-	if (TimeTail->TimeNext){
-		printf("Error: TimeTail->Next was not NULL.  Time chain is corrupted\n");
+	if (TimeTail->TimeNext) {
+		PRINTERROR("TimeTail->Next was not NULL.  Time chain is corrupted!\n");
 		return FALSE;
 	}
 	
-	TimeTail->TimeNext=Port;
-	Port->TimePrev=TimeTail;
-	Port->TimeNext=NULL;
-	TimeTail=Port;
+	TimeTail->TimeNext = Port;
+	Port->TimePrev = TimeTail;
+	Port->TimeNext = NULL;
+	TimeTail = Port;
 
 	return TRUE;
 }
 
-/************************************
-* move this to the end of the list
-************************************/
+/**
+ * Update this session (port pair) when a new packet arrives.
+ * Move this record to the end of the "time list". (no need to update the 
+ * LastTime field since it should have been updated before calling this function)
+ * The idea is: a new packet arrived, so start counting again the timeout for
+ * this TCP session.
+ */
 int UpdateTime(PP* Port)
 {
 	DEBUGPATH;
 
-	if (TimeTail==Port){
-		/*already the last*/
+	if (TimeTail == Port) {
+		/* already the last */
 		return TRUE;
 	}
 
-	if (TimeHead==Port){
-		if (Port->TimeNext==NULL){
-			/*only item in chain*/
+	if (TimeHead == Port) {
+		if (Port->TimeNext == NULL) {
+			/* only item in chain */
 			return TRUE;
 		}
 		
-		TimeHead=TimeHead->TimeNext;
-		TimeHead->TimePrev=NULL;
+		TimeHead = TimeHead->TimeNext;
+		TimeHead->TimePrev = NULL;
 		
-		TimeTail->TimeNext=Port;
-		Port->TimeNext=NULL;
-		Port->TimePrev=TimeTail;
-		TimeTail=Port;
+		TimeTail->TimeNext = Port;
+		Port->TimeNext = NULL;
+		Port->TimePrev = TimeTail;
+		TimeTail = Port;
 		
 		return TRUE;
 	}
 	
-	Port->TimePrev->TimeNext=Port->TimeNext;
-	Port->TimeNext->TimePrev=Port->TimePrev;
-	Port->TimeNext=NULL;
-	TimeTail->TimeNext=Port;
-	Port->TimePrev=TimeTail;
-	TimeTail=Port;
+	Port->TimePrev->TimeNext = Port->TimeNext;
+	Port->TimeNext->TimePrev = Port->TimePrev;
+	Port->TimeNext = NULL;
+	TimeTail->TimeNext = Port;
+	Port->TimePrev = TimeTail;
+	TimeTail = Port;
 	
 	return TRUE;
 }
@@ -379,11 +387,11 @@ int RemovePort(PP* Port)
 	Pair = Port->Parent;
 	Bin = Pair->Parent;
 
-	/*remove from the time linked list*/
+	/* remove from the time linked list */
 	if ( (Port == TimeHead) && (Port == TimeTail) ) {
 		/* only item in the list */
 		if (Port->TimeNext || Port->TimePrev) {
-			PRINTERROR("Error Time chain is corrupt\n");
+			PRINTERROR("Error Time chain is corrupt!\n");
 			return FALSE;
 		}
 		
@@ -435,6 +443,8 @@ int RemovePort(PP* Port)
 	memmove(&Pair->Ports[Middle], &Pair->Ports[Middle+1], sizeof(PP*)*(Pair->NumPorts - Middle - 1));
 	Pair->NumPorts--;
 	Pair->Ports[Pair->NumPorts] = NULL;
+	FREE(Port->Stream0);
+	FREE(Port->Stream1);
 	free(Port);
 	Port = NULL;
 	
@@ -533,10 +543,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		bzero(&(Port->Seqs), sizeof(struct tcp_stream_buffer));
 				
 		SessionCount++;
-#ifdef DEBUG1
-		PRINT1("There are %i sessions\n", SessionCount);
-#endif		
-
+		DBG( PRINT1("There are %i sessions\n", SessionCount) );
 		AddToTime(Port);
 
 		if (Globals.logSession_StartEnd || Globals.logSession_All)
@@ -571,9 +578,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		}
 		
 		if ( (Port->Port1 == Port1) && (Port->Port2 == Port2) ) {
-#ifdef DEBUG
-			PRINTERROR1("Found Port in Slot %i\n", Middle);
-#endif		
+			DBG( PRINTERROR1("Found Port in Slot %i\n", Middle) );
 			Port->LastTime = Now;
 			UpdateTime(Port);
 			return Port;
@@ -650,13 +655,10 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		       Port->Direction, Port->TCPCount);
 
 	AddToTime(Port);
-	
 	SessionCount++;
-#ifdef DEBUG1
-	PRINTERROR1("There are %i sessions\n", SessionCount);
-#endif	
+	DBG( PRINT1("There are %i sessions\n", SessionCount) );
 
-	/*Tell everyone this session exists*/
+	/* Tell everyone this session exists */
 	CallCreateFuncs(Port);
 	
 	return Port;
@@ -665,6 +667,11 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 
 /**
  * Free up the sessions (port pairs) that are expired.
+ * Searches the "time list" and frees up sessions that timed out, i.e. sessions
+ * where the time between a packet and the next one took longer than the 
+ * set timeout for a TCP session.
+ * @see AddToTime
+ * @see UpdateTime
  */
 int TimeoutSessions(long int Now)
 {
@@ -673,6 +680,17 @@ int TimeoutSessions(long int Now)
 	DEBUGPATH;
 
 	while (TimeHead && (TimeHead->LastTime + SESSION_FORCE_TIMEOUT < Now)) {
+		TimeNext = TimeHead->TimeNext;	
+		RemovePort(TimeHead);
+		TimeHead = TimeNext;
+	}
+	
+/* Checks if there are pending sessions with just one packet waiting;
+   this probably is the last packet in a TCP session, so let it go */
+	while (TimeHead && (TimeHead->LastTime + (SESSION_FORCE_TIMEOUT/10) < Now)) {
+		if (TimeHead->Stream0 != NULL) {
+			if (TimeHead->Stream0->NumPieces == 1)
+				TCPSessionUnblock(TimeHead->Stream0
 		TimeNext = TimeHead->TimeNext;	
 		RemovePort(TimeHead);
 		TimeHead = TimeNext;
@@ -699,7 +717,8 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	IPP*		Pair;
 	PP*		Port;
 	Stream		struct tcp_stream;
-	char		remount = 0;
+	char		remount = 0;	// try to remount this packet?
+	char		outoforder = 0;	// packet isn't in the expected order?
 
 	DEBUGPATH;
 
@@ -751,8 +770,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	/* Discover the direction and state of this session */
 
 	if ( (Port->ServerState == TCP_STATE_NEW) && (Port->ClientState == TCP_STATE_NEW) ) {
-		/*
-		 * We don't know what direction or state this is yet.
+		/* We don't know what direction or state this is yet.
 		 *
 		 * If it starts with a SYN:
 		 *   Sender is Client, State is SYN
@@ -928,6 +946,10 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 					Port->ClientState = TCP_STATE_DATA;
 					Port->ClientSeq = ntohl(TData->Header->seq);
 					Port->ClientAck = ntohl(TData->Header->ack_seq);
+					if (TData->Header->DataLen > 0) {
+						DBG( PRINT("syn|ack ack has payload?\n") );
+						remount = 1;
+					}
 				} else if (Port->ClientState == TCP_STATE_DATA) {
 					DBGDIR( PRINT("Normal Client Traffic\n") );
 
@@ -964,12 +986,24 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 
 	if (remount && !(Port->noremount)) {
 		if ((Port->Direction == SESSION_IP1_SERVER && TData->Header->saddr == IP2) ||
-		    (Port->Direction == SESSION_IP2_SERVER && TData->Header->saddr == IP1))
-			Stream = &(Port->Stream0);
-		else
-			Stream = &(Port->Stream1);
+		    (Port->Direction == SESSION_IP2_SERVER && TData->Header->saddr == IP1)) {
+			if (Port->Stream0 == NULL) {
+				Port->Stream0 = MALLOC(sizeof(struct tcp_stream));
+				bzero(Port->Stream0, sizeof(struct tcp_stream));
+			}
+			Stream = Port->Stream0;
+		} else {
+			if (Port->Stream1 == NULL) {
+				Port->Stream1 = MALLOC(sizeof(struct tcp_stream));
+				bzero(Port->Stream1, sizeof(struct tcp_stream));
+			}
+			Stream = Port->Stream1;
+		}
+
+		
 	}
 
+	
 
 	TimeoutSessions(Globals.Packets[PacketSlot].tv.tv_sec);
 

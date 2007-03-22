@@ -349,15 +349,27 @@ int AddPacketToPending(int PacketSlot)
 
 
 /**
- * Marks a packet as 'blocked' (thread safe)
+ * Marks a packet as 'blocked' (thread safe).
  * Blocked packets can't be processed until are unblocked. Usually they're
  * blocked by session handling functions
  * @see RemountTCPStream
  */
 int BlockPacket(int PacketSlot)
 {
-	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
-	Globals.Packets[PacketSlot].Status=PACKET_STATUS_BLOCKED;
+	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_BLOCKED;
+	hlbr_mutex_unlock(&PacketMutex);
+
+	return TRUE;
+}
+
+int DropPacket(int PacketSlot)
+{
+	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
+	// (taken from action_drop.c)
+	Globals.Packets[PacketSlot].PassRawPacket = FALSE;
+	//if (Globals.Packets[PacketSlot].Status == PACKET_STATUS_BLOCKED)
+	//TCPRemount_unblock(Port->Seqs.queue[i], TRUE);
 	hlbr_mutex_unlock(&PacketMutex);
 
 	return TRUE;
