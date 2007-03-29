@@ -31,8 +31,9 @@
 struct ip_pair;
 struct ip_bin;
 
-#define TCP_CACHE_SIZE		4*1460
+#define TCP_PAYLOAD_BUFFER_SIZE	4*1460
 #define TCP_QUEUE_SIZE		16	// max number of TCP packets to 'queue'
+#define TCP_PAYLOAD_PIECES_SIZE	1024	// max number of TCP packets to put in the Queue (if it holds them all)
 
 
 struct tcp_stream_piece {
@@ -64,9 +65,9 @@ struct tcp_stream_piece {
 struct tcp_stream {
 	unsigned char		NumPieces;
 	struct tcp_stream_piece	Pieces[TCP_QUEUE_SIZE];
-	unsigned char		Payloads[TCP_CACHE_SIZE];
+	unsigned char		Payloads[TCP_PAYLOAD_BUFFER_SIZE];
 	unsigned char		QueueSize;
-	int			Queue[TCP_QUEUE_SIZE];
+	int			Queue[TCP_PAYLOAD_PIECES_SIZE];
 	unsigned int		TopSeq;
 	unsigned int		LastSeq;
 };

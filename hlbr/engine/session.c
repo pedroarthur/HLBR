@@ -981,10 +981,13 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	Globals.Packets[PacketSlot].Stream = Port;
 
 
-	/* Does the magic - remounts the payload in the big buffer 
-	   & call tests upon it */
+	/* Does the magic
+	 * Reassemblies the payload in the big buffer 
+	 *  & call tests upon it 
+	 */
 
-	if (remount && !(Port->noremount)) {
+	// Will this packet be reassembled in the TCP stream?
+	if (reassemble && !(Port->noreassemble)) {
 		if ((Port->Direction == SESSION_IP1_SERVER && TData->Header->saddr == IP2) ||
 		    (Port->Direction == SESSION_IP2_SERVER && TData->Header->saddr == IP1)) {
 			if (Port->Stream0 == NULL) {
@@ -1000,7 +1003,43 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 			Stream = Port->Stream1;
 		}
 
-		
+#define PIECE_SIZE(p)		(p.piece_end - p.piece_start + 1)
+#define PAYLOADS_SIZE(s)	(s->LastSeq - s->TopSeq + 1)
+		/* This packet goes right after the others in the Payloads 
+		   buffer, or must we queue it? */
+		if (TData->Header->seq == Stream->LastSeq + 1) { // Goes to Payloads
+			// First block in the buffer?
+			if (Stream->NumPieces == 0) {
+				Stream->Piece[0].piece_start = TData->Header->seq;
+				Stream->Piece[0].piece_end = TData->Header->seq + TData->Header->DataLen - 1;
+				Stream->Piece[0].PacketSlot = PacketSlot;
+				Stream->TopSeq = Stream->Piece[0].piece_start;
+				Stream->LastSeq = Stream->Piece[0].piece_end;
+				memcpy(&(Stream->Payloads[0]), TData->Data, TData->DataLen);
+				BlockPacket(PacketSlot);
+				Stream->NumPieces++;
+			} else {
+				if (Stream->NumPieces == TCP_PAYLOAD_PIECES_SIZE) {
+					// Pieces is full so make room to one more...
+					UnblockPacket(Stream->Pieces[0].PacketSlot);
+					memmove(&(Stream->Payloads[0]), 
+						&(Stream->Payloads[ PIECE_SIZE(Stream->Pieces[0]) ]),
+						PAYLOADS_SIZE(Stream) - PIECE_SIZE(Stream->Pieces[0]) );
+					memmove(&(Stream->Pieces[0]), &(Stream->Pieces[1]),
+						(--Stream->NumPieces) * sizeof(struct tcp_stream_piece) );
+					Stream->TopSeq = Stream->Pieces[0].piece_start;
+				}
+				// And now, put it in Payloads/Pieces, at the end
+				//...
+			}				
+		} else {
+// queue it... check for a place for it in the queue
+// (check the boundaries of each piece for teardrop attacks, of course)
+// and then queue and block it.
+		}
+
+		// Now try to unqueue as many packets as possible
+// now, finally, apply the test on Payloads
 	}
 
 	
