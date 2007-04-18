@@ -538,8 +538,8 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 			printf("SessionID was not 0\n");
 		}
 		Port->SessionID = SessionCount;
-		DBG( PRINTERROR1("Filling session %d's struct with 0s...\n", Port->SessionID) );
-		bzero(&(Port->Seqs), sizeof(struct tcp_stream_buffer));
+		//DBG( PRINTERROR1("Filling session %d's struct with 0s...\n", Port->SessionID) );
+		//bzero(&(Port->Seqs), sizeof(struct tcp_stream_buffer));
 				
 		SessionCount++;
 		DBG( PRINT1("There are %i sessions\n", SessionCount) );
@@ -636,7 +636,6 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		PRINTERROR("SessionID was not NULL\n");
 	}
 	Port->SessionID = SessionCount;
-	Port->TheOtherPortPair = NULL;
 
 
 	if (Globals.logSession_StartEnd)
@@ -687,9 +686,10 @@ int TimeoutSessions(long int Now)
 /* Checks if there are pending sessions with just one packet waiting;
    this probably is the last packet in a TCP session, so let it go */
 	while (TimeHead && (TimeHead->LastTime + (SESSION_FORCE_TIMEOUT/10) < Now)) {
-		if (TimeHead->Stream0 != NULL) {
-			if (TimeHead->Stream0->NumPieces == 1)
-				TCPSessionUnblock(TimeHead->Stream0
+		//TODO
+		//if (TimeHead->Stream0 != NULL) {
+		//	if (TimeHead->Stream0->NumPieces == 1)
+		//		TCPSessionUnblock(TimeHead->Stream0
 		TimeNext = TimeHead->TimeNext;	
 		RemovePort(TimeHead);
 		TimeHead = TimeNext;
@@ -715,8 +715,8 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	unsigned short	Port1, Port2;
 	IPP*		Pair;
 	PP*		Port;
-	Stream		struct tcp_stream;
-	char		remount = 0;	// try to remount this packet?
+	struct tcp_stream*	Stream;
+	char		reassemble = 0;	// try to remount this packet?
 	char		outoforder = 0;	// packet isn't in the expected order?
 
 	DEBUGPATH;
@@ -752,7 +752,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	Pair = FindIPPair(IP1, IP2);
 	if (!Pair) {
 		PRINTPKTERROR(PacketSlot, IData, TData, FALSE);
-		PRINTERROR("Failed to assign session pair for %d.%d.%d.%d:%d <-> %d.%d.%d.%d:%d\n",
+		PRINTERROR4("Failed to assign session pair for %d.%d.%d.%d:%d <-> %d.%d.%d.%d:%d\n",
 			   IP_BYTES(IP1), Port1, IP_BYTES(IP2), Port2);
 		return FALSE;
 	}
@@ -761,7 +761,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	if (!Port) {
 		PRINTPKTERROR(PacketSlot, IData, TData, FALSE);
 		PRINTSESERROR(Port, FALSE);
-		PRINTERROR("Failed to assign session port for %d.%d.%d.%d:%d <-> %d.%d.%d.%d:%d\n",
+		PRINTERROR4("Failed to assign session port for %d.%d.%d.%d:%d <-> %d.%d.%d.%d:%d\n",
 			   IP_BYTES(IP1), Port1, IP_BYTES(IP2), Port2);
 		return FALSE;
 	}
@@ -849,7 +849,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 			Port->ClientAck = ntohl(TData->Header->ack_seq);
 			/* It's useless to try to remount anything if we're not
 			   catching the initial data */
-			Port->noremount = 1;
+			Port->noreassemble = 1;
 		}
 
 	} else {
@@ -914,14 +914,14 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 					Port->ServerState = TCP_STATE_DATA;
 					Port->ServerSeq = ntohl(TData->Header->seq);
 					Port->ServerAck = ntohl(TData->Header->ack_seq);
-					remount = 1;
+					reassemble = 1;
 				} else if (Port->ServerState == TCP_STATE_DATA) {
 					DBGDIR( printf("Normal Data from Server\n") );
 
 					Port->ServerSeq = ntohl(TData->Header->seq);
 					Port->ServerAck = ntohl(TData->Header->ack_seq);
 				} else {
-					DBGDIR( PRINT("Error: This packet was unexpected (1)\n");
+					DBGDIR( PRINT("Error: This packet was unexpected (1)\n") );
 					Port->Error = TRUE;
 				}
 			}
@@ -945,16 +945,16 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 					Port->ClientState = TCP_STATE_DATA;
 					Port->ClientSeq = ntohl(TData->Header->seq);
 					Port->ClientAck = ntohl(TData->Header->ack_seq);
-					if (TData->Header->DataLen > 0) {
+					if (TData->DataLen > 0) {
 						DBG( PRINT("syn|ack ack has payload?\n") );
-						remount = 1;
+						reassemble = 1;
 					}
 				} else if (Port->ClientState == TCP_STATE_DATA) {
 					DBGDIR( PRINT("Normal Client Traffic\n") );
 
 					Port->ClientSeq = ntohl(TData->Header->seq);
 					Port->ClientAck = ntohl(TData->Header->ack_seq);
-					remount = 1;
+					reassemble = 1;
 				} else {
 					DBGDIR( PRINT("Error:  This packet was unexpected (2)\n") );
 				}
@@ -987,8 +987,8 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 
 	// Will this packet be reassembled in the TCP stream?
 	if (reassemble && !(Port->noreassemble)) {
-		if ((Port->Direction == SESSION_IP1_SERVER && TData->Header->saddr == IP2) ||
-		    (Port->Direction == SESSION_IP2_SERVER && TData->Header->saddr == IP1)) {
+		if ((Port->Direction == SESSION_IP1_SERVER && IData->Header->saddr == IP2) ||
+		    (Port->Direction == SESSION_IP2_SERVER && IData->Header->saddr == IP1)) {
 			if (Port->Stream0 == NULL) {
 				Port->Stream0 = MALLOC(sizeof(struct tcp_stream));
 				bzero(Port->Stream0, sizeof(struct tcp_stream));
@@ -1009,11 +1009,11 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 		if (TData->Header->seq == Stream->LastSeq + 1) { // Goes to Payloads
 			// First block in the buffer?
 			if (Stream->NumPieces == 0) {
-				Stream->Piece[0].piece_start = TData->Header->seq;
-				Stream->Piece[0].piece_end = TData->Header->seq + TData->Header->DataLen - 1;
-				Stream->Piece[0].PacketSlot = PacketSlot;
-				Stream->TopSeq = Stream->Piece[0].piece_start;
-				Stream->LastSeq = Stream->Piece[0].piece_end;
+				Stream->Pieces[0].piece_start = TData->Header->seq;
+				Stream->Pieces[0].piece_end = TData->Header->seq + TData->DataLen - 1;
+				Stream->Pieces[0].PacketSlot = PacketSlot;
+				Stream->TopSeq = Stream->Pieces[0].piece_start;
+				Stream->LastSeq = Stream->Pieces[0].piece_end;
 				memcpy(&(Stream->Payloads[0]), TData->Data, TData->DataLen);
 				BlockPacket(PacketSlot);
 				Stream->NumPieces++;
@@ -1031,13 +1031,13 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 				// And now, put it in Payloads/Pieces, at the end
 				memcpy(&(Stream->Payloads[PAYLOADS_SIZE(Stream)]),
 				       TData->Data, TData->DataLen);
-				Stream->LastSeq = TData->seq + TData->DataLen - 1;
-				Stream->Pieces[Stream->NumPieces].piece_start = TData->seq;
+				Stream->LastSeq = TData->Header->seq + TData->DataLen - 1;
+				Stream->Pieces[Stream->NumPieces].piece_start = TData->Header->seq;
 				Stream->Pieces[Stream->NumPieces].piece_end = Stream->LastSeq;
 				Stream->Pieces[Stream->NumPieces].PacketSlot = PacketSlot;
 				Stream->NumPieces++;
 				
-			}				
+			}
 		} else {
 // queue it... check for a place for it in the queue
 // (check the boundaries of each piece for teardrop attacks, of course)
@@ -1086,6 +1086,7 @@ int InitSession()
 
 
 
+#if 0
 /**
  * Remounts packets in a TCP stream and check them together for signatures.
  * @return FALSE if the packet couldn't be queued due to lack of space
@@ -1289,6 +1290,7 @@ int TCPStream_Unqueue(PP* Port)
 
 	return FALSE;
 }
+#endif
 
 /** Unblock the first packet in the TCP stream buffer this packet belongs.
  * The very first packet of the TCP stream buffer will be marked as PENDING,
@@ -1301,8 +1303,10 @@ int TCPStream_Unqueue(PP* Port)
  * because it went away already.
  * @return FALSE if anything unexpected occured (such as null pointers)
  */
+int UnblockPacket(int PacketSlot){}
 int TCPRemount_unblock(int PacketSlot, int thispacket)
 {
+/*
 	PacketRec*			p;
 	struct tcp_stream_buffer*	seq;
 	int				nseq;
@@ -1324,8 +1328,8 @@ int TCPRemount_unblock(int PacketSlot, int thispacket)
 		DBG( PRINTERROR1("Packet %d's stream doesn't have any pieces to be unblocked\n", PacketSlot) );
 		return FALSE;
 	}
-	/* if there's only one piece in the buffer, it can be unblocked only
-	   if it's the last packet in the TCP session */
+	// if there's only one piece in the buffer, it can be unblocked only
+	// if it's the last packet in the TCP session
 	if (seq->num_pieces == 1) {
 		GetDataByID(PacketSlot, TCPDecoderID, (void**)&TData);
 		if (TData)
@@ -1365,4 +1369,5 @@ int TCPRemount_unblock(int PacketSlot, int thispacket)
 	}
 
 	return TRUE;
+*/
 }

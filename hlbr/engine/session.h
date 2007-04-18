@@ -63,7 +63,7 @@ struct tcp_stream_piece {
  * - LastSeq holds the sequence number of the highest byte stored in Payloads.
  */
 struct tcp_stream {
-	unsigned char		NumPieces;
+	unsigned short int	NumPieces;
 	struct tcp_stream_piece	Pieces[TCP_QUEUE_SIZE];
 	unsigned char		Payloads[TCP_PAYLOAD_BUFFER_SIZE];
 	unsigned char		QueueSize;
@@ -124,7 +124,7 @@ typedef struct port_pair {
 	/* The two streams in a TCP session (cli->srv and srv->cli) */
 	struct tcp_stream*	Stream0;
 	struct tcp_stream*	Stream1;
-	char			noremount;
+	char			noreassemble;
 } PP;
 
 /**

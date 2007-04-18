@@ -93,6 +93,7 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes)
  */
 int TestTCPContent_Stream(int PacketSlot, TestNode* Nodes)
 {
+/*
 	PacketRec*	p;
 
 	if (!Nodes) return FALSE;
@@ -102,6 +103,7 @@ int TestTCPContent_Stream(int PacketSlot, TestNode* Nodes)
 	MatchStrings(&TCPContentTree, p->RuleBits, p->Stream->Seqs.buffer, p->Stream->Seqs.LastSeq - p->Stream->Seqs.TopSeq + 1);
 	
 	return TRUE;
+*/
 }
 
 

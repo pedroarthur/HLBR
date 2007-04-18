@@ -37,6 +37,7 @@
 #define PRINTERROR2(msg, p1, p2)	fprintf(stderr, msg, p1, p2)
 #define PRINTERROR3(msg, p1, p2, p3)	fprintf(stderr, msg, p1, p2, p3)
 #define PRINTERROR4(msg, p1, p2, p3, p4)		fprintf(stderr, msg, p1, p2, p3, p4)
+#define PRINTERROR5(msg, p1, p2, p3, p4, p5)		fprintf(stderr, msg, p1, p2, p3, p4, p5)
 #define PRINTERROR6(msg, p1, p2, p3, p4, p5, p6)	fprintf(stderr, msg, p1, p2, p3, p4, p5, p6)
 
 /* This define is for printing packet details in stderr.
