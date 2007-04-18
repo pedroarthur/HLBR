@@ -538,7 +538,6 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 			printf("SessionID was not 0\n");
 		}
 		Port->SessionID = SessionCount;
-		Port->TheOtherPortPair = NULL;
 		DBG( PRINTERROR1("Filling session %d's struct with 0s...\n", Port->SessionID) );
 		bzero(&(Port->Seqs), sizeof(struct tcp_stream_buffer));
 				
@@ -1030,7 +1029,14 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 					Stream->TopSeq = Stream->Pieces[0].piece_start;
 				}
 				// And now, put it in Payloads/Pieces, at the end
-				//...
+				memcpy(&(Stream->Payloads[PAYLOADS_SIZE(Stream)]),
+				       TData->Data, TData->DataLen);
+				Stream->LastSeq = TData->seq + TData->DataLen - 1;
+				Stream->Pieces[Stream->NumPieces].piece_start = TData->seq;
+				Stream->Pieces[Stream->NumPieces].piece_end = Stream->LastSeq;
+				Stream->Pieces[Stream->NumPieces].PacketSlot = PacketSlot;
+				Stream->NumPieces++;
+				
 			}				
 		} else {
 // queue it... check for a place for it in the queue
@@ -1040,6 +1046,13 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 
 		// Now try to unqueue as many packets as possible
 // now, finally, apply the test on Payloads
+		printf("O buffer tem:\n");
+		for (IP1=0; IP1<PAYLOADS_SIZE(Stream); IP1++)
+			if (Stream->Payloads[IP1] >= 32 && Stream->Payloads[IP1] <= 126)
+				putchar(Stream->Payloads[IP1]);
+			else
+				putchar(46);
+		putchar(10);
 	}
 
 	

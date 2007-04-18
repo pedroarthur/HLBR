@@ -501,9 +501,16 @@ int CallShutdownHandlers()
 void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TData, char newline)
 {
 	if (!IData) {
-		if (PacketSlot != -1)
-			fprintf(stream, "P:%u -%c", PacketSlot,
-				(newline ? '\n' : ' '));
+		if (!TData) {
+			if (PacketSlot != -1)
+				fprintf(stream, "P:%u -%c", PacketSlot,
+					(newline ? '\n' : ' '));
+		} else 
+			// No IP data but TCP data?...
+			fprintf(stream, "P:%u TCP ?.?.?.?:%d->?.?.?.?:%d [%u ack:%u]%c",
+		PacketSlot, TData->Header->source, TData->Header->dest,
+		TData->Header->seq, TData->Header->ack_seq,
+		(newline ? '\n' : ' '));
 		return;
 	}
 	if (!TData) {
@@ -513,7 +520,7 @@ void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TD
 				(newline ? '\n' : ' '));
 		return;
 	}
-	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d [%u,%u]%c",
+	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d [%u ack:%u]%c",
 		PacketSlot,
 		IP_BYTES(IData->Header->saddr), TData->Header->source,
 		IP_BYTES(IData->Header->daddr), TData->Header->dest,
@@ -525,12 +532,48 @@ void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TD
 /**
  * Prints a one-line summary of the session.
  * Can be called right after PrintPacketSummary, and continue printing in the
- * same line.
+ * same line (in this case PrintPacketSummary's newline parameter should be
+ * false, of course.).
  */
 void PrintSessionSummary(FILE* stream, PP* Port, char newline)
 {
 	fprintf(stream, "S:%d, %d packets%c", Port->SessionID, Port->TCPCount,
 		(newline ? '\n' : ' '));
+	
+	return;
+}
+
+/**
+ * Prints the TCP buffer for the session.
+ * Non-printable characters are printed as dots
+ */
+void PrintSessionBuffer(FILE* stream, PP* Port)
+{
+	int i;
+
+	fprintf(stream, "Session:%d (%d.%d.%d.%d:%d->%d.%d.%d.%d:%d)\n",
+		Port->SessionID, IP_BYTES(Port->Parent->IP1), Port->Port1,
+		IP_BYTES(Port->Parent->IP2), Port->Port2);
+	if (Port->Stream0) {
+		fprintf(stream, "\tStream0:\n");
+		for (i=0; i < (Port->Stream0->LastSeq - Port->Stream0->TopSeq + 1); i++)
+			putc(
+				(Port->Stream0->Payloads[0] >= 32 || Port->Stream0->Payloads[0] <=127
+				 ? Port->Stream0->Payloads[0] : '.'),
+				stream
+				);
+		putc(10, stream);
+	}
+	if (Port->Stream1) {
+		fprintf(stream, "\tStream1:\n");
+		for (i=0; i < (Port->Stream1->LastSeq - Port->Stream1->TopSeq + 1); i++)
+			putc(
+				(Port->Stream1->Payloads[0] >= 32 || Port->Stream1->Payloads[0] <=127
+				 ? Port->Stream1->Payloads[0] : '.'),
+				stream
+				);
+		putc(10, stream);
+	}
 	
 	return;
 }
