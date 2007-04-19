@@ -209,10 +209,10 @@ int ParseArgs(int argc, char **argv)
 		case 'l':
 			Globals.LogDir=(char*)calloc(strlen(optarg)+2,sizeof(char));
 			memcpy(Globals.LogDir, optarg, strlen(optarg));
-			if (Globals.LogDir[strlen(Globals.LogDir)-1]!='/'){
-				Globals.LogDir[strlen(Globals.LogDir)]='/';
+			if (Globals.LogDir[strlen(Globals.LogDir)-1] != '/') {
+				Globals.LogDir[strlen(Globals.LogDir)] = '/';
 			}
-			printf("Log directory is %s\n",Globals.LogDir);			
+			PRINT1("Log directory is %s\n", Globals.LogDir);
 			break;			
 		case 'L':
 			if ((!optarg) || (strncmp("help", optarg, 4) == 0)) {
@@ -261,9 +261,15 @@ int ParseArgs(int argc, char **argv)
 		}	
 	}
 
-	if (!Globals.LogDir){
-		Globals.LogDir=calloc(5,1);
+	if (!Globals.LogDir) {
+		Globals.LogDir = calloc(5,1);
 	}
+	if (Globals.logSession_StartEnd || Globals.logSession_All) {
+		snprintf(Globals.logSessionFile.fname, 1024, "%s%s", 
+			 Globals.LogDir, "sessions.log");
+		PRINT1("Sessions log file is %s\n", Globals.logSessionFile.fname);
+	}
+
 
 	return TRUE;
 }

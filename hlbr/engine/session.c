@@ -366,22 +366,24 @@ int RemovePort(PP* Port)
 	IPB*		Bin;
 	int		Top, Bottom, Middle;
 	unsigned short	Hash;
+	char		Message[1024];
 	
 	DEBUGPATH;
 
-#ifdef DEBUG_TIME
-	printf("Freeing port with SessionID %u\n", Port->SessionID);
-#endif
+	DBG( PRINT1("Freeing port with SessionID %u\n", Port->SessionID) );
 
 	/* tell everyone this is going away */
 	CallDestroyFuncs(Port);
 
 	/* logs session */
-	if (Globals.logSession_StartEnd)
-		printf("LE:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
-		       Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
-		       IP_BYTES(Pair->IP2), Port->Port2,
-		       Port->Direction, Port->TCPCount);
+	if (Globals.logSession_StartEnd) {
+		snprintf(Message, 1024, 
+			 "End:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n",
+			 Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
+			 IP_BYTES(Pair->IP2), Port->Port2,
+			 Port->Direction, Port->TCPCount);
+		LogMessage(Message, Globals.logSessionFile);
+	}
 
 	/* get pointers to parents */
 	Pair = Port->Parent;
@@ -512,6 +514,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	int	i;
 	PP*	Port;
 	int	Top, Bottom, Middle;
+	char	Message[1024];
 	
 	DEBUGPATH;
 
@@ -545,13 +548,15 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		DBG( PRINT1("There are %i sessions\n", SessionCount) );
 		AddToTime(Port);
 
-		if (Globals.logSession_StartEnd || Globals.logSession_All)
-			printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
-			       Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
-			       IP_BYTES(Pair->IP2), Port->Port2,
-//		       (TData->Header->syn ? 's' : '.'),
-//     		       (TData->Header->ack ? 'a' : '.'),
-			       Port->Direction, Port->TCPCount);
+		if (Globals.logSession_StartEnd || Globals.logSession_All) {
+			snprintf(Message, 1024, 
+				 "Start %4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n",
+				 Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
+				 IP_BYTES(Pair->IP2), Port->Port2,
+				 //(TData->Header->syn ? 's' : '.'), (TData->Header->ack ? 'a' : '.'),
+				 Port->Direction, Port->TCPCount);
+			LogMessage(Message, Globals.logSessionFile);
+		}
 
 		/* Tell everyone this session exists */
 		CallCreateFuncs(Port);
@@ -598,9 +603,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		}
 	} while(1);
 	
-#ifdef DEBUG
-	PRINTERROR1("Creating new port with sessionID %u\n", SessionCount);
-#endif
+	DBG( PRINTERROR1("Creating new port with sessionID %u\n", SessionCount) );
 
 	if (Pair->NumPorts == Pair->NumAllocated) {
 		/* allocate some more ports */
@@ -638,8 +641,9 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	Port->SessionID = SessionCount;
 
 
-	if (Globals.logSession_StartEnd)
-		printf("LS:%4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
+	if (Globals.logSession_StartEnd) {
+		printf(Message, 1024, 
+		       "Start %4x %d.%d.%d.%d:%d->%d.%d.%d.%d:%d dir:%d pcount:%d\n", 
 		       Port->SessionID,
 #ifdef HLBR_LITTLE_ENDIAN
 		       (Pair->IP1 & 0x000000ff), (Pair->IP1 & 0x0000ff00)>>8, (Pair->IP1 & 0x00ff0000)>>16, Pair->IP1>>24, Port->Port1,
@@ -648,9 +652,10 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		       Pair->IP1>>24, (Pair->IP1 & 0x00ff0000)>>16, (Pair->IP1 & 0x0000ff00)>>8, (Pair->IP1 & 0x000000ff), Port->Port1, 
 		       Pair->IP2>>24, (Pair->IP2 & 0x00ff0000)>>16, (Pair->IP2 & 0x0000ff00)>>8, (Pair->IP2 & 0x000000ff), Port->Port2, 
 #endif
-//		       (TData->Header->syn ? 's' : '.'),
-//     		       (TData->Header->ack ? 'a' : '.'),
+		       //(TData->Header->syn ? 's' : '.'), (TData->Header->ack ? 'a' : '.'),
 		       Port->Direction, Port->TCPCount);
+		LogMessage(Message, Globals.logSessionFile);
+	}
 
 	AddToTime(Port);
 	SessionCount++;

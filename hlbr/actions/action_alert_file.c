@@ -6,122 +6,97 @@
 
 //#define DEBUG
 
-typedef struct action_file_rec{
-	char		fname[1024];
-} ActionFileRec;
-
 extern GlobalVars	Globals;
 
 FILE*	fp;
 
-/******************************************
-* Parse the args for this action
-******************************************/
-void* AlertFileParseArgs(char* Args){
-	FILE*			fp;
-	ActionFileRec*	data;
-	char			FileName[1024];
-#ifdef DEBUGPATH
-	printf("In AlertFileParseArgs\n");
+/**
+ * Parse the args for this action (alert file).
+ */
+void* AlertFileParseArgs(char* Args)
+{
+#ifndef KEEP_LOGFILE_OPEN
+	FILE*		fp;
 #endif
+	LogFileRec*	data;
+	char		FileName[1024];
 
-#ifdef DEBUG
-	printf("Parsing args for action_alert_file\n");
-#endif	
+	DEBUGPATH;
 
 	snprintf(FileName,1024,"%s%s",Globals.LogDir, Args);
-	fp=fopen(FileName, "a");
-	if (!fp){
-		printf("Couldn't open file \"%s\" for appending\n", FileName);
+	fp = fopen(FileName, "a");
+	if (!fp) {
+		PRINTERROR1("Couldn't open file \"%s\" for appending\n", FileName);
 		return NULL;
 	}
 	fclose(fp);
 
-	data=(ActionFileRec*)calloc(sizeof(ActionFileRec),1);
+	data = (LogFileRec*)calloc(sizeof(LogFileRec), 1);
 	snprintf(data->fname, 1024, "%s", FileName);
 
 	return data;
 }
 
 
-/******************************************
-* handle informational messages
-******************************************/
-int AlertFileMessage(char* Message, void* Data){
-	FILE*			fp;
-	ActionFileRec*	data;
+/**
+ * Handle the message (write to a log file).
+ * Basically it gets a file name (inside the LogFileRec type) and writes 
+ * the message to it.
+ */
+int AlertFileMessage(char* Message, void* Data)
+{
+	LogFileRec*	data;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertFileMessage\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Writing to the Alert File\n");
-#endif
-
-	if (!Data){
-#ifdef DEBUG
-		printf("I must have a filename to write to\n");
-#endif	
+	if (!Data) {
+		PRINTERROR("I must have a filename to write to!\n");
 		return FALSE;
 	}
 	
-	data=(ActionFileRec*)Data;
+	data = (LogFileRec*)Data;
 
-	fp=fopen(data->fname, "a");
-	if (!fp){
-#ifdef DEBUG	
-		printf("Couldn't open \"%s\" for writing\n",data->fname);
-#endif		
+	fp = fopen(data->fname, "a");
+	if (!LogFile(data)) {
 		return FALSE;
 	}
 
-	fwrite(Message, strlen(Message), 1, fp);
-	fwrite("\n", 1, 1, fp);
+	fwrite(Message, strlen(Message), 1, data->fp);
+	fwrite("\n", 1, 1, data->fp);
 	
-	fclose(fp);
+	CloseLogFile(data);
 	
 	return TRUE;
 }
 
-/******************************************
-* write the alert message to the alert file
-******************************************/
-int AlertFileAction(int RuleNum, int PacketSlot, void* Data){
-	char	Buff[1024];
-	FILE*			fp;
-	ActionFileRec*	data;
-	PacketRec*		p;
+/**
+ * Write the alert message to the alert file (action alert file).
+ */
+int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
+{
+	char		Buff[1024];
+	FILE*		fp;
+	LogFileRec*	data;
+	PacketRec*	p;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertFileAction\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Writing to the Alert File\n");
-#endif
-
-	if (!Data){
-#ifdef DEBUG
-		printf("I must have a filename to write to\n");
-#endif	
+	if (!Data) {
+		PRINTERROR("AlertFileAction: Must have a filename to write to!\n");
 		return FALSE;
 	}
 	
-	
-	p=&Globals.Packets[PacketSlot];
-	data=(ActionFileRec*)Data;
+	p = &Globals.Packets[PacketSlot];
+	data = (LogFileRec*)Data;
 
-	fp=fopen(data->fname, "a");
-	if (!fp){
-#ifdef DEBUG	
-		printf("Couldn't open \"%s\" for writing\n",data->fname);
-#endif		
+	fp = fopen(data->fname, "a");
+	if (!fp) {
+		PRINTERROR1("AlertFileAction: Couldn't open \"%s\" for writing\n",data->fname);
 		return FALSE;
 	}
 
-	if (!ApplyMessage(Globals.AlertHeader, PacketSlot, Buff, 1024)){
-		printf("Couldn't alert header to packet\n");
+	if (!ApplyMessage(Globals.AlertHeader, PacketSlot, Buff, 1024)) {
+		PRINTERROR("AlertFileAction: Couldn't alert header to packet\n");
 		return FALSE;
 	}
 
@@ -129,8 +104,8 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data){
 	fwrite(" ", 1, 1, fp);
 
 
-	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, Buff, 1024)){
-		printf("Couldn't apply message to packet\n");
+	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, Buff, 1024)) {
+		PRINTERROR("AlertFileAction: Couldn't apply message to packet\n");
 		return FALSE;
 	}
 
@@ -142,27 +117,24 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data){
 	return TRUE;
 }
 
-/********************************
-* Set up the alert file stuff
-********************************/
-int InitActionAlertFile(){
+/**
+ * Set up the alert file stuff.
+ */
+int InitActionAlertFile()
+{
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionAlertFile\n");
-#endif
+	DEBUGPATH;
 
-	ActionID=CreateAction("alert file");
-	if (ActionID==ACTION_NONE){
-#ifdef DEBUG
-		printf("Couldn't allocation action alert file\n");
-#endif	
+	ActionID = CreateAction("alert file");
+	if (ActionID == ACTION_NONE) {
+		PRINTERROR("InitActionAlertFile: Couldn't allocate action alert file\n");
 		return FALSE;
 	}
 	
-	Globals.ActionItems[ActionID].ActionFunc=AlertFileAction;
-	Globals.ActionItems[ActionID].MessageFunc=AlertFileMessage;
-	Globals.ActionItems[ActionID].ParseArgs=AlertFileParseArgs;
+	Globals.ActionItems[ActionID].ActionFunc = AlertFileAction;
+	Globals.ActionItems[ActionID].MessageFunc = AlertFileMessage;
+	Globals.ActionItems[ActionID].ParseArgs = AlertFileParseArgs;
 
 	return TRUE;
 }

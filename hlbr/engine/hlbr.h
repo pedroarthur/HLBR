@@ -24,8 +24,62 @@
 #define DEBUGLOCKS
 
 
-/*
- * printfs
+#define MAJOR_VERSION	1
+#define MINOR_VERSION	1
+
+
+#include "num_list.h"
+#include "session.h"
+
+#define MAX_PACKET_SIZE		65536+14+1
+#define TYPICAL_PACKET_SIZE	16000
+#define MAX_NAME_LEN		20
+#define MAX_RULES		10240
+#define MAX_INTERFACES		8
+#define MAX_DECODERS		128
+#define MAX_TESTS		1024
+#ifdef _OBSD_
+#define IDLE_TIMEOUT		100000
+#else
+#define IDLE_TIMEOUT		200		/*usec's*/
+#endif
+#define MAX_DECODER_DEPTH	16
+#define MAX_MESSAGE_LEN		256
+#define MAX_ACTIONS		16
+#define MAX_ACTION_ITEMS	64
+#define MAX_ITEMS_PER_ACTION	16
+#define MAX_ROUTES		16
+#define MAX_MANGLERS		8
+#define MAX_MODULES		16
+#define MAX_LISTS		16
+#define MAX_TIMERS		16
+#define MAX_PACKETS		512
+
+#define DEFAULT_SENSOR_NAME	"Default Sensor"
+#define DEFAULT_SENSOR_ID	0
+
+#define MAX_INTERFACE_NAME_LEN	256
+
+#define LIST_TYPE_IP		1
+#define LIST_TYPE_NUM		2
+#define LIST_TYPE_PORT		3
+#define LIST_TYPE_IPPORT	4
+
+#define USER_RULE_START		50000
+
+
+/* Defines behaviour of logging files.
+ * Default behaviour is to open and close the file every time a message is written.
+ * Uncomment this if you want to open the file only once and keep it open
+ */
+//#define KEEP_LOGFILE_OPEN
+
+
+/**********************************************
+ * Some useful defines, mostly for convenience
+ **********************************************/
+
+/* printfs
  * Use these instead of directly using printf/fprintf to stdout or stderr
  */
 #define PRINT(msg)			printf(msg)
@@ -41,53 +95,14 @@
 #define PRINTERROR6(msg, p1, p2, p3, p4, p5, p6)	fprintf(stderr, msg, p1, p2, p3, p4, p5, p6)
 
 /* This define is for printing packet details in stderr.
- * Depends on the PrintPacketSummary() function, defined at session.c
+ * Depends on the PrintPacketSummary() and PrintSessionSummary() functions,
+ * defined at session.c
  */
 #define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
 #define PRINTSESERROR(pp, cr)		PrintSessionSummary(stderr, pp, cr)
 
 
-#include "num_list.h"
-#include "session.h"
 
-#define MAJOR_VERSION	1
-#define MINOR_VERSION	1
-
-#define MAX_PACKET_SIZE			65536+14+1
-#define TYPICAL_PACKET_SIZE		16000
-#define MAX_NAME_LEN			20
-#define MAX_RULES			10240
-#define MAX_INTERFACES			8
-#define MAX_DECODERS			128
-#define MAX_TESTS			1024
-#ifdef _OBSD_
-#define IDLE_TIMEOUT			100000
-#else
-#define IDLE_TIMEOUT			200		/*usec's*/
-#endif
-#define MAX_DECODER_DEPTH		16
-#define MAX_MESSAGE_LEN			256
-#define MAX_ACTIONS			16
-#define MAX_ACTION_ITEMS		64
-#define MAX_ITEMS_PER_ACTION	16
-#define MAX_ROUTES				16
-#define MAX_MANGLERS			8
-#define MAX_MODULES				16
-#define MAX_LISTS				16
-#define MAX_TIMERS				16
-#define MAX_PACKETS				512
-
-#define DEFAULT_SENSOR_NAME	"Default Sensor"
-#define DEFAULT_SENSOR_ID	0
-
-#define MAX_INTERFACE_NAME_LEN	256
-
-#define LIST_TYPE_IP		1
-#define LIST_TYPE_NUM		2
-#define LIST_TYPE_PORT		3
-#define LIST_TYPE_IPPORT	4
-
-#define USER_RULE_START		50000
 
 
 /**********/
@@ -255,8 +270,8 @@ typedef struct action_rec{
 } ActionRec;
 
 typedef struct message_item{
-	int						Type;
-	int						Value;
+	int			Type;
+	int			Value;
 	struct message_item*	Next;
 } MessageItem;
 
@@ -374,7 +389,10 @@ typedef struct global_vars{
 	/* logging flags */
 	unsigned char			logSession_StartEnd;
 	unsigned char			logSession_All;
+	LogFileRec			logSessionFile;
 } GlobalVars;
+
+
 
 
 #define GET_SESSION_1		1001

@@ -9,6 +9,17 @@ struct queue_t {
 };
 typedef struct queue_t QueueList;
 
+
+/**
+ * Struct used to keep names/handlers/etc of log files.
+ * This is mainly used by action alert file.
+ */
+typedef struct log_file_rec {
+	char	fname[1024];
+	FILE*	fp;
+} LogFileRec;
+
+
 /**************/
 /* Prototypes */
 /**************/

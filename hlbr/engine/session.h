@@ -33,13 +33,13 @@ struct ip_bin;
 
 #define TCP_PAYLOAD_BUFFER_SIZE	4*1460
 #define TCP_QUEUE_SIZE		16	// max number of TCP packets to 'queue'
-#define TCP_PAYLOAD_PIECES_SIZE	1024	// max number of TCP packets to put in the Queue (if it holds them all)
+#define TCP_PAYLOAD_PIECES_SIZE	1024	// max number of TCP packets to put in the Queue (if it can hold them all)
 
 
 struct tcp_stream_piece {
-	unsigned int		piece_start;	// seq number
-	unsigned int		piece_end;
-	int			PacketSlot;
+	unsigned int	piece_start;	// seq number
+	unsigned int	piece_end;
+	int		PacketSlot;
 };
 
 /**

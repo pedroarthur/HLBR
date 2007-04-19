@@ -157,37 +157,38 @@ void FreeMessage(MessageItem* MItem){
 	}
 }
 
-/***************************************************
-* Fill in the message string from the packet
-***************************************************/
-int ApplyMessage(MessageItem* MItem, int PacketSlot, char* Buff, int BuffLen){
+/**
+ * Fill in the message string from the packet (for use by the actions).
+ * This function searches for all the relevant fields (source and destiny IP, port, etc.)
+ * and formats the message.
+ */
+int ApplyMessage(MessageItem* MItem, int PacketSlot, char* Buff, int BuffLen)
+{
 	MessageItem*	MThis;
-	int				Total;
-	IPData*			ip_data=NULL;
-	TCPData*		tcp_data=NULL;
-	UDPData*		udp_data=NULL;
-	PacketRec*		p;
-	struct tm*		tm;
+	int		Total;
+	IPData*		ip_data = NULL;
+	TCPData*	tcp_data = NULL;
+	UDPData*	udp_data = NULL;
+	PacketRec*	p;
+	struct tm*	tm;
 	
-#ifdef DEBUGPATH
-	printf("In ApplyMessage\n");
-#endif
+	DEBUGPATH;
 
-	if (!MItem){
-		Buff[0]=0x00;
+	if (!MItem) {
+		Buff[0] = 0x00;
 		return FALSE;
 	}
 
-	p=&Globals.Packets[PacketSlot];
-	tm=localtime(&p->tv.tv_sec);
+	p = &Globals.Packets[PacketSlot];
+	tm = localtime(&p->tv.tv_sec);
 
-	Total=0;
-	MThis=MItem;
-	while (MThis){
-		switch (MThis->Type){
+	Total = 0;
+	MThis = MItem;
+	while (MThis) {
+		switch (MThis->Type) {
 		case MESSAGE_ITEM_SIP:
-			if (!ip_data){
-				if (!GetDataByID(PacketSlot, GetDecoderByName("IP"), (void**)&ip_data)){
+			if (!ip_data) {
+				if (!GetDataByID(PacketSlot, GetDecoderByName("IP"), (void**)&ip_data)) {
 					snprintf(Buff+Total, BuffLen-Total, "???.???.???.???");
 					Total+=strlen("???.???.???.???");
 					break;
@@ -315,12 +316,10 @@ int ApplyMessage(MessageItem* MItem, int PacketSlot, char* Buff, int BuffLen){
 			Total+=8;
 			break;			
 		default:
-#ifdef DEBUG
-			printf("I don't know how to handle that message type (%i)\n", MThis->Type);
-#endif	
+			PRINTERROR1("ApplyMessage: I don't know how to handle that message type (%i)\n", MThis->Type);
 			break;
 		}
-		MThis=MThis->Next;
+		MThis = MThis->Next;
 	}
 
 	return TRUE;

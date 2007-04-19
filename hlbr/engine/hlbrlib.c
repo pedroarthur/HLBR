@@ -5,6 +5,77 @@
 #include "hlbr.h"
 #include "hlbrlib.h"
 
+/*********************
+ * Log file functions
+ *********************/
+
+/**
+ * If the log file has not been opened yet, open it, otherwise return the 
+ * file pointer previously opened.
+ * The KEEP_LOGFILE_OPEN define controls how this function works.
+ */
+FILE* LogFile(LogFileRec* log)
+{
+#ifdef KEEP_LOGFILE_OPEN
+	if (log->fp == NULL)
+		log->fp = fopen(log->fname, "a");
+#else
+	log->fp = fopen(log->fname, "a");
+#endif
+	if (!(log->fp)) {
+		PRINTERROR1("LogFile: Couldn't open file \"%s\" for appending\n",
+			    log->fname);
+		return NULL;
+	}
+
+	return log->fp;
+} 
+
+/**
+ * If the log file is still opened - and we're opening/closing it at every
+ * access - then close it.
+ * The KEEP_LOGFILE_OPEN define controls how this function works.
+ */
+void CloseLogFile(LogFileRec* log)
+{
+#ifndef KEEP_LOGFILE_OPEN
+	if (log->fp != NULL)
+		fclose(log->fp);
+#endif
+} 
+
+/**
+ * Handle the message (write to a log file).
+ * Basically it gets a file name (inside the LogFileRec type) and writes 
+ * the message to it.
+ */
+int LogMessage(char* Message, void* Data)
+{
+	LogFileRec*	data;
+	
+	DEBUGPATH;
+
+	if (!Data) {
+		PRINTERROR("I must have a filename to write to!\n");
+		return FALSE;
+	}
+	
+	data = (LogFileRec*)Data;
+
+	fp = fopen(data->fname, "a");
+	if (!LogFile(data)) {
+		return FALSE;
+	}
+
+	fwrite(Message, strlen(Message), 1, data->fp);
+	fwrite("\n", 1, 1, data->fp);
+	
+	CloseLogFile(data);
+	
+	return TRUE;
+}
+
+
 /*********************/ 
 /* STRING FUNCTIONS */
 /*******************/ 
