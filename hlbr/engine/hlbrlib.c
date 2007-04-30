@@ -62,7 +62,7 @@ int LogMessage(char* Message, void* Data)
 	
 	data = (LogFileRec*)Data;
 
-	fp = fopen(data->fname, "a");
+	data->fp = fopen(data->fname, "a");
 	if (!LogFile(data)) {
 		return FALSE;
 	}

@@ -11,6 +11,7 @@
 #define _HLBR_H_
 
 #include "../config.h"
+#include "hlbrlib.h"
 #include <sys/time.h>
 #ifdef HAS_THREADS
 #include <pthread.h>
@@ -202,6 +203,7 @@ typedef struct test_node{
 	void*			Data;
 	struct test_node*	Next;
 } TestNode;
+
 
 /**
  * Structure for a test (like 'tcp nocase', for example)

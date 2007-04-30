@@ -1,6 +1,8 @@
 #ifndef _HLBR_LIB_H_
 #define _HLBR_LIB_H_
 
+#include <stdio.h>
+
 
 /* Used to queue a lot of things */
 struct queue_t {
@@ -18,6 +20,7 @@ typedef struct log_file_rec {
 	char	fname[1024];
 	FILE*	fp;
 } LogFileRec;
+
 
 
 /**************/
