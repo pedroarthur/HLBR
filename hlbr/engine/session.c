@@ -1058,8 +1058,8 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 			else
 				putchar(46);
 		putchar(10);
+		//PrintSessionBuffer(stdout, Port);
 	}
-
 	
 
 	TimeoutSessions(Globals.Packets[PacketSlot].tv.tv_sec);

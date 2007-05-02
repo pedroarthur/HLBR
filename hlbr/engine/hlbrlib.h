@@ -4,7 +4,10 @@
 #include <stdio.h>
 
 
-/* Used to queue a lot of things */
+/**
+ * Generic linked list struct for strings.
+ * Used to queue a lot of things along the code
+ */
 struct queue_t {
    char *item;
    struct queue_t *next;
@@ -26,10 +29,17 @@ typedef struct log_file_rec {
 /**************/
 /* Prototypes */
 /**************/
+FILE* LogFile(LogFileRec*);
+void CloseLogFile(LogFileRec*);
+int LogMessage(char*, void*);
+
 char *ParseCmp(char *,char *);
 char *RmSpace(char *);
+
 QueueList *ListAdd(char *,QueueList *, char);
 QueueList *ListDel(char *,QueueList *,int *);
 void ListClear(QueueList *);
+
+void DumpBuffer(char *, int);
 
 #endif /* _HLBR_LIB_H_ */

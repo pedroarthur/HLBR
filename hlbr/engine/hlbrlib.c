@@ -47,49 +47,55 @@ void CloseLogFile(LogFileRec* log)
 /**
  * Handle the message (write to a log file).
  * Basically it gets a file name (inside the LogFileRec type) and writes 
- * the message to it.
+ * the message to it. If the LogFileRec passed is NULL, then writes to standard
+ * output.
  */
 int LogMessage(char* Message, void* Data)
 {
-	LogFileRec*	data;
+	FILE*		fp;
 	
 	DEBUGPATH;
 
 	if (!Data) {
-		PRINTERROR("I must have a filename to write to!\n");
-		return FALSE;
+		//PRINTERROR("I must have a filename to write to!\n");
+		//return FALSE;
+		fp = stdin;
+	} else {
+		fp = fopen((LogFileRec*)Data->fname, "a");
+		if (!LogFile((LogFileRec*)Data))
+			return FALSE;
 	}
 	
-	data = (LogFileRec*)Data;
-
-	data->fp = fopen(data->fname, "a");
-	if (!LogFile(data)) {
-		return FALSE;
-	}
-
-	fwrite(Message, strlen(Message), 1, data->fp);
-	fwrite("\n", 1, 1, data->fp);
+	fwrite(Message, strlen(Message), 1, fp);
+	fwrite("\n", 1, 1, fp);
 	
-	CloseLogFile(data);
+	if (Data)
+		CloseLogFile((LogFileRec*)Data);
 	
 	return TRUE;
 }
+
 
 
 /*********************/ 
 /* STRING FUNCTIONS */
 /*******************/ 
 
-char *RmSpace(char *s){
 
+/**
+ * Removes all spaces from the start and end of a string.
+ */
+char *RmSpace(char *s)
+{
     char *p;
-    /* wipe start & end of string */
+
     for (p = s + strlen(s) - 1; ((isspace(*p)) && (p >= s)); p--);
     if (p != s + strlen(s) - 1)
         *(p + 1) = 0;
     for (p = s; ((isspace(*p)) && (*p)); p++);
     if (p != s)
         strcpy(s, p);
+
     return (char *) s;
 }
 
@@ -108,34 +114,42 @@ char *ParseCmp(char *name, char *buf)
 
     snprintf(opt, sizeof(opt), "%s=", name);
     if (strncasecmp(buf, opt, strlen(name) + 1) == 0) {
-        DBG((printf
-             ("%s(%s->%s) \n", __FUNCTION__, name,
-              (strchr(buf, '=') + 1))));
+        DBG(
+		PRINTERROR3("%s(%s->%s) \n", __FUNCTION__, name,
+			   (strchr(buf, '=') + 1)));
         return (char *) strdup(strchr(buf, '=') + 1);
     }
-    return NULL;  
+    return NULL;
 }
+
 /*************************/
 /* END STRING FUNCTIONS */
 /***********************/
+
 
 
 /**********************/
 /*** LINKED LISTS  ***/
 /********************/
 
-/* 
- Add something to a list queue or create it 
- if it does not already exist.
-*/
-
+/**
+ * Breaks up a string in a list and store it into a QueueList linked list.
+ * The character defined by the 'separator' parameter is searched in the
+ * string 'ss' and the elements in-between are copied as items in the list;
+ * note that all elements will have any leading and trailing spaces removed
+ * (with RmSpace()).
+ * @see QueueList
+ * @see RmSpace
+ */
 QueueList *ListAdd(char *ss, QueueList *q, char separator)
 {
    QueueList *ll, *z;
    char *s, *ptr, *p;
 
    s = strdup(ss);
+   MALLOC_CHECK(s);
    ptr = (char *) MALLOC(strlen(ss));
+   MALLOC_CHECK(ptr);
 
    do {
       p = strchr(s, separator);
@@ -147,9 +161,9 @@ QueueList *ListAdd(char *ss, QueueList *q, char separator)
 	 *ptr = 0;
       RmSpace(s);
       RmSpace(ptr);
-      ll = (QueueList *) MALLOC(sizeof(QueueList));
+      MALLOC_CHECK( ll = (QueueList *) MALLOC(sizeof(QueueList)) );
       ll->next = NULL;
-      ll->item = (char *) MALLOC(strlen(s) + 1);
+      MALLOC_CHECK( ll->item = (char *) MALLOC(strlen(s) + 1) );
       strcpy(ll->item, s);
       if (q == NULL)
 	 q = ll;
@@ -169,7 +183,11 @@ QueueList *ListAdd(char *ss, QueueList *q, char separator)
    return q;
 }
 
-/* remove an item from a list queue */
+/**
+ * Remove an item from a list queue.
+ * @see QueueList
+ * @see ListAdd
+ */
 QueueList *ListDel(char *s, QueueList *q, int *retval)
 {
    QueueList *ll, *list, *old;
@@ -212,4 +230,21 @@ void ListClear(QueueList *list)
       FREE(ll);
       ll = q;
    }
+}
+
+
+
+/***********************************
+ * Generic memory buffer functions *
+ ***********************************/
+
+void DumpBuffer(char *data, int size)
+{
+	int i;
+
+	if (data == NULL || size <= 0)
+		return;
+
+	for (i=0; i < size; i++) {
+		putc((data[i] >= 32 || data[i] <=127 ? data[i] : '.'), stream);
 }

@@ -564,8 +564,8 @@ void PrintSessionBuffer(FILE* stream, PP* Port)
 		fprintf(stream, "\tStream0:\n");
 		for (i=0; i < (Port->Stream0->LastSeq - Port->Stream0->TopSeq + 1); i++)
 			putc(
-				(Port->Stream0->Payloads[0] >= 32 || Port->Stream0->Payloads[0] <=127
-				 ? Port->Stream0->Payloads[0] : '.'),
+				(Port->Stream0->Payloads[i] >= 32 || Port->Stream0->Payloads[i] <=127
+				 ? Port->Stream0->Payloads[i] : '.'),
 				stream
 				);
 		putc(10, stream);
@@ -574,8 +574,8 @@ void PrintSessionBuffer(FILE* stream, PP* Port)
 		fprintf(stream, "\tStream1:\n");
 		for (i=0; i < (Port->Stream1->LastSeq - Port->Stream1->TopSeq + 1); i++)
 			putc(
-				(Port->Stream1->Payloads[0] >= 32 || Port->Stream1->Payloads[0] <=127
-				 ? Port->Stream1->Payloads[0] : '.'),
+				(Port->Stream1->Payloads[i] >= 32 || Port->Stream1->Payloads[i] <=127
+				 ? Port->Stream1->Payloads[i] : '.'),
 				stream
 				);
 		putc(10, stream);

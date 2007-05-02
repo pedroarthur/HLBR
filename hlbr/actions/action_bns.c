@@ -125,7 +125,7 @@ int BNSAction(int RuleNum, int PacketSlot, void* Data){
 	}
 						
 	snprintf(Message, 512,"Rerouting %s to Honeypot for %i seconds",inet_ntoa(*(struct in_addr*)&IP->Header->saddr),data->TimeOut);
-	LogMessage(Message);
+	LogMessageAllActions(Message);
 				
 	return AddRangeTime(BNSRerouteList, ntohl(IP->Header->saddr), ntohl(IP->Header->saddr), p->tv.tv_sec+data->TimeOut);
 }

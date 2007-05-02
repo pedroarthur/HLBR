@@ -113,13 +113,19 @@
 #define ARRAYSIZE(array) (sizeof(array)/sizeof(array[0]))
 
 #define MALLOC malloc
+#define MALLOC_CHECK(x) { \
+	if (x == NULL) { \
+		PRINTERROR2("Couldn't allocate memory! (%s():%d)\n", __FUNC__, __LINE__); \
+		return NULL; \
+	} \
+}
 
 #define FREE(x) { \
-  if (x != NULL) { \
-    free(x); \
-  } else { \
-    DBG((printf("Attempting to free a NULL pointer at 0x%x\n", x))); \
-  } \
+	if (x != NULL) { \
+		free(x); \
+	} else { \
+		PRINTERROR3("Attempting to free a NULL pointer at 0x%x (%s():%d)\n", x, __FUNC__, __LINE__); \
+	} \
 }
 
 #define FREE_IF(x) { \

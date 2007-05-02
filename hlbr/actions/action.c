@@ -150,19 +150,22 @@ int PerformActions(int PacketSlot){
 	return TRUE;
 }
 
-/******************************************
-* Log a message
-*******************************************/
-int	LogMessage(char* Message){
+/**
+ * Log a message, using all applicable responses in all defined actions.
+ * Differentrly from LogMessage, this function searches for all responses in
+ * all defined actions and calls every one of them.
+ * @see LogMessage
+ */
+int	LogMessageAllActions(char* Message)
+{
 	int 		i,j;
 	ActionRec*	Action;
-#ifdef DEBUGPATH
-	printf("In LogMessage\n");
-#endif
 
-	for (i=0;i<Globals.NumActions;i++){
-		Action=&Globals.Actions[i];
-		for (j=0;j<Action->NumItems;j++){
+	DEBUGPATH;
+
+	for (i = 0; i < Globals.NumActions; i++) {
+		Action = &Globals.Actions[i];
+		for (j = 0; j < Action->NumItems; j++) {
 			if (Globals.ActionItems[Action->ActionItems[j]].MessageFunc)
 				Globals.ActionItems[Action->ActionItems[j]].MessageFunc(Message, Globals.Actions[Globals.Rules[i].Action].ActionItemData[j]);
 		}
