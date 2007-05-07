@@ -30,15 +30,9 @@ int TestTCPNoCase(int PacketSlot, TestNode* Nodes)
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestTCPNoCase\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Testing TCP NoCase\n");
-#endif	
-
-	p=&Globals.Packets[PacketSlot];
+	p = &Globals.Packets[PacketSlot];
 	
 	if (!Nodes) return FALSE;
 	

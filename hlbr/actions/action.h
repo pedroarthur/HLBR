@@ -11,6 +11,6 @@ int	GetActionByName(char* Name);
 int CreateAction(char* Name);
 int BuildMessageString(char* Message, int PacketSlot, char* TargetBuff, int TargetBuffLen);
 int PerformActions(int PacketSlot);
-int	LogMessage(char* Message);
+int	LogMessageAllActions(char* Message);
 
 #endif

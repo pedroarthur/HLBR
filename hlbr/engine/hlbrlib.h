@@ -40,6 +40,6 @@ QueueList *ListAdd(char *,QueueList *, char);
 QueueList *ListDel(char *,QueueList *,int *);
 void ListClear(QueueList *);
 
-void DumpBuffer(char *, int);
+void DumpBuffer(unsigned char *, int, FILE *);
 
 #endif /* _HLBR_LIB_H_ */

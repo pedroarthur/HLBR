@@ -115,7 +115,7 @@
 #define MALLOC malloc
 #define MALLOC_CHECK(x) { \
 	if (x == NULL) { \
-		PRINTERROR2("Couldn't allocate memory! (%s():%d)\n", __FUNC__, __LINE__); \
+		PRINTERROR2("Couldn't allocate memory! (%s():%d)\n", __FUNCTION__, __LINE__); \
 		return NULL; \
 	} \
 }
@@ -124,7 +124,7 @@
 	if (x != NULL) { \
 		free(x); \
 	} else { \
-		PRINTERROR3("Attempting to free a NULL pointer at 0x%x (%s():%d)\n", x, __FUNC__, __LINE__); \
+		PRINTERROR3("Attempting to free a NULL pointer at 0x%x (%s():%d)\n", x, __FUNCTION__, __LINE__); \
 	} \
 }
 

@@ -514,7 +514,7 @@ void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TD
 		} else 
 			// No IP data but TCP data?...
 			fprintf(stream, "P:%u TCP ?.?.?.?:%d->?.?.?.?:%d [%u ack:%u]%c",
-		PacketSlot, TData->Header->source, TData->Header->dest,
+		PacketSlot, ntohs(TData->Header->source), ntohs(TData->Header->dest),
 		TData->Header->seq, TData->Header->ack_seq,
 		(newline ? '\n' : ' '));
 		return;
@@ -526,12 +526,22 @@ void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TD
 				(newline ? '\n' : ' '));
 		return;
 	}
-	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d [%u ack:%u]%c",
+	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d [%u",
 		PacketSlot,
-		IP_BYTES(IData->Header->saddr), TData->Header->source,
-		IP_BYTES(IData->Header->daddr), TData->Header->dest,
-		TData->Header->seq, TData->Header->ack_seq,
-		(newline ? '\n' : ' '));
+		IP_BYTES(IData->Header->saddr), ntohs(TData->Header->source),
+		IP_BYTES(IData->Header->daddr), ntohs(TData->Header->dest),
+		TData->Header->seq);
+	if (TData->Header->ack_seq)
+		fprintf(stream, " ack:%u", TData->Header->ack_seq);
+	if (TData->Header->syn || TData->Header->fin || TData->Header->rst) {
+		putc(' ', stream);
+		if (TData->Header->syn)	putc('s', stream);
+		if (TData->Header->fin)	putc('f', stream);
+		if (TData->Header->rst)	putc('r', stream);
+	}
+	putc(']', stream);
+	if (newline)
+		putc('\n', stream);
 	return;
 }
 

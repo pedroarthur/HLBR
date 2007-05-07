@@ -61,7 +61,7 @@ int LogMessage(char* Message, void* Data)
 		//return FALSE;
 		fp = stdin;
 	} else {
-		fp = fopen((LogFileRec*)Data->fname, "a");
+		fp = fopen(((LogFileRec*)Data)->fname, "a");
 		if (!LogFile((LogFileRec*)Data))
 			return FALSE;
 	}
@@ -238,13 +238,13 @@ void ListClear(QueueList *list)
  * Generic memory buffer functions *
  ***********************************/
 
-void DumpBuffer(char *data, int size)
+void DumpBuffer(unsigned char *data, int size, FILE *stream)
 {
 	int i;
 
 	if (data == NULL || size <= 0)
 		return;
 
-	for (i=0; i < size; i++) {
-		putc((data[i] >= 32 || data[i] <=127 ? data[i] : '.'), stream);
+	for (i=0; i < size; i++)
+		putc((data[i] >= 32 && data[i] <=127 ? data[i] : '.'), stream);
 }

@@ -1,4 +1,7 @@
 #define DEBUG
+//#define DEBUG_TIME	// Debug the session timing out code
+#define DEBUG_DIRECTION	// Debug the find session direction/state code
+
 // TODO: add a shutdown handler that frees all allocated memory for sessions
 #include "session.h"
 #include "hlbrlib.h"
@@ -24,9 +27,6 @@ extern	GlobalVars	Globals;
 PP*			TimeHead;
 PP*			TimeTail;
 
-//#define DEBUG
-//#define DEBUG_TIME
-//#define DEBUG_DIRECTION	// Debug the find session direction/state code
 #ifdef DEBUG_DIRECTION
 #define DBGDIR(a)	a
 #else
@@ -216,9 +216,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2)
 		}
 		
 		if ((Pair->IP1==IP1) && (Pair->IP2==IP2)) {
-#ifdef DEBUG
-			printf("Found Pair in Bin %i Slot %i\n",Hash, Middle);
-#endif				
+			//DBG( PRINT2("Found Pair in Bin %i Slot %i\n", Hash, Middle) );
 			return Pair;
 		}
 		
@@ -382,7 +380,7 @@ int RemovePort(PP* Port)
 			 Port->SessionID, IP_BYTES(Pair->IP1), Port->Port1,
 			 IP_BYTES(Pair->IP2), Port->Port2,
 			 Port->Direction, Port->TCPCount);
-		LogMessage(Message, Globals.logSessionFile);
+		LogMessage(Message, &(Globals.logSessionFile));
 	}
 
 	/* get pointers to parents */
@@ -555,7 +553,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 				 IP_BYTES(Pair->IP2), Port->Port2,
 				 //(TData->Header->syn ? 's' : '.'), (TData->Header->ack ? 'a' : '.'),
 				 Port->Direction, Port->TCPCount);
-			LogMessage(Message, Globals.logSessionFile);
+			LogMessage(Message, &(Globals.logSessionFile));
 		}
 
 		/* Tell everyone this session exists */
@@ -582,7 +580,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 		}
 		
 		if ( (Port->Port1 == Port1) && (Port->Port2 == Port2) ) {
-			DBG( PRINTERROR1("Found Port in Slot %i\n", Middle) );
+			//DBG( PRINTERROR1("Found Port in Slot %i\n", Middle) );
 			Port->LastTime = Now;
 			UpdateTime(Port);
 			return Port;
@@ -654,7 +652,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 #endif
 		       //(TData->Header->syn ? 's' : '.'), (TData->Header->ack ? 'a' : '.'),
 		       Port->Direction, Port->TCPCount);
-		LogMessage(Message, Globals.logSessionFile);
+		LogMessage(Message, &(Globals.logSessionFile));
 	}
 
 	AddToTime(Port);
@@ -867,7 +865,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 			((Port->Direction == SESSION_IP2_SERVER) && (IData->Header->saddr == IP2))
 			) {
 			
-			DBG( PRINT("This packet came from the server\n") );
+			DBGDIR( PRINT("This packet came from the server\n") );
 			
 			if ( (Port->ClientState == TCP_STATE_FIN) && (Port->ServerState == TCP_STATE_FIN) && !(TData->Header->fin || TData->Header->syn || TData->Header->rst) ) {
 				DBGDIR( PRINT("Final ACK\n") );
@@ -882,7 +880,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 				/* syn|ack from the server */
 
 				if ( (Port->ServerState == TCP_STATE_NEW) && (Port->ClientState == TCP_STATE_SYN)) {
-					DBG( PRINT("Normal SYN|ACK\n") );
+					DBGDIR( PRINT("Normal SYN|ACK\n") );
 
 					Port->ServerState = TCP_STATE_SYNACK;
 					Port->ServerSeq = ntohl(TData->Header->seq);
@@ -932,7 +930,8 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 			}
 		} else {
 
-			DBG( PRINT("This packet came from the client\n") );
+			DBGDIR( PRINT("This packet came from the client - ") );
+			PrintPacketSummary(stdout, PacketSlot, IData, TData, TRUE);
 			
 			if ( (Port->ClientState == TCP_STATE_FIN) && (Port->ServerState == TCP_STATE_FIN) && !(TData->Header->fin || TData->Header->syn || TData->Header->rst) ) {
 				DBGDIR( PRINT("Final ACK\n") );
@@ -961,7 +960,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 					Port->ClientAck = ntohl(TData->Header->ack_seq);
 					reassemble = 1;
 				} else {
-					DBGDIR( PRINT("Error:  This packet was unexpected (2)\n") );
+					DBGDIR( PRINT2("Error:  This packet was unexpected (2) SrvState:%d CliState:%d\n", Port->ServerState, Port->ClientState) );
 				}
 			} else if (TData->Header->rst) {
 				DBGDIR( PRINT("Client sent a RST\n") );
@@ -991,6 +990,7 @@ int AssignSessionTCP(int PacketSlot, void* Data)
 	 */
 
 	// Will this packet be reassembled in the TCP stream?
+	DBG( PRINT2("Reassemble:%d noreassemble:%d\n", reassemble, Port->noreassemble) );
 	if (reassemble && !(Port->noreassemble)) {
 		if ((Port->Direction == SESSION_IP1_SERVER && IData->Header->saddr == IP2) ||
 		    (Port->Direction == SESSION_IP2_SERVER && IData->Header->saddr == IP1)) {
