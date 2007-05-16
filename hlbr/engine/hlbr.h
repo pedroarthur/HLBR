@@ -268,34 +268,34 @@ typedef struct action_item{
 	void* 	(*ParseArgs)(char* Args);
 } ActionItem;
 
-typedef struct action_rec{
-	char				Name[MAX_NAME_LEN];
-	int					ID;
+typedef struct action_rec {
+	char		Name[MAX_NAME_LEN];
+	int		ID;
 	
-	int					ActionItems[MAX_ITEMS_PER_ACTION];
-	void*				ActionItemData[MAX_ITEMS_PER_ACTION];
-	int					NumItems;
+	int		ActionItems[MAX_ITEMS_PER_ACTION];
+	void*		ActionItemData[MAX_ITEMS_PER_ACTION];
+	int		NumItems;
 } ActionRec;
 
-typedef struct message_item{
+typedef struct message_item {
 	int			Type;
 	int			Value;
 	struct message_item*	Next;
 } MessageItem;
 
-typedef struct rule_rec{
-	int					ID;
-	MessageItem*		MessageFormat;
-	int					GlobalID;
-	int					Revision;
-	int					ModifyDate;
-	int					Action;
+typedef struct rule_rec {
+	int		ID;
+	MessageItem*	MessageFormat;
+	int		GlobalID;
+	int		Revision;
+	int		ModifyDate;
+	int		Action;
 } RuleRec;
 
 typedef struct route_rec{
-	int					ID;
-	char				Name[MAX_NAME_LEN];	
-	char				Active;
+	int		ID;
+	char		Name[MAX_NAME_LEN];	
+	char		Active;
 	
 	int (*RouteFunc)(int PacketSlot);
 	int (*AddNode)(int RouteID, char* Args);
@@ -335,7 +335,7 @@ typedef struct timer_rec{
 
 typedef struct global_vars{
 	char*			SensorName;
-	int				SensorID;
+	int			SensorID;
 
 	char			Done;
 	char			UseThreads;	
@@ -343,47 +343,47 @@ typedef struct global_vars{
 	char*			ConfigFilename;
 	char*			RulesFilename;	
 	char*			LogDir;
-	int				PacketLimit;
-	MessageItem*	AlertHeader;
-	unsigned int	AlertCount;
+	int			PacketLimit;
+	MessageItem*		AlertHeader;
+	unsigned int		AlertCount;
 	
 	PacketRec		Packets[MAX_PACKETS];
-	int				IdleCount;
-	int				PendingCount;
-	int				SavedCount;
-	int				AllocatedCount;
-	int				ProcessingCount;
+	int			IdleCount;
+	int			PendingCount;
+	int			SavedCount;
+	int			AllocatedCount;
+	int			ProcessingCount;
 	
 	RuleRec			Rules[MAX_RULES];
-	int				NumRules;
+	int			NumRules;
 	
-	InterfaceRec	Interfaces[MAX_INTERFACES];
-	int				NumInterfaces;
+	InterfaceRec		Interfaces[MAX_INTERFACES];
+	int			NumInterfaces;
 	
 	DecoderRec		Decoders[MAX_DECODERS];
-	int				NumDecoders;
-	int				DecoderRoot;
+	int			NumDecoders;
+	int			DecoderRoot;
 	
 	ModuleRec		Modules[MAX_MODULES];
-	int				NumModules;
+	int			NumModules;
 	
 	TestRec			Tests[MAX_TESTS];
-	int				NumTests;	
+	int			NumTests;	
 	
 	ActionItem		ActionItems[MAX_ACTION_ITEMS];
-	int				NumActionItems;
+	int			NumActionItems;
 	
 	ActionRec		Actions[MAX_ACTIONS];
-	int				NumActions;
+	int			NumActions;
 	
 	RouteRec		Routes[MAX_ACTIONS];
-	int				NumRoutes;
+	int			NumRoutes;
 
 	MangleRec		Mangles[MAX_ACTIONS];
-	int				NumMangles;
+	int			NumMangles;
 	
 	GlobalList		Lists[MAX_LISTS];
-	int				NumLists;
+	int			NumLists;
 
 	TimerRec		Timers[MAX_TIMERS];
 
