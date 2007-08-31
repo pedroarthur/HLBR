@@ -32,7 +32,13 @@ int TestIPDst(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In TestIPDst\n");
+#endif
+
+#ifdef DEBUG
+	printf("Testing IP Dst\n");
+#endif	
 	
 	if (!Nodes) return FALSE;
 	
@@ -97,14 +103,20 @@ int TestIPDst(int PacketSlot, TestNode* Nodes){
 * Add a rule node to this test
 ******************************************/
 int IPDstAddNode(int TestID, int RuleID, char* Args){
-	IPDstData*	data;
-	IPDstData*	t;
-	IPDstData*	last;
+	IPDstData*			data;
+	IPDstData*			t;
+	IPDstData*			last;
 #ifdef DEBUG	
-	int		i;
+	int					i;
 #endif
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In IPDstAddNode\n");
+#endif
+
+#ifdef DEBUG
+	printf("Addding a Node with args %s\n",Args);
+#endif
 
 	data=calloc(sizeof(IPDstData),1);
 	

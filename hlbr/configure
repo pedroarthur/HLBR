@@ -184,24 +184,24 @@ fi
 rm -f conftest.freopen conftest.freopen.c
 #end checking for freopen
 
-##check for a built-in dlopen call
-#echo -n "Buscando dlopen / Checking for dlopen.............."
-#cat >conftest.dlopen.c <<EOF
-##include <unistd.h>
-#int main() { dlopen(0,0); return 0; }
-#EOF
-#if $CCompiler -o conftest.dlopen conftest.dlopen.c -ldl -rdynamic > /dev/null 2>&1
-#then
-#        echo "#define HAS_DLOPEN" >> config.h
-#        echo "" >> config.h
-#        echo "Encontrado / Found"
-#	echo "LIB_DL=-ldl" >> Makefile
-#	echo "LATE_BINDING=-rdynamic" >> Makefile
-#else
-#        echo "Nao encontrado / Not found"
-#fi
-#rm -f conftest.dlopen conftest.dlopen.c
-##end checking for dlopen
+#check for a built-in dlopen call
+echo -n "Buscando dlopen / Checking for dlopen.............."
+cat >conftest.dlopen.c <<EOF
+#include <unistd.h>
+int main() { dlopen(0,0); return 0; }
+EOF
+if $CCompiler -o conftest.dlopen conftest.dlopen.c -ldl -rdynamic > /dev/null 2>&1
+then
+        echo "#define HAS_DLOPEN" >> config.h
+        echo "" >> config.h
+        echo "Encontrado / Found"
+	echo "LIB_DL=-ldl" >> Makefile
+	echo "LATE_BINDING=-rdynamic" >> Makefile
+else
+        echo "Nao encontrado / Not found"
+fi
+rm -f conftest.dlopen conftest.dlopen.c
+#end checking for dlopen
 
 
 #finish off the config.h file

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../engine/hlbr.h"
 #include "../decoders/decode_tcp.h"
 #include "../packets/packet.h"
 #include "../engine/jtree.h"
@@ -17,8 +16,8 @@ typedef struct tcp_content_data{
 //#define DEBUG
 //#define DEBUGMATCH
 
-int	TCPDecoderID;
-JTree	TCPContentTree;
+int 			TCPDecoderID;
+JTree			TCPContentTree;
 
 #ifdef OLD_MATCH
 /********************************************
@@ -27,8 +26,9 @@ JTree	TCPContentTree;
 int MatchString(char* Candidate, int CLen, char* Packet, int PLen){
 	int 	i;
 	int		j;
-
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In MatchString\n");
+#endif
 
 	if (CLen<PLen) return FALSE;
 	
@@ -45,17 +45,22 @@ int MatchString(char* Candidate, int CLen, char* Packet, int PLen){
 }
 #endif
 
-/**
- * Apply the Test TCP Content
- */
-int TestTCPContent(int PacketSlot, TestNode* Nodes)
-{
-	PacketRec*		p;
+/******************************************
+* Apply the Test
+******************************************/
+int TestTCPContent(int PacketSlot, TestNode* Nodes){
+	PacketRec*			p;
 #ifdef DEBUGMATCH	
-	int			i;
+	int					i;
 #endif	
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In TestTCPContent\n");
+#endif
+
+#ifdef DEBUG
+	printf("Testing TCP Content\n");
+#endif	
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -87,33 +92,19 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes)
 	return TRUE;
 }
 
-
-/**
- * Apply the Test TCP Content, for a TCP stream buffer
- */
-int TestTCPContent_Stream(int PacketSlot, TestNode* Nodes)
-{
-/*
-	PacketRec*	p;
-
-	if (!Nodes) return FALSE;
-
-	p=&Globals.Packets[PacketSlot];
-	
-	MatchStrings(&TCPContentTree, p->RuleBits, p->Stream->Seqs.buffer, p->Stream->Seqs.LastSeq - p->Stream->Seqs.TopSeq + 1);
-	
-	return TRUE;
-*/
-}
-
-
 /******************************************
 * Add a rule node to this test
 ******************************************/
 int TCPContentAddNode(int TestID, int RuleID, char* Args){
 	TCPContentData*		data;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In TCPContentAddNode\n");
+#endif
+
+#ifdef DEBUG
+	printf("Addding a Node with args %s\n",Args);
+#endif
 
 	data=calloc(sizeof(TCPContentData),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, Args);
@@ -128,24 +119,26 @@ int TCPContentAddNode(int TestID, int RuleID, char* Args){
 	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
-/**
- * Called when we're all done adding TCP Content rules
- */
-int TestTCPContentFinishedSetup()
-{
-	DEBUGPATH;
+/****************************************
+* Called when we're all done adding rules
+****************************************/
+int TestTCPContentFinishedSetup(){
+#ifdef DEBUGPATH
+	printf("In TestTCPContentFinishedSetup\n");
+#endif
 
 	return FinalizeJTree(&TCPContentTree);
 }
 
-/**
- * Set up the test of the TCP Content
- */
-int InitTestTCPContent()
-{
+/****************************************
+* Set up the test of the TCP Content
+*****************************************/
+int InitTestTCPContent(){
 	int	TestID;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In InitTestTCPContent\n");
+#endif
 
 	InitJTree(&TCPContentTree, FALSE);
 
@@ -160,7 +153,6 @@ int InitTestTCPContent()
 	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "content");
 	Globals.Tests[TestID].AddNode=TCPContentAddNode;
 	Globals.Tests[TestID].TestFunc=TestTCPContent;
-	Globals.Tests[TestID].TestStreamFunc=TestTCPContent_Stream;
 	Globals.Tests[TestID].FinishedSetup=TestTCPContentFinishedSetup;
 	
 	TCPDecoderID=GetDecoderByName("TCP");

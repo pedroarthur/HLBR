@@ -1,5 +1,4 @@
 DEBUG=-g -Wall 
-#define DEBUG 1
 
 all: hlbr.o  \
 parse_config.o  \
@@ -28,7 +27,7 @@ message.o: message.c message.h ../config.h hlbr.h
 
 num_list.o: num_list.c num_list.h ../config.h hlbr.h
 	$(CC) -c -o num_list.o num_list.c $(DEBUG)
-
+	
 jtree.o: jtree.c jtree.h ../config.h hlbr.h
 	$(CC) -c -o jtree.o jtree.c $(DEBUG)
 

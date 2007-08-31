@@ -117,7 +117,7 @@ int RebuildPacket(struct defrag_item* Frags, int NumFrags){
 	
 	for (i=0;i<NumFrags;i++){
 		if (!GetDataByID(Frags[i].PacketSlot, IPDecoderID, (void**)&idata)){
-			printf("Failed to get IP data in slot %i\n",PacketSlot);
+			printf("1Failed to get IP data in slot %i\n",PacketSlot);
 			return FALSE;
 		}
 	
@@ -194,7 +194,9 @@ int SortFragArray(struct defrag_item* Frags, int NumFrags){
 	int			found;
 	int			last;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In SortFragArray\n");
+#endif
 
 	next=0;
 	last=FALSE;
@@ -258,7 +260,9 @@ void* DecodeIPDefrag(int PacketSlot){
 	
 	PacketRec*			p;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In DecodeIPDefrag\n");
+#endif
 
 #ifdef DEBUG
 	printf("----------------------------\n");
@@ -388,7 +392,9 @@ void* DecodeIPDefrag(int PacketSlot){
 int InitDecoderIPDefrag(){
 	int DecoderID;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In InitDecoderIPDefrag\n");
+#endif
 
 	if ((DecoderID=CreateDecoder("IPDefrag"))==DECODER_NONE){
 #ifdef DEBUG

@@ -40,13 +40,10 @@ extern GlobalVars	Globals;
 //#define DEBUG
 #define DEBUG1
 
-/**
- * Add all the tests to the tree
- * Calls every test's initializer function (every test must have one and have
- * it declared here)
- */
-int InitTests()
-{
+/*******************************
+* Add all the tests to the tree
+*******************************/
+int InitTests(){
 #ifdef DEBUGPATH
 	printf("In InitTests\n");
 #endif

@@ -3,7 +3,6 @@
 * threads and other factors.
 *******************************************/
 #include "main_loop.h"
-#include "hlbrlib.h"
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -17,7 +16,6 @@
 #include <string.h>
 
 //#define DEBUG
-#define DEBUGPATH ;
 //#define DEBUGPACKETS
 //#define DEBUG1
 
@@ -25,21 +23,21 @@ extern GlobalVars	Globals;
 extern int			TCPDecoderID;
 extern int			UDPDecoderID;
 
-
-/**
- * Idle function. Called whenever hlbr is idle
- */
-void IdleFunc()
-{
-	DEBUGPATH;
+/************************************
+* Called whenever hlbr is idle
+************************************/
+void IdleFunc(){
+#ifdef DEBUGPATH
+	printf("In IdleFunc\n");
+#endif
 
 #ifdef DEBUGPACKETS
-	PRINTERROR("There are:\n");
-	PRINTERROR1("  %i Idle\n",	Globals.IdleCount);
-	PRINTERROR1("  %i Pending\n",	Globals.PendingCount);
-	PRINTERROR1("  %i Saved\n",	Globals.SavedCount);
-	PRINTERROR1("  %i Allocated\n",	Globals.AllocatedCount);
-	PRINTERROR1("  %i Processing\n",Globals.ProcessingCount);
+	printf("There are:\n");
+	printf("  %i Idle\n",Globals.IdleCount);
+	printf("  %i Pending\n",Globals.PendingCount);
+	printf("  %i Saved\n",Globals.SavedCount);
+	printf("  %i Allocated\n",Globals.AllocatedCount);
+	printf("  %i Processing\n",Globals.ProcessingCount);
 #endif
 #ifdef _OBSD_	
  	usleep(100);
@@ -49,28 +47,31 @@ void IdleFunc()
 }
 
 
-/**
- * Apply the routing and send out the packet.
- */
-int RouteAndSend(int PacketSlot)
-{
+/**********************************************
+* Apply the routing and send out the packet
+***********************************************/
+int RouteAndSend(int PacketSlot){
 	PacketRec*	p;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In RouteAndSend\n");
+#endif
+
+#ifdef DEBUG
+	printf("Routing the packet\n");
+#endif
 	
-	p = &Globals.Packets[PacketSlot];
+	p=&Globals.Packets[PacketSlot];
 	
-	/* No routing Protocols */
-	if (Globals.NumRoutes == 0)
-		return TRUE;
-	/* dropped by rules */
-	if (!p->PassRawPacket)
-		return TRUE;
+	/*No routing Protocols*/
+	if (Globals.NumRoutes==0) return TRUE;
+	/*dropped by rules*/
+	if (!p->PassRawPacket) return TRUE;
 	
-	p->TargetInterface = -1;
+	p->TargetInterface=-1;
 	
 #ifdef DEBUG1	
-	if (p->InterfaceNum == 2)
+	if (p->InterfaceNum==2)
 	printf("Routing %02X:%02X:%02X:%02X:%02X:%02X->%02X:%02X:%02X:%02X:%02X:%02X\n",
 		p->RawPacket[6],
 		p->RawPacket[7],
@@ -86,21 +87,24 @@ int RouteAndSend(int PacketSlot)
 		p->RawPacket[5]);
 #endif	
 	
-	if (!Route(PacketSlot)) {
-		DBG( PRINTERROR("Routing rules dropped the packet\n") );
+	if (!Route(PacketSlot)){
+#ifdef DEBUG	
+		printf("Routing rules dropped the packet\n");
+#endif		
 		return TRUE;
 	}
 
-	if (p->TargetInterface == -1) {
-		DBG( PRINTERROR("No Packet Handler set a route. Dropping.\n") );
+	if (p->TargetInterface==-1){
+#ifdef DEBUG
+		printf("No Packet Handler set a route. Dropping.\n");
+#endif	
 		return FALSE;
 	}
 
 #ifdef DEBUG1
-	if (p->InterfaceNum == 2)
-	printf("- Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
+	if (p->InterfaceNum==2)
+	printf("Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
 #endif	
-
 	return WritePacket(PacketSlot);	
 }
 
@@ -113,7 +117,9 @@ int HandleTimers(int Now){
 	int			TimeLeft;
 	TimerRec*	t;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In HandleTimers\n");
+#endif	
 
 	if ( (NextTimer!=0) && (Now<NextTimer) ) return TRUE;
 		
@@ -144,24 +150,10 @@ int HandleTimers(int Now){
 	return TRUE;	
 }
 
-/**
- * Check the packet for rules matches.
- * This is one of the main functions responsible for everything HLBR does;
- * the other is Decode(), called here. Decode() is called with the 'root'
- * packet decoder, so all registered decoders (TCP, UDP, etc.) will 
- * be called, with all their respective registered tests (according to the
- * rules defined by the user). After this, the RuleBits field of the packet 
- * structure is tested to see if any rule matched, and the necessary actions
- * performed. Then finally the packet is 'routed' and sent.
- * @return Always TRUE?
- * @remarks Basically this is what ProcessPacket does:
- * @li Calls HandleTimers()
- * @li Calls the 'root' decoder (defined in Globals.DecoderRoot) with Decode()
- * @li Tests the RuleBits packet field (results of the tests/rules); if any rule matched, calls PerformActions()
- * @li Then, the packet is routed with RouteAndSend()
- */
-int ProcessPacket(int PacketSlot)
-{
+/************************************
+* Check the packet for rules matches
+************************************/
+int ProcessPacket(int PacketSlot){
 	PacketRec*	p;
 	static int	PacketSec=0;
 	static int	TCPSec=0;
@@ -169,82 +161,87 @@ int ProcessPacket(int PacketSlot)
 	static int	LastTime=0;
 	void*		data;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In ProcessPacket\n");
+#endif
 
-	if (Globals.PacketLimit == 0) {
-		PRINTERROR("Packet Limit Reached\n");
-		Globals.Done = TRUE;
+
+	if (Globals.PacketLimit==0){
+		printf("Packet Limit Reached\n");
+		Globals.Done=TRUE;
 	}
 	
-	if (Globals.PacketLimit > 0)
-		Globals.PacketLimit--;
+	if (Globals.PacketLimit>0) Globals.PacketLimit--;
 
-	p = &Globals.Packets[PacketSlot];
+	p=&Globals.Packets[PacketSlot];
 
-	DBG( PRINTERROR1("P:%u\n", p->PacketNum) );
+#ifdef DEBUG
+	printf("++++++++++++++++++++++++++++++++%u\n",p->PacketNum);
+#endif
 
-	if (p->tv.tv_sec)
-		HandleTimers(p->tv.tv_sec);
+	if (p->tv.tv_sec) HandleTimers(p->tv.tv_sec);
 
-	if (!Decode(Globals.DecoderRoot,PacketSlot)) {
-		PRINTERROR("Error applying decoder to packet\n");
+	if (!Decode(Globals.DecoderRoot,PacketSlot)){
+		printf("Error Processing Packet\n");
 	}
 
-	/* update the packet statistics */
+	/*update the packet statistics*/
 	PacketSec++;
-	if (GetDataByID(PacketSlot, TCPDecoderID, &data)) {
+	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
 		TCPSec++;
-		// Unblock first packet from TCP remount buffer
-		TCPRemount_unblock(PacketSlot, FALSE);
-	} else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
+	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
 		UDPSec++;
 		
-	if (Globals.Packets[PacketSlot].tv.tv_sec != LastTime) {
-		Globals.PacketsPerSec = PacketSec;
-		Globals.TCPPerSec = TCPSec;
-		Globals.UDPPerSec = UDPSec;
+	if (Globals.Packets[PacketSlot].tv.tv_sec!=LastTime){
+		Globals.PacketsPerSec=PacketSec;
+		Globals.TCPPerSec=TCPSec;
+		Globals.UDPPerSec=UDPSec;
 	
 		//printf("%i packet, %i tcp, %i udp %i other\n",PacketSec, TCPSec, UDPSec, PacketSec-(TCPSec+UDPSec));	
 		
-		PacketSec = 0;
-		TCPSec = 0;
-		UDPSec = 0;
-		LastTime = Globals.Packets[PacketSlot].tv.tv_sec;
+		PacketSec=0;
+		TCPSec=0;
+		UDPSec=0;
+		LastTime=Globals.Packets[PacketSlot].tv.tv_sec;
 	}
 
-		
-	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)) {
-		DBG( PRINTERROR("There are rule matches\n") );
-		if (!PerformActions(PacketSlot)) {
-			PRINTERROR("Failed to execute the actions\n");
+	
+	
+	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
+#ifdef DEBUG
+		printf("There are rule matches\n");
+#endif	
+		if (!PerformActions(PacketSlot)){
+			printf("Failed to execute the actions\n");
 		}
 	}
-
-	// route the packet only if it isn't blocked by TCP stream remount
-	if (p->Status != PACKET_STATUS_BLOCKED) {
-		RouteAndSend(PacketSlot);
-		ReturnEmptyPacket(PacketSlot);
-	}
-
+	
+	
+	RouteAndSend(PacketSlot);
+	ReturnEmptyPacket(PacketSlot);
+	
 	return TRUE;
 }
 
-
-/**
-* Thread to process packets from the queue.
-* There may be more than one of these (but not currently in HLBR).
-*/
-void* ProcessPacketThread(void* v)
-{
+/*******************************
+* Start up a thread to process 
+* packets from the queue.
+* There may be more than one of
+* these.
+*******************************/
+void* ProcessPacketThread(void* v){
 	int	PacketSlot;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In ProcessPacketThread\n");
+#endif
+	
 
 	while (!Globals.Done){
-		PacketSlot = PopFromPending();		
-		if (PacketSlot != PACKET_NONE) {
+		PacketSlot=PopFromPending();		
+		if (PacketSlot!=PACKET_NONE){
 			ProcessPacket(PacketSlot);
-		} else {
+		}else{
 			IdleFunc();
 		}	
 	}
@@ -264,7 +261,14 @@ int MainLoopPoll(){
 	int				highest;
 	int				PacketSlot;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In MainLoopPoll\n");
+#endif
+
+#ifdef DEBUG
+	printf("Starting loop in poll mode\n");
+	printf("--------------------------\n");
+#endif
 
 	Globals.Done=FALSE;
 	while (!Globals.Done){
@@ -311,28 +315,29 @@ int MainLoopPoll(){
 	return TRUE;
 }
 
-/**
- * Spawn a thread for each interface.
- */
-int MainLoopThreaded()
-{
+/*******************************
+* Spawn a thread for each interface
+*******************************/
+int MainLoopThreaded(){
 	int i;
 //	pthread_t	test_thread;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In MainLoopThreaded\n");
+#endif
 
-	Globals.Done = FALSE;
+#ifdef DEBUG
+	printf("Starting loop in Threaded mode\n");
+#endif
+
+	Globals.Done=FALSE;
 	
-	/* start up the interface threads */
+	/*start up the interface threads*/
 	for (i=0;i<Globals.NumInterfaces;i++)
 		if (!StartInterfaceThread(i)){
 			printf("Couldn't start thread for interface\n");
 			return FALSE;
 		}
-#ifdef DEBUG
-		else
-			printf("Starting thread for interface %i\n", i);
-#endif
 	
 	/*start up the first process packet thread*/
 	//pthread_create(&test_thread, NULL, ProcessPacketThread, NULL);
@@ -341,27 +346,25 @@ int MainLoopThreaded()
 	return FALSE;
 }
 
-/**
- * Main loop, start handling packets. Calls one of the two other functions:
- * MainLoopThreaded() if HLBR is running in multi-thread mode, or 
- * MainLoopPolling(), if in single-thread mode.
- * @return Always FALSE?
- */
-int MainLoop()
-{
+/**************************
+* Start handling packets
+**************************/
+int MainLoop(){
 	int i;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In MainLoop\n");
+#endif	
 
-	if (!Globals.UseThreads) {
-		for (i = 0; i < Globals.NumInterfaces; i++) {
-			if (!Globals.Interfaces[i].IsPollable) {
-				PRINTERROR("All interfaces must be able to poll in single thread mode.\n");
+	if (!Globals.UseThreads){
+		for (i=0;i<Globals.NumInterfaces;i++){
+			if (!Globals.Interfaces[i].IsPollable){
+				printf("Error. All interfaces must be able to poll in single thread mode.\n");
 				return FALSE;
 			}
 		}
 		return MainLoopPoll();
-	} else {
+	}else{
 		return MainLoopThreaded();
 	}
 	

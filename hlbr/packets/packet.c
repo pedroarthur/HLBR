@@ -1,12 +1,9 @@
 #include "packet.h"
-#include "../engine/hlbr.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../engine/bits.h"
 //#include "../mangle/mangle.h"
-
-#define DEBUGPATH ;
 
 /*****************************************
 * Includes for all the interface types
@@ -37,7 +34,9 @@ unsigned int 		CurPacketNum=0;
 **************************************/
 int GetPacketTypeByName(char* Name){
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In GetPacketTypeByName\n");
+#endif
 
 	if (strcasecmp(Name, "linux_raw")==0){
 		return PACKET_TYPE_LINUX_RAW;
@@ -63,7 +62,9 @@ int GetPacketTypeByName(char* Name){
 **************************************/
 int GetPacketProtoByName(char* Name){
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In GetPacketProtoByName\n");
+#endif
 
 	if (strcasecmp(Name, "ethernet")==0){
 		return PACKET_PROTO_ETHERNET;
@@ -78,7 +79,9 @@ int GetPacketProtoByName(char* Name){
 **************************************/
 int GetPacketRoleByName(char* Name){
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In GetPacketProtoByName\n");
+#endif
 
 	if (strcasecmp(Name, "normal")==0){
 		return PACKET_ROLE_NORMAL;
@@ -99,7 +102,9 @@ int GetPacketRoleByName(char* Name){
 int OpenInterface(int InterfaceID){
 	InterfaceRec*	Interface;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In OpenInterface\n");
+#endif
 
 #ifdef DEBUG
 	printf("Opening Interface %s\n",Globals.Interfaces[InterfaceID].Name);
@@ -137,11 +142,12 @@ int OpenInterface(int InterfaceID){
 /******************************************
 * Open up all the interfaces
 ******************************************/
-int OpenInterfaces()
-{
+int OpenInterfaces(){
 	int 	i;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In OpenInterfaces\n");
+#endif
 
 	for (i=0;i<Globals.NumInterfaces;i++)
 		if (!OpenInterface(i)) return FALSE;
@@ -153,11 +159,12 @@ int OpenInterfaces()
 * Read packet(s) from an interface
 * Packets will be put on the pending queue
 ******************************************/
-int ReadPacket(int InterfaceID)
-{
+int ReadPacket(int InterfaceID){
 	InterfaceRec*	Interface;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In ReadPacket\n");
+#endif
 
 	Interface=&Globals.Interfaces[InterfaceID];
 	
@@ -191,15 +198,16 @@ int ReadPacket(int InterfaceID)
 /*****************************************************
 * Send off the packet
 *****************************************************/
-int WritePacket(int PacketSlot)
-{
+int WritePacket(int PacketSlot){
 	InterfaceRec*	Interface;
 	int				i;
 	int				InterfaceID;
 	unsigned char*	Packet;
 	int				PacketLen;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In WritePacket\n");
+#endif
 
 	InterfaceID=Globals.Packets[PacketSlot].TargetInterface;
 	Packet=Globals.Packets[PacketSlot].RawPacket;
@@ -324,16 +332,16 @@ int WritePacket(int PacketSlot)
 	return FALSE;
 }
 
-/**
- * Marks a packet as 'pending' (thread safe, called from ReadPacket)
- * Gets called every time a packet gets put on the pending list. Uses a 
- * mutex lock (to avoid problems with threads).
- * This may be called more than once per ReadPacket request.
- * @see ReadPacket
- */
-int AddPacketToPending(int PacketSlot)
-{
-	DEBUGPATH;
+/******************************************
+* Gets called every time a packet gets
+* put on the pending list.
+* This may be called more than once per
+* ReadPacket request.
+******************************************/
+int AddPacketToPending(int PacketSlot){
+#ifdef DEBUGPATH
+	printf("In AddPacketToPending\n");
+#endif
 
 	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
 	
@@ -347,48 +355,18 @@ int AddPacketToPending(int PacketSlot)
 	return TRUE;
 }
 
-
-/**
- * Marks a packet as 'blocked' (thread safe).
- * Blocked packets can't be processed until are unblocked. Usually they're
- * blocked by session handling functions
- * @see RemountTCPStream
- */
-int BlockPacket(int PacketSlot)
-{
-	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
-	Globals.Packets[PacketSlot].Status = PACKET_STATUS_BLOCKED;
-	hlbr_mutex_unlock(&PacketMutex);
-
-	return TRUE;
-}
-
-int DropPacket(int PacketSlot)
-{
-	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
-	// (taken from action_drop.c)
-	Globals.Packets[PacketSlot].PassRawPacket = FALSE;
-	//if (Globals.Packets[PacketSlot].Status == PACKET_STATUS_BLOCKED)
-	//TCPRemount_unblock(Port->Seqs.queue[i], TRUE);
-	hlbr_mutex_unlock(&PacketMutex);
-
-	return TRUE;
-}
-
-
-/**
- * Pops a packet off the pending queue
- * Give the caller a packet off the pending queue (marked as 
- * PACKET_STATUS_PENDING
- */
-int PopFromPending()
-{
+/*****************************************
+* Give the caller a packet off the pending
+* Queue
+******************************************/
+int PopFromPending(){
 	int		PacketSlot;
 	int		i;
-
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In PopFromPending\n");
+#endif
 	
-	PacketSlot = PACKET_NONE;
+	PacketSlot=PACKET_NONE;
 	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
 	
 	for (i=0;i<MAX_PACKETS;i++){
@@ -412,8 +390,9 @@ int PopFromPending()
 int GetEmptyPacket(){
 	PacketRec*	Packet;
 	int			i;
-
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In GetEmptyPacket\n");
+#endif	
 
 	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
 
@@ -481,7 +460,9 @@ void ReturnEmptyPacket(int PacketSlot){
 	int 		i;
 	PacketRec*	p;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In ReturnEmptyPacket\n");
+#endif	
 
 	hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 	
@@ -533,8 +514,9 @@ void ReturnEmptyPacket(int PacketSlot){
 ************************************/
 int StartInterfaceThread(int InterfaceID){
 	InterfaceRec*	Interface;
-
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In StartIntefaceThread\n");
+#endif
 
 #ifndef HAS_THREADS
 	return FALSE;
@@ -573,7 +555,9 @@ int StartInterfaceThread(int InterfaceID){
 * Check to see if a rule is still active
 **********************************************/
 inline int RuleIsActive(int PacketSlot, int RuleNum){
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("in RuleIsActive\n");
+#endif	
 
 	return GetBit(Globals.Packets[PacketSlot].RuleBits, Globals.NumRules, RuleNum);	
 }
@@ -582,7 +566,9 @@ inline int RuleIsActive(int PacketSlot, int RuleNum){
 * Mark a rule as no longer active
 **********************************************/
 inline int SetRuleInactive(int PacketSlot, int RuleNum){
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In SetRuleInactive\n");
+#endif	
 	
 	SetBit(Globals.Packets[PacketSlot].RuleBits, Globals.NumRules, RuleNum, 0);
 	
@@ -595,7 +581,9 @@ inline int SetRuleInactive(int PacketSlot, int RuleNum){
 int GetInterfaceByName(char* Name){
 	int	i;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("GetInterfaceByName\n");
+#endif
 
 	for (i=0;i<Globals.NumInterfaces;i++){
 		if (strcasecmp(Name, Globals.Interfaces[i].Name)==0){

@@ -1,19 +1,9 @@
-/** @mainpage HLBR Code Documentation
- * This is the documentation for HLBR's code, generated with Doxygen.\n
- * HLBR code can be quite a bit hard to grasp at first glance; 
- * if you want a place to start, I'd suggest you take a look at the 
- * ProcessPacket() and Decode() functions.
- */
-
 #include "hlbr.h"
-#include "hlbrlib.h"
 #include "parse_config.h"
 #include "parse_rules.h"
 #include "main_loop.h"
 #include "session.h"
 #include "../decoders/decode.h"
-#include "../decoders/decode_ip.h"
-#include "../decoders/decode_tcp.h"
 #include "../tests/test.h"
 #include "../packets/packet.h"
 #include "../packets/packet_cache.h"
@@ -34,9 +24,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-//#define DEBUGPATH ;
-//#define DEBUG
-//#define DEBUGLOCKS
+//#define DEBUGPATH
+#define DEBUG
+#define DEBUGLOCKS
 
 GlobalVars Globals;
 
@@ -69,53 +59,42 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 }
 
 
-/**
- * Print out the version number.
- */
-void PrintVersion()
-{
-	printf("\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
+/**************************************
+* print out the version number
+***************************************/
+void PrintVersion() {
+	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
 //	printf("by Andre Bertelli Araujo and\n   Joao Eriberto Mota Filho\n\n");
-	printf("http://hlbr.sourceforge.net\n");
-	printf("(based in Jason Larsen's Hogwash)\n");
+	printf("http://hlbr.sourceforge.net\n\n");
+	printf("(Jason Larsen's Hogwash based)\n\n");
 }
 
-/**
- * Tell the user about the command line.
- */
-void PrintUsage(char op)
-{
-	DEBUGPATH;
+/*************************************
+* Tell the user about the command line
+**************************************/
+void PrintUsage(){
 
+#ifdef DEBUGPATH
+	printf("In PrintUsage\n");
+#endif
 	PrintVersion();
 
-	switch (op) {
-	case 0:
-		printf("Utilizacao / Usage:\n");
-		printf("------------------\n");
-		printf("hlbr <args>\n");
-		printf("  -c  <Arquivo de configuracao / Config file>\n");
-		printf("  -r  <Arquivo de regras / Rules file>\n");
-		printf("  -l  <Diretorio de log / Log directory>\n");
-		printf("  -L  <Opcoes de log / Log options> (-L help)\n");
-		printf("  -t  Analisa regras e sai / Parse rules and exit\n");
-		printf("  -n  Processa n pacotes e sai / Process n packets and exit\n");
-		printf("  -d  Executa em modo daemon / Enter Daemon Mode (Background Execution)\n");
-		printf("  -v  Mostra versao e sai / Print version and exit\n");
-		printf("------------------\n");
-		printf("Exemplo / Example:\n");
-		printf("  hlbr -c hlbr.config -r hlbr.rules &\n");
-		printf("------------------\n");
-		printf("Os arquivos de configuracao e regras estao em /etc/hlbr/.\n");
-		printf("The configuration files and rules are in /etc/hlbr/.\n\n\n");	
-		break;
-	case 1:
-		printf("Opcoes para a chave -L / Options for -L flag\n");
-		printf("  s  Loga inicio e fim de sessao TCP / Logs start and end of a TCP session\n");
-		printf("  S  Loga todos os detalhes sobre uma sessao TCP (gera MUITA saida)\n     Logs all details about a TCP session (generates TOO MUCH output)\n");
-		printf("Ex: hlbr -L s\n");
-		break;
-	}
+	printf("Utilizacao / Usage:\n");
+	printf("------------------\n");
+	printf("hlbr <args>\n");
+	printf("  -c  <Arquivo de configuracao / Config file>\n");
+	printf("  -r  <Arquivo de regras / Rules file>\n");
+	printf("  -l  <Diretorio de log / Log directory>\n");
+	printf("  -t  Analisa regras e sai / Parse rules and exit\n");
+	printf("  -n  Processa n pacotes e sai / Process n packets and exit\n");
+	printf("  -d  Executa em modo daemon / Enter Daemon Mode (Background Execution)\n");
+	printf("  -v  Mostra versao e sai / Print version and exit\n");
+	printf("------------------\n");
+	printf("Exemplo / Example:\n");
+	printf("  hlbr -c hlbr.config -r hlbr.rules &\n");
+	printf("------------------\n");
+	printf("Os arquivos de configuracao e regras estao em /etc/hlbr/.\n");
+	printf("The configuration files and rules are in /etc/hlbr/.\n\n\n");	
 }
 
 /******************************************
@@ -163,18 +142,17 @@ int hlbr_daemon(int nochdir, int noclose){
 	return TRUE;
 }
 
-/**
- * Make sense of the command line.
- * Parse the parameters received by the main() function
- */
-int ParseArgs(int argc, char **argv)
-{
+/***********************************
+* Make sense of the command line
+************************************/
+int ParseArgs(int argc, char **argv){
 	int 	c;
-	char* 	l;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In ParseArgs\n");
+#endif
 
-#define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhvL:"
+#define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhv"
 
 	while (1) {
 #ifndef HAS_OPT_LONG
@@ -190,7 +168,6 @@ int ParseArgs(int argc, char **argv)
 			{"daemon", 0, 0, 'd'},
 			{"help", 0, 0, 'h'},
 			{"version", 0, 0, 'v'},
-			{"log-options", 1, 0, 'L'},
 			{0, 0, 0, 0}
 		};
 
@@ -209,32 +186,11 @@ int ParseArgs(int argc, char **argv)
 		case 'l':
 			Globals.LogDir=(char*)calloc(strlen(optarg)+2,sizeof(char));
 			memcpy(Globals.LogDir, optarg, strlen(optarg));
-			if (Globals.LogDir[strlen(Globals.LogDir)-1] != '/') {
-				Globals.LogDir[strlen(Globals.LogDir)] = '/';
+			if (Globals.LogDir[strlen(Globals.LogDir)-1]!='/'){
+				Globals.LogDir[strlen(Globals.LogDir)]='/';
 			}
-			PRINT1("Log directory is %s\n", Globals.LogDir);
+			printf("Log directory is %s\n",Globals.LogDir);			
 			break;			
-		case 'L':
-			if ((!optarg) || (strncmp("help", optarg, 4) == 0)) {
-				PrintUsage(1);
-				exit(0);
-			}
-			l = optarg;
-			while (*l)
-				switch (*(l++)) {
-				case 's':
-					PRINT("Logging sessions: start and end of sessions\n");
-					Globals.logSession_StartEnd = 1;
-					break;
-				case 'S':
-					PRINT("Logging sessions: all details\n");
-					Globals.logSession_All = 1;
-					break;
-				default:
-					PrintUsage(1);
-					exit(0);
-				}
-			break;	
 		case 'r':
 			printf("Rules file is %s\n",optarg);
 
@@ -251,7 +207,7 @@ int ParseArgs(int argc, char **argv)
 			hlbr_daemon(0,0);
 			break;
 		case 'h':
-			PrintUsage(0);
+			PrintUsage();
 			exit(0);
 		case 'v':
 			PrintVersion();
@@ -261,15 +217,9 @@ int ParseArgs(int argc, char **argv)
 		}	
 	}
 
-	if (!Globals.LogDir) {
-		Globals.LogDir = calloc(5,1);
+	if (!Globals.LogDir){
+		Globals.LogDir=calloc(5,1);
 	}
-	if (Globals.logSession_StartEnd || Globals.logSession_All) {
-		snprintf(Globals.logSessionFile.fname, 1024, "%s%s", 
-			 Globals.LogDir, "sessions.log");
-		PRINT1("Sessions log file is %s\n", Globals.logSessionFile.fname);
-	}
-
 
 	return TRUE;
 }
@@ -325,14 +275,15 @@ int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
 #endif
 }
 
-/**
- * Handle the signals (POSIX signals)
- */
-void HandleSignal(int signal)
-{
-	DEBUGPATH;
+/*************************************
+* Handle the signals
+*************************************/
+void HandleSignal(int signal){
+#ifdef DEBUGPATH
+	printf("In HandleSignal\n");
+#endif
 
-	switch (signal) {
+	switch (signal){
 	case SIGINT:
 	case SIGQUIT:
 	case SIGTERM:
@@ -351,54 +302,54 @@ int main(int argc, char**argv){
 	Globals.IdleCount=MAX_PACKETS;
 	Globals.PacketLimit=-1;
 
-	if (argc==1) {
-		PrintUsage(0);
+	if (argc==1){
+		PrintUsage();
 		return FALSE;
 	}	
 	
 	if (!ParseArgs(argc, argv)){
 		printf("Couldn't understand command line, quitting\n\n");
-		PrintUsage(0);
+		PrintUsage();
 		return FALSE;
 	}
 
-	if (!InitDecoders()) {
+	if (!InitDecoders()){
 		printf("Error initializing decoders\n");
 		return FALSE;
 	}
 
-	if (!InitTests()) {
+	if (!InitTests()){
 		printf("Error initializing tests\n");
 		return FALSE;
 	}
 
-	if (!InitActions()) {
+	if (!InitActions()){
 		printf("Error initializing actions\n");
 		return FALSE;
 	}
 
-	if (!InitSession()) {
+	if (!InitSession()){
 		printf("Error initializing session tracker\n");
 		return FALSE;
 	}
 		
-	if (!InitRoutes()) {
+	if (!InitRoutes()){
 		printf("Error initializing route handlers\n");
 		return FALSE;
 	}
 
-	if (!ParseConfig()) {
+	if (!ParseConfig()){
 		printf("Error loading config file\n");
 		return FALSE;
 	}
 
-	if (!ParseRules(Globals.RulesFilename)) {
+	if (!ParseRules(Globals.RulesFilename)){
 		printf("Error loading rules file\n");
 		return FALSE;
 	}
 	printf("Loaded %i rules\n",Globals.NumRules);
 
-	if (!TestsFinishSetup()) {
+	if (!TestsFinishSetup()){
 		printf("Tests failed finish setup\n");
 		return FALSE;
 	}
@@ -424,10 +375,7 @@ int main(int argc, char**argv){
 #endif	
 #endif
 
-	if (Globals.UseThreads)
-		MainLoopThreaded();
-	else
-		MainLoop();
+	MainLoop();
 
 	printf("HLBR is all done.  Calling shutdown handlers\n");
 	CallShutdownHandlers();
@@ -440,8 +388,9 @@ int main(int argc, char**argv){
 ***************************************/
 int GetListByName(char* Name){
 	int	i;
-
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In GetListByName\n");
+#endif
 
 	for (i=0;i<Globals.NumLists;i++){
 		if (strcasecmp(Globals.Lists[i].Name, Name)==0) return i;
@@ -451,145 +400,50 @@ int GetListByName(char* Name){
 
 }
 
-/**
- * Add a function to be called during shutdown.
- * Defines a callback function.
- */
-int AddShutdownHandler(int (*func)(void* data), void* data)
-{
+/*****************************************
+* Add a function to be called during
+* shutdown
+****************************************/
+int AddShutdownHandler(int (*func)(void* data), void* data){
 	FuncList*	f;
 	FuncList*	this;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In AddShutdownHandler\n");
+#endif
 
-	f = calloc(sizeof(FuncList),1);
-	f->Func = func;
-	f->Data = data;
+	f=calloc(sizeof(FuncList),1);
+	f->Func=func;
+	f->Data=data;
 
-	if (!Globals.ShutdownFuncs) {
-		Globals.ShutdownFuncs = f;
+	if (!Globals.ShutdownFuncs){
+		Globals.ShutdownFuncs=f;
 		return TRUE;
 	}else{
-		this = Globals.ShutdownFuncs;
-		while (this->Next) this = this->Next;
-		this->Next = f;
+		this=Globals.ShutdownFuncs;
+		while (this->Next) this=this->Next;
+		this->Next=f;
 		return TRUE;
 	}
 }
 
-/**
- * Let everything shutdown gracefully.
- * Calls callback functions defined for shutdown.
- */
-int CallShutdownHandlers()
-{
+/****************************************
+* Let everything shutdown gracefully
+****************************************/
+int CallShutdownHandlers(){
 	FuncList*	this;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In CallShutdownHandlers\n");
+#endif
 
-	this = Globals.ShutdownFuncs;
-	while (this) {
-		if (!this->Func(this->Data)) {
+	this=Globals.ShutdownFuncs;
+	while (this){
+		if (!this->Func(this->Data)){
 			printf("Shutdown handler failed\n");
 		}
-		this = this->Next;
+		this=this->Next;
 	}
 	
 	return TRUE;
-}
-
-
-
-/**
- * Prints a one-line summary of the packet.
- * Inspects packet's IP and TCP structure (if any)
- */
-void PrintPacketSummary(FILE* stream, int PacketSlot, IPData* IData, TCPData* TData, char newline)
-{
-	if (!IData) {
-		if (!TData) {
-			if (PacketSlot != -1)
-				fprintf(stream, "P:%u -%c", PacketSlot,
-					(newline ? '\n' : ' '));
-		} else 
-			// No IP data but TCP data?...
-			fprintf(stream, "P:%u TCP ?.?.?.?:%d->?.?.?.?:%d [%u ack:%u]%c",
-		PacketSlot, ntohs(TData->Header->source), ntohs(TData->Header->dest),
-		TData->Header->seq, TData->Header->ack_seq,
-		(newline ? '\n' : ' '));
-		return;
-	}
-	if (!TData) {
-		if (PacketSlot != -1)
-			fprintf(stream, "P:%u IP %d.%d.%d.%d->%d.%d.%d.%d%c", PacketSlot,
-				IP_BYTES(IData->Header->saddr), IP_BYTES(IData->Header->daddr),
-				(newline ? '\n' : ' '));
-		return;
-	}
-	fprintf(stream, "P:%u TCP %d.%d.%d.%d:%d->%d.%d.%d.%d:%d [%u",
-		PacketSlot,
-		IP_BYTES(IData->Header->saddr), ntohs(TData->Header->source),
-		IP_BYTES(IData->Header->daddr), ntohs(TData->Header->dest),
-		TData->Header->seq);
-	if (TData->Header->ack_seq)
-		fprintf(stream, " ack:%u", TData->Header->ack_seq);
-	if (TData->Header->syn || TData->Header->fin || TData->Header->rst) {
-		putc(' ', stream);
-		if (TData->Header->syn)	putc('s', stream);
-		if (TData->Header->fin)	putc('f', stream);
-		if (TData->Header->rst)	putc('r', stream);
-	}
-	putc(']', stream);
-	if (newline)
-		putc('\n', stream);
-	return;
-}
-
-/**
- * Prints a one-line summary of the session.
- * Can be called right after PrintPacketSummary, and continue printing in the
- * same line (in this case PrintPacketSummary's newline parameter should be
- * false, of course.).
- */
-void PrintSessionSummary(FILE* stream, PP* Port, char newline)
-{
-	fprintf(stream, "S:%d, %d packets%c", Port->SessionID, Port->TCPCount,
-		(newline ? '\n' : ' '));
-	
-	return;
-}
-
-/**
- * Prints the TCP buffer for the session.
- * Non-printable characters are printed as dots
- */
-void PrintSessionBuffer(FILE* stream, PP* Port)
-{
-	int i;
-
-	fprintf(stream, "Session:%d (%d.%d.%d.%d:%d->%d.%d.%d.%d:%d)\n",
-		Port->SessionID, IP_BYTES(Port->Parent->IP1), Port->Port1,
-		IP_BYTES(Port->Parent->IP2), Port->Port2);
-	if (Port->Stream0) {
-		fprintf(stream, "\tStream0:\n");
-		for (i=0; i < (Port->Stream0->LastSeq - Port->Stream0->TopSeq + 1); i++)
-			putc(
-				(Port->Stream0->Payloads[i] >= 32 || Port->Stream0->Payloads[i] <=127
-				 ? Port->Stream0->Payloads[i] : '.'),
-				stream
-				);
-		putc(10, stream);
-	}
-	if (Port->Stream1) {
-		fprintf(stream, "\tStream1:\n");
-		for (i=0; i < (Port->Stream1->LastSeq - Port->Stream1->TopSeq + 1); i++)
-			putc(
-				(Port->Stream1->Payloads[i] >= 32 || Port->Stream1->Payloads[i] <=127
-				 ? Port->Stream1->Payloads[i] : '.'),
-				stream
-				);
-		putc(10, stream);
-	}
-	
-	return;
 }

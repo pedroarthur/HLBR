@@ -5,12 +5,15 @@
 #include "../decoders/decode_tcp.h"
 #include "../packets/packet.h"
 #include <arpa/inet.h>
+#include <pcre.h>
+
 
 extern GlobalVars	Globals;
 
 typedef struct tcp_regexp_data{
 	unsigned char	tcp_content[MAX_CONTENT_LEN];
-	regex_t            *re;
+	pcre		*re;
+	pcre_extra	*ere;
 } TCPRegExpData;
 
 //#define DEBUG
@@ -26,7 +29,7 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 	PacketRec* p;
 	TestNode* Node;
 	TCPRegExpData* data;
-	int result;
+	/* int result; */
 	int i;
 
 #ifdef DEBUGPATH
@@ -35,7 +38,7 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 
 #ifdef DEBUG
 	printf("Testing TCP RegExp\n");
-#endif	
+#endif
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -50,31 +53,44 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 	else
 		printf("Rule %i is inactive\n",i);
 	printf("**************************************\n");
-#endif	
+#endif
 	Node=Nodes;
 
 	while (Node) {
-	 
-	  if (RuleIsActive(PacketSlot, Node->RuleID)) {
-          	regex_t   re;
 
-	  	data=(TCPRegExpData*)Node->Data;
-	  	result=0;
+		if (RuleIsActive(PacketSlot, Node->RuleID)) {
+			pcre *re;
 
-	  	//regfree(&re);
+			/* I thought it was unnecessary to declare 'int result' cause
+			 * it was not used for nothing unless to execute the 'if'
+			 * conditional, so it was just a waste of time. If you think it
+			 * is a necessary 'evil' please undo my changes.
+			 *
+			 * If DEBUGMATCH macro is set, the 'char regex_str[50]' variable
+			 * will return some match information.
+			 * */
 
-		result = match(p->RawPacket+p->BeginData, data->re);
+#ifdef DEBUGMATCH
+			char regex_str[50];
+#endif
+			data=(TCPRegExpData*)Node->Data;
 
-		if (result != 0)
-			SetRuleInactive(PacketSlot, Node->RuleID);
-
-	  }
+#ifdef DEBUGMATCH
+			if (pcre_exec(data->re, data->ere, p->RawPacket + P->BeginData, p->PacketLen - p->BeginData, 0, PCRE_NOTEMPTY, regex_str, 50) < 0) {
+				printf ("%s\n", regex_str);
+#else
+			if (pcre_exec(data->re, data->ere, p->RawPacket + p->BeginData, p->PacketLen - p->BeginData, 0, PCRE_NOTEMPTY, NULL, 0) < 0)
+#endif
+				SetRuleInactive(PacketSlot, Node->RuleID);
+#ifdef DEBUGMATCH
+			}
+#endif
+		}
 
                 Node=Node->Next;
-	
 	}
 
- 	
+
 #ifdef DEBUGMATCH
 	printf("**************************************\n");
 	for (i=0;i<Globals.NumRules;i++)
@@ -83,8 +99,8 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 	else
 		printf("Rule %i is inactive\n",i);
 	printf("**************************************\n");
-#endif	
-		
+#endif
+
 	return TRUE;
 }
 
@@ -93,7 +109,9 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 ******************************************/
 int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 	TCPRegExpData* data;
-	int status;
+	int erofset;
+	int errocode;
+	const char *errors;
 
 #ifdef DEBUGPATH
 	printf("In TCPRegExpAddNode\n");
@@ -104,14 +122,25 @@ int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 #endif
 
 	data=calloc(sizeof(TCPRegExpData),1);
-	data->re=calloc(sizeof(regex_t),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, "%s", Args);
-     	
-	if((status=regcomp( data->re, data->tcp_content, REG_EXTENDED)) != 0)
-        return(status);
-	
+
+	data->re = pcre_compile2(data->tcp_content, PCRE_MULTILINE, &errocode, &errors, &erofset, NULL);
+
+	if (errocode) {
+		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Errocode=%d Error=\"%s\"\n"\
+				, TestID, RuleID, Args, errocode, errors);
+		return 1;
+	}
+
+	data->ere = pcre_study(data->re, 0, &errors);
+	if (errors != NULL) {
+		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Error=\"%s\"\n"\
+				, TestID, RuleID, Args, errors);
+		return 1;
+	}
+
 	//data = regular expression
-	return TestAddNode(TestID, RuleID, (void*)data); 
+	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
 /****************************************
@@ -126,12 +155,12 @@ int InitTestTCPRegExp(){
 
 	TestID=CreateTest("TCPRegExp");
 	if (TestID==TEST_NONE) return FALSE;
-	
+
 	if (!BindTestToDecoder(TestID, "TCP")){
 		printf("Failed to Bind to TCP\n");
 		return FALSE;
-	} 
-	
+	}
+
 	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "regex");
 	Globals.Tests[TestID].AddNode=TCPRegExpAddNode;
 	Globals.Tests[TestID].TestFunc=TestTCPRegExp;

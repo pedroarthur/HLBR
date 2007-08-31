@@ -5,12 +5,14 @@
 #include "../decoders/decode_udp.h"
 #include "../packets/packet.h"
 #include <arpa/inet.h>
+#include <pcre.h>
 
 extern GlobalVars	Globals;
 
 typedef struct udp_regexp_data{
 	unsigned char	udp_content[MAX_CONTENT_LEN];
-	regex_t            *re;
+	pcre		*re;
+	pcre_extra	*ere;
 } UDPRegExpData;
 
 //#define DEBUG
@@ -35,7 +37,7 @@ int TestUDPRegExp(int PacketSlot, TestNode* Nodes){
 
 #ifdef DEBUG
 	printf("Testing UDP RegExp\n");
-#endif	
+#endif
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -50,31 +52,43 @@ int TestUDPRegExp(int PacketSlot, TestNode* Nodes){
 	else
 		printf("Rule %i is inactive\n",i);
 	printf("**************************************\n");
-#endif	
+#endif
 	Node=Nodes;
 
 	while (Node) {
-	 
-	  if (RuleIsActive(PacketSlot, Node->RuleID)) {
-          	regex_t   re;
 
-	  	data=(UDPRegExpData*)Node->Data;
-	  	result=0;
+		if (RuleIsActive(PacketSlot, Node->RuleID)) {
+			pcre *re;
 
-	  	//regfree(&re);
+			/* 
+			 * Please refer to file test_tcp_regex.c for some
+			 * comments about the changes i've made. 
+			 * 
+			 * */
 
-		result = match(p->RawPacket+p->BeginData, data->re);
+#ifdef DEBUGMATCH
+			char regex_str[50];
+#endif
+			data=(UDPRegExpData*)Node->Data;
 
-		if (result != 0)
-			SetRuleInactive(PacketSlot, Node->RuleID);
+			// string = (p->RawPacket + p->BeginData);
 
-	  }
+#ifdef DEBUGMATCH
+			if (pcre_exec(data->re, data->ere, p->RawPacket + p->BeginData, p->PacketLen - p->BeginData, 0, PCRE_NOTEMPTY, regex_str, 50) < 0) {
+				printf ("%s\n", regex_str);
+#else
+			if (pcre_exec(data->re, data->ere, p->RawPacket + p->BeginData, p->PacketLen - p->BeginData, 0, PCRE_NOTEMPTY, NULL, 0) < 0)
+#endif
+				SetRuleInactive(PacketSlot, Node->RuleID);
+#ifdef DEBUGMATCH
+			}
+#endif
+		}
 
-                Node=Node->Next;
-	
+		Node=Node->Next;
 	}
 
- 	
+
 #ifdef DEBUGMATCH
 	printf("**************************************\n");
 	for (i=0;i<Globals.NumRules;i++)
@@ -83,8 +97,8 @@ int TestUDPRegExp(int PacketSlot, TestNode* Nodes){
 	else
 		printf("Rule %i is inactive\n",i);
 	printf("**************************************\n");
-#endif	
-		
+#endif
+
 	return TRUE;
 }
 
@@ -93,7 +107,9 @@ int TestUDPRegExp(int PacketSlot, TestNode* Nodes){
 ******************************************/
 int UDPRegExpAddNode(int TestID, int RuleID, char* Args){
 	UDPRegExpData* data;
-	int status;
+	int errocode;
+	int erofset;
+	const char *errors;
 
 #ifdef DEBUGPATH
 	printf("In UDPRegExpAddNode\n");
@@ -104,14 +120,25 @@ int UDPRegExpAddNode(int TestID, int RuleID, char* Args){
 #endif
 
 	data=calloc(sizeof(UDPRegExpData),1);
-	data->re=calloc(sizeof(regex_t),1);
 	snprintf(data->udp_content, MAX_CONTENT_LEN, "%s", Args);
-     	
-	if((status=regcomp( data->re, data->udp_content, REG_EXTENDED)) != 0)
-        return(status);
-	
+
+	data->re = pcre_compile(data->udp_content, PCRE_MULTILINE, &errors, &erofset, NULL);
+
+	if (errocode) {
+		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Errocode=%d Error=\"%s\"\n"\
+				, TestID, RuleID, Args, errocode, errors);
+		return 1;
+	}
+
+	data->ere = pcre_study(data->re, 0, &errors);
+	if (errors != NULL) {
+		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Error=\"%s\"\n"\
+				, TestID, RuleID, Args, errors);
+		return 1;
+	}
+
 	//data = regular expression
-	return TestAddNode(TestID, RuleID, (void*)data); 
+	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
 /****************************************
@@ -126,17 +153,16 @@ int InitTestUDPRegExp(){
 
 	TestID=CreateTest("UDPRegExp");
 	if (TestID==TEST_NONE) return FALSE;
-	
+
 	if (!BindTestToDecoder(TestID, "UDP")){
 		printf("Failed to Bind to UDP\n");
 		return FALSE;
-	} 
-	
+	}
+
 	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "regex");
 	Globals.Tests[TestID].AddNode=UDPRegExpAddNode;
 	Globals.Tests[TestID].TestFunc=TestUDPRegExp;
 
-	
 	UDPDecoderID=GetDecoderByName("UDP");
 
 	return TRUE;

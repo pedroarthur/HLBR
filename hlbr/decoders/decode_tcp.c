@@ -1,8 +1,6 @@
 #include "decode_tcp.h"
 #include "decode_ip.h"
 #include "../packets/packet.h"
-#include "../engine/hlbrlib.h"
-#include "../engine/session.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <netinet/in.h>
@@ -13,68 +11,78 @@ extern GlobalVars	Globals;
 
 int	IPDecoderID;
 
-/**
- * Apply the TCP decoding.
- */
-void* DecodeTCP(int PacketSlot)
-{
-	TCPData*	data;
-	IPData*		ip_data;
+/***************************************
+* Apply the tcp decoding
+****************************************/
+void* DecodeTCP(int PacketSlot){
+	TCPData*		data;
+	IPData*			ip_data;
 	unsigned char	ip_proto;
-	PacketRec*	p;
+	PacketRec*		p;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In DecodeTCP\n");
+#endif
 
-	p = &Globals.Packets[PacketSlot];
+#ifdef DEBUG
+	printf("Decoding TCP Header\n");
+#endif
 
-	if (!GetDataByID(PacketSlot, IPDecoderID, (void**)&ip_data)) {
-		PRINTERROR("Failed to get IP header data\n");
+	p=&Globals.Packets[PacketSlot];
+
+	if (!GetDataByID(PacketSlot, IPDecoderID, (void**)&ip_data)){
+		printf("Failed to get IP header data\n");
 		return NULL;
 	}
 
-	ip_proto = ip_data->Header->protocol;
+	ip_proto=ip_data->Header->protocol;
 	
-	if (ip_proto != IP_PROTO_TCP) {
-		DBG( PRINTERROR1("IP doesn't think this is a tcp packet %02x\n",ip_proto) );
+	if (ip_proto!=IP_PROTO_TCP){
+#ifdef DEBUG
+		printf("IP doesn't think this is a tcp packet %02x\n",ip_proto);
+#endif		
 		return NULL;
 	}
+				
+	data=malloc(sizeof(TCPData));
+	data->Header=(TCPHdr*)(p->RawPacket+p->BeginData);
+	p->BeginData+=(data->Header->doff*4);
+	data->Data=(unsigned char*)(p->RawPacket+p->BeginData);
+	data->DataLen=p->PacketLen-((int)(data->Data)-(int)(p->RawPacket));
 	
-	data = malloc(sizeof(TCPData));
-	data->Header = (TCPHdr*)(p->RawPacket+p->BeginData);
-	p->BeginData += (data->Header->doff*4);
-	data->Data = (unsigned char*)(p->RawPacket+p->BeginData);
-	data->DataLen = p->PacketLen-((int)(data->Data)-(int)(p->RawPacket));
-	
-	DBG( PRINTERROR3("In PacketSlot %i TCP %u->%u\n",PacketSlot, ntohs(data->Header->source), ntohs(data->Header->dest)) ); 
+#ifdef DEBUG
+	printf("In PacketSlot %i TCP %u->%u\n",PacketSlot, ntohs(data->Header->source), ntohs(data->Header->dest)); 
+#endif	
 
-	// Assigns a session structure (PortPair) for this packet
-	// this will enable the stream tests, in further decoders.
 	AssignSessionTCP(PacketSlot, (void*)data);
 
 	return data;
 }
 
-/**
- * Set up the TCP decoder.
- */
-int InitDecoderTCP()
-{
+/*************************************
+* Set up the decoder
+*************************************/
+int InitDecoderTCP(){
 	int DecoderID;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In InitDecoderTCP\n");
+#endif
 	
-	if ((DecoderID = CreateDecoder("TCP")) == DECODER_NONE) {
-		DBG( PRINTERROR("Couldn't Allocate TCP Decoder\n") );
+	if ((DecoderID=CreateDecoder("TCP"))==DECODER_NONE){
+#ifdef DEBUG
+		printf("Couldn't Allocate TCP Decoder\n");
+#endif	
 		return FALSE;
 	}
 	
-	Globals.Decoders[DecoderID].DecodeFunc = DecodeTCP;
-	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)) {
-		PRINTERROR("Failed to Bind TCP Decoder to IPDefrag Decoder\n");
+	Globals.Decoders[DecoderID].DecodeFunc=DecodeTCP;
+	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)){
+		printf("Failed to Bind TCP Decoder to IPDefrag Decoder\n");
 		return FALSE;
 	}
 
-	IPDecoderID = GetDecoderByName("IP");
+	IPDecoderID=GetDecoderByName("IP");
 
 	return TRUE;
 }

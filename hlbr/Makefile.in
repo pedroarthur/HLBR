@@ -1,6 +1,7 @@
 
 DEBUG=-g -Wall
 CC=gcc -g
+EXTRA_LIBS=-lpcre
 
 HLBR_OBJECTS= \
   engine/hlbr.o \
@@ -14,7 +15,6 @@ HLBR_OBJECTS= \
   engine/message.o \
   engine/cache.o \
   engine/hlbrlib.o \
-  engine/regex.o \
   packets/packet.o \
   packets/packet_linux_raw.o \
   packets/packet_obsd_bpf.o \

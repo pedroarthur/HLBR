@@ -9,13 +9,11 @@
 #define PORT_START	5
 #define PORT_GROW	10
 
-/* Timeout for a (TCP) session */
 #define SESSION_FORCE_TIMEOUT	60
 
-/* TCP session direction */
-#define SESSION_UNKNOWN			0
-#define SESSION_IP1_SERVER		1
-#define SESSION_IP2_SERVER		2
+#define SESSION_UNKNOWN				0
+#define SESSION_IP1_SERVER			1
+#define SESSION_IP2_SERVER			2
 #define SESSION_IP1_SERVER_MAYBE	3
 #define SESSION_IP2_SERVER_MAYBE	4
 
@@ -31,72 +29,16 @@
 struct ip_pair;
 struct ip_bin;
 
-#define TCP_PAYLOAD_BUFFER_SIZE	4*1460
-#define TCP_QUEUE_SIZE		16	// max number of TCP packets to 'queue'
-#define TCP_PAYLOAD_PIECES_SIZE	1024	// max number of TCP packets to put in the Queue (if it can hold them all)
-
-
-struct tcp_stream_piece {
-	unsigned int	piece_start;	// seq number
-	unsigned int	piece_end;
-	int		PacketSlot;
-};
-
-/**
- * TCP stream.
- * This struct represents a TCP stream; the concept is that in a TCP session
- * there are two streams, from the client to the server and from the server to
- * the client.
- * There are a buffer to hold the last packets received in a TCP session, 
- * to make it possible to detect signatures across different packets.
- * Details:
- * - Pieces[] holds the references to each packet stored in Payloads (the
- * PacketSlot number and the start/end sequence numbers). Note that the packets
- * may not be ordered by their sequence numbers here!
- * - Payloads is a mere buffer for copying the packets' payloads all together.
- * Note: only sequential payloads are stored here; packets that arrive out of
- * order are put in the Queue[].
- * - Queue[] holds the packets (the PacketSlots) that arrived out of sequence,
- * until they can be mounted in Payloads and put in Pieces[].
- * -TopSeq holds the sequence number of the first byte in Payloads - the seq
- * number of the 'oldest' packet in Pieces[]
- * - LastSeq holds the sequence number of the highest byte stored in Payloads.
- */
-struct tcp_stream {
-	unsigned short int	NumPieces;
-	struct tcp_stream_piece	Pieces[TCP_QUEUE_SIZE];
-	unsigned char		Payloads[TCP_PAYLOAD_BUFFER_SIZE];
-	unsigned char		QueueSize;
-	int			Queue[TCP_PAYLOAD_PIECES_SIZE];
-	unsigned int		TopSeq;
-	unsigned int		LastSeq;
-};
-
-
-/**
- * Struct that represents the actual session.
- * Holds the source/dest ports, a pointer to the ip_pair struct, and other
- * info about the session (packet counts, connection state etc.)
- * @see ip_pair
- */
-typedef struct port_pair {
+typedef struct port_pair{
 	unsigned int		SessionID;
 	unsigned short		Port1;
 	unsigned short		Port2;
 	struct ip_pair*		Parent;
 	
-	long int		FirstTime;
-	long int		LastTime;
+	long int			FirstTime;
+	long int			LastTime;
 	unsigned char		Direction;
-
-	unsigned char		Error; 
-	/* Notes: this (Error) is being used to flag:
-	   - srv->cli:ServerAck doesn't match ClientSeq+1 during handshake1
-	   - srv->cli:ServerAck/ClientSeq don't match stored ones in handshake2
-	   - srv->cli:any unexpected packet order
-	   - cli->srv:any unexpected packet order (both with no fin/rst and
-	     with any of them)
-	*/
+	unsigned char		Error;
 	
 	unsigned short		TCPCount;
 	unsigned short		UDPCount;
@@ -112,43 +54,23 @@ typedef struct port_pair {
 	unsigned int		ClientAck;
 	unsigned char		ClientFin;
 
-	/** These two fields (TimeNext and TimePrev) are used to track
-	 * port_pair structs that are in the "time list".
-	 * @see AddToTime
-	 * @see UpdateTime
-	 * @see TimeoutSessions
-	 */
 	struct port_pair*	TimeNext;
 	struct port_pair*	TimePrev;
-
-	/* The two streams in a TCP session (cli->srv and srv->cli) */
-	struct tcp_stream*	Stream0;
-	struct tcp_stream*	Stream1;
-	char			noreassemble;
 } PP;
 
-/**
- * Struct that represents the two IPs in a session (?).
- * The two IPs are supposed to be server/client IPs. This struct doesn't hold
- * info about the actual session, only about the source/destination. 
- * Info about the session lies in the struct port_pair. 
- * @see port_pair
- */
-typedef struct ip_pair {
+typedef struct ip_pair{
 	unsigned int	IP1;
 	unsigned int	IP2;
 	unsigned int	NumAllocated;
 	unsigned int	NumPorts;
-	PP**		Ports;
+	PP**			Ports;
 	struct ip_bin*	Parent;
-
-	unsigned char	RefuseFromThisIP : 1;	/**< Refuse any sessions from IP1 in the future */
 } IPP;
 
-typedef struct ip_bin {
+typedef struct ip_bin{
 	unsigned int	NumAllocated;
 	unsigned int	NumIPs;
-	IPP**		Pairs;
+	IPP**			Pairs;
 } IPB;
 
 typedef struct session_func{
@@ -160,8 +82,5 @@ typedef struct session_func{
 int InitSession();
 int AddSessionCreateHandler(void (*Func) (PP* Port, void* Data), void* Data);
 int AddSessionDestroyHandler(void (*Func) (PP* Port, void* Data), void* Data);
-int AssignSessionTCP(int, void*);
-int TCPRemount_unblock(int, int);
-
 
 #endif

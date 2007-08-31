@@ -22,7 +22,9 @@ extern GlobalVars Globals;
 * Set up all the routing code
 ***********************************/
 int InitRoutes(){
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In InitRoutes\n");
+#endif
 	
 	if (!InitRouteDIP()) return FALSE;
 	if (!InitRouteSIP()) return FALSE;
@@ -40,7 +42,9 @@ int InitRoutes(){
 * Put a new entry into the routing system
 ******************************************/
 int RouteAdd(int RouteID, char* Args){
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In RouteAdd\n");
+#endif
 
 	if (RouteID>=Globals.NumRoutes) return FALSE;
 	if (!Globals.Routes[RouteID].AddNode) return FALSE;
@@ -55,7 +59,9 @@ int RouteAdd(int RouteID, char* Args){
 int	GetRouteByName(char* Name){
 	int	i;
 
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("GetRouteByName\n");
+#endif
 
 	for (i=0;i<Globals.NumRoutes;i++){
 		if (strcasecmp(Name, Globals.Routes[i].Name)==0){
@@ -72,7 +78,9 @@ int	GetRouteByName(char* Name){
 int CreateRoute(char* Name){
 	int RouteID;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In CreateRoute\n");
+#endif
 
 	/*check to see if this name is already used*/
 	RouteID=GetRouteByName(Name);
@@ -103,7 +111,9 @@ int Route(int PacketSlot){
 	int 		i;
 	int 		result;
 	
-	DEBUGPATH;
+#ifdef DEBUGPATH
+	printf("In Route\n");
+#endif	
 
 	for (i=0;i<Globals.NumRoutes;i++){
 		if (Globals.Routes[i].Active)
