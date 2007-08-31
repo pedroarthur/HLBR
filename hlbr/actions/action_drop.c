@@ -23,8 +23,8 @@ int DropAction(int RuleNum, int PacketSlot, void* Data){
 #endif
 	p=&Globals.Packets[PacketSlot];
 	p->PassRawPacket=FALSE;
-	if (p->Status == PACKET_STATUS_BLOCKED)
-		TCPRemount_unblock(PacketSlot, TRUE);
+//	if (p->Status == PACKET_STATUS_BLOCKED)
+//		TCPRemount_unblock(PacketSlot, TRUE);
 	
 	return TRUE;
 }

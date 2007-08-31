@@ -36,14 +36,10 @@ void* DecodeInterface(int PacketSlot){
 int InitDecoderInterface(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderInterface\n":);
-#endif
+    DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("Interface"))==DECODER_NONE){
-#ifdef DEBUG
-		printf("Couldn't Allocate Decoder Interface\n");
-#endif	
+		DBG( PRINTERROR("Couldn't Allocate Decoder Interface\n") );
 		return FALSE;
 	}
 	
