@@ -18,9 +18,7 @@ extern GlobalVars	Globals;
 ****************************************************/
 int	InitTree(BMTree* tree, char IgnoreCase){
 
-#ifdef DEBUGPATH
-	printf("In InitTree\n");
-#endif
+  DEBUGPATH;
 
 	bzero(tree, sizeof(BMTree));
 
@@ -36,9 +34,7 @@ int AddToTreeSorted(BMTree* Tree, char* String, int Len, int RuleID){
 	BNode** last;
 	int		count;
 	
-#ifdef DEBUGPATH
-	printf("In AddToTree\n");
-#endif
+DEBUGPATH
 
 	if (Len==0) return FALSE;
 
@@ -107,9 +103,7 @@ int AddToTree(BMTree* Tree, char* String, int Len, int RuleID){
 	char	HexChar[3];
 	int		HexCount;
 	
-#ifdef DEBUGPATH
-	printf("In AddToTree\n");
-#endif
+	DEBUGPATH;
 
 	if (Len==0) return FALSE;
 
@@ -230,9 +224,7 @@ int MatchStringTree(BMTree* Tree, unsigned char* PacketRuleBits, char* Packet, i
 	unsigned char	LocalDepend[MAX_RULES/8];
 	unsigned char	ThisChar;
 	
-#ifdef DEBUGPATH
-	printf("In MatchStringTree\n");
-#endif	
+	DEBUGPATH;
 	
 	memcpy(LocalDepend, Tree->TreeDependMask, MAX_RULES/8);
 	

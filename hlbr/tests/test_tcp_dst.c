@@ -33,13 +33,7 @@ int TestTCPDstOld(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestTCPDst\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Dst\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -116,13 +110,7 @@ int TestTCPDst(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestTCPDst\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Dst\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -184,13 +172,9 @@ int TCPDstAddNode(int TestID, int RuleID, char* Args){
 	TCPDstData*			t;
 	TCPDstData*			last;
 
-#ifdef DEBUGPATH
-	printf("In TCPDstAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPDstData),1);
 	
@@ -249,9 +233,7 @@ int TCPDstAddNode(int TestID, int RuleID, char* Args){
 int InitTestTCPDst(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPDst\n");
-#endif
+	DEBUGPATH;
 
 	TCPDstHead=NULL;
 

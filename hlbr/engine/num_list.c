@@ -15,9 +15,9 @@ extern GlobalVars Globals;
 *************************************/
 NumList* InitNumList(int ListType){
 	NumList*	n;
-#ifdef DEBUGPATH
-	printf("In InitNumList\n");
-#endif	
+
+	DEBUGPATH;
+
 	n=calloc(sizeof(NumList),1);
 	
 	n->ListType=ListType;
@@ -33,9 +33,7 @@ NumList* InitNumList(int ListType){
 int ClearNumList(NumList* n){
 	int		i;
 	
-#ifdef DEBUGPATH
-	printf("In ClearNumList\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<n->NumEntries;i++){
 		if (n->Items[i]){
@@ -57,9 +55,9 @@ int ClearNumList(NumList* n){
 * Get rid of this number list
 ****************************************/
 void DestroyNumList(NumList* n){
-#ifdef DEBUGPATH
-	printf("In DestroyNumList\n");
-#endif
+
+  DEBUGPATH;
+
 	ClearNumList(n);
 	if (n->Items){
 		free(n->Items);
@@ -76,9 +74,7 @@ int AddRangeTime(NumList* n, unsigned int Lower, unsigned int Upper, int Time){
 	NumItem*	i;
 	NumItem**	new_items;
 		
-#ifdef DEBUGPATH
-	printf("In AddRangeTime\n");
-#endif
+	DEBUGPATH;
 
 	i=calloc(sizeof(NumItem),1);
 	i->Lower=Lower;
@@ -106,9 +102,9 @@ int AddRangeTime(NumList* n, unsigned int Lower, unsigned int Upper, int Time){
 * Wrapper function for normal lists
 ****************************************************/
 int AddRange(NumList* n, unsigned int Lower, unsigned int Upper){
-#ifdef DEBUGPATH
-	printf("In AddRange\n");
-#endif
+
+  DEBUGPATH;
+
 	return AddRangeTime(n,Lower, Upper, -1);
 }
 
@@ -119,9 +115,7 @@ int AddSubList(NumList* n, NumList* SubList){
 	NumItem*	i;
 	NumItem**	new_items;
 		
-#ifdef DEBUGPATH
-	printf("In AddSubList\n");
-#endif
+	DEBUGPATH;
 
 	i=calloc(sizeof(NumItem),1);
 	i->Time=-1;	/*this item doesn't have a timeout*/
@@ -151,9 +145,7 @@ int IsInList(NumList* n, unsigned int Number){
 	NumItem*	i;
 	int			j;
 	
-#ifdef DEBUGPATH
-	printf("In IsInList\n");
-#endif
+	DEBUGPATH;
 
 	for (j=0;j<n->NumEntries;j++){
 		i=n->Items[j];
@@ -178,9 +170,7 @@ int IsInListTime(NumList* n, unsigned int Number, int Now){
 	NumItem*	i;
 	int			j;
 	
-#ifdef DEBUGPATH
-	printf("In IsInListTime\n");
-#endif
+	DEBUGPATH;
 
 	if ((n->ListType!=LIST_TYPE_TIME) && (n->ListType!=LIST_TYPE_AGE)) return FALSE;
 
@@ -240,9 +230,7 @@ int ReplaceAliases(char* s1, int s1len, char* s2, int s2len, NumAlias* a, int Nu
 	char	TempBuff[65536];
 	char*	pos;
 	
-#ifdef DEBUGPATH
-	printf("In ReplaceAliases\n");
-#endif
+	DEBUGPATH;
 
 	if (s1len>65536) return FALSE;
 	if (NumAliases==0){
@@ -279,9 +267,7 @@ int AddRangesString(NumList* n, char* RawRanges, NumAlias* Aliases, int NumAlias
 	int				IsRange;
 	char*			Ranges;
 	
-#ifdef DEBUGPATH
-	printf("In AddRangesString\n");
-#endif
+	DEBUGPATH;
 
 	if (!n) return FALSE;
 
@@ -383,9 +369,7 @@ int AddIPRanges(NumList* n, char* Ranges){
 	int				SubListID;
 	int				IsDashed=FALSE;
 	
-#ifdef DEBUGPATH
-	printf("In AddIPRanges\n");
-#endif
+	DEBUGPATH;
 
 	if (!n) return FALSE;
 
@@ -662,9 +646,7 @@ int	RemoveFromList(NumList* n, unsigned int Number){
 	NumItem*	i;
 	int			j;
 	
-#ifdef DEBUGPATH
-	printf("In RemoveFromList\n");
-#endif
+	DEBUGPATH;
 
 	if (!n->NumEntries) return FALSE;
 	
@@ -697,9 +679,7 @@ int NumListCompare(NumList* n1, NumList* n2){
 	NumItem*	t2;
 	int			i;
 	
-#ifdef DEBUGPATH
-	printf("In NumListCompare\n");
-#endif
+	DEBUGPATH;
 
 	if (n1->NumEntries != n2->NumEntries){
 #ifdef DEBUG

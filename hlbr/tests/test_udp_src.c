@@ -33,13 +33,7 @@ int TestUDPSrc(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestUDPSrc\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing UDP Src\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -101,13 +95,9 @@ int UDPSrcAddNode(int TestID, int RuleID, char* Args){
 	UDPSrcData*			t;
 	UDPSrcData*			last;
 
-#ifdef DEBUGPATH
-	printf("In UDPSrcAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(UDPSrcData),1);
 	
@@ -166,9 +156,7 @@ int UDPSrcAddNode(int TestID, int RuleID, char* Args){
 int InitTestUDPSrc(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestUDPSrc\n");
-#endif
+	DEBUGPATH;
 
 	UDPSrcHead=NULL;
 

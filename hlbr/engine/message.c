@@ -19,9 +19,8 @@ MessageItem* ParseMessageString(char* MString){
 	MessageItem*	MI=NULL;
 	MessageItem*	MThis=NULL;
 	char*			CThis=NULL;
-#ifdef DEBUGPATH
-	printf("In ParseMessageString\n");
-#endif
+
+	DEBUGPATH;
 	
 	CThis=MString;
 	while (*CThis){
@@ -144,9 +143,8 @@ MessageItem* ParseMessageString(char* MString){
 void FreeMessage(MessageItem* MItem){
 	MessageItem*	m;
 	MessageItem*	del;
-#ifdef DEBUGPATH
-	printf("In FreeMessage\n");
-#endif
+
+	DEBUGPATH;
 
 	m=MItem;
 	while (m){
@@ -169,9 +167,7 @@ int ApplyMessage(MessageItem* MItem, int PacketSlot, char* Buff, int BuffLen){
 	PacketRec*		p;
 	struct tm*		tm;
 	
-#ifdef DEBUGPATH
-	printf("In ApplyMessage\n");
-#endif
+	DEBUGPATH;
 
 	if (!MItem){
 		Buff[0]=0x00;

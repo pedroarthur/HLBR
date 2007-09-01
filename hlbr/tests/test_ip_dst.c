@@ -32,13 +32,7 @@ int TestIPDst(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestIPDst\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing IP Dst\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -110,13 +104,9 @@ int IPDstAddNode(int TestID, int RuleID, char* Args){
 	int					i;
 #endif
 
-#ifdef DEBUGPATH
-	printf("In IPDstAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(IPDstData),1);
 	
@@ -175,9 +165,7 @@ int IPDstAddNode(int TestID, int RuleID, char* Args){
 int InitTestIPDst(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestIPDst\n");
-#endif
+	DEBUGPATH;
 
 	IPDstHead=NULL;
 

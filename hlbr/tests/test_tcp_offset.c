@@ -30,13 +30,8 @@ int TestTCPOffset(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 	
-#ifdef DEBUGPATH
+	DEBUGPATH;
 	printf("In TestTCPOffset\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Offset\n");
-#endif	
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -116,13 +111,9 @@ int TCPOffsetAddNode(int TestID, int RuleID, char* Args){
 	int						BinChar;
 	int						SLen;
 
-#ifdef DEBUGPATH
-	printf("In TCPOffsetAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPOffsetData), 1);
 	
@@ -221,9 +212,7 @@ int TCPOffsetAddNode(int TestID, int RuleID, char* Args){
 int InitTestTCPOffset(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPOffset\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("TCPOffset");
 	if (TestID==TEST_NONE) return FALSE;

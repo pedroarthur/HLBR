@@ -141,13 +141,7 @@ void* AlertListenSocketParseArgs(char* Args){
 	unsigned short		Port;
 	struct sockaddr_in	listen_addr;
 	
-#ifdef DEBUGPATH
-	printf("In AlertListenSocketParseArgs\n");
-#endif
-
-#ifdef DEBUG
-	printf("Parsing args for action_alert_listensocket\n");
-#endif	
+	DEBUGPATH;
 
 	while (*Args==' ') Args++;
 	
@@ -200,13 +194,7 @@ void* AlertListenSocketParseArgs(char* Args){
 int AlertListenSocketMessage(char* Message, void* Data){
 	ActionLSocketRec*	data;
 	
-#ifdef DEBUGPATH
-	printf("In AlertListenSocketMessage\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to the Alert Socket\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -233,13 +221,7 @@ int AlertListenSocketAction(int RuleNum, int PacketSlot, void* Data){
 	PacketRec*			p;
 	DRecAlert			alert;
 	
-#ifdef DEBUGPATH
-	printf("In AlertListenSocketAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to the Alert Socket\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -281,9 +263,7 @@ int AlertListenSocketAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionAlertListenSocket(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionAlertListenSocket\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("alert lsocket");
 	if (ActionID==ACTION_NONE){

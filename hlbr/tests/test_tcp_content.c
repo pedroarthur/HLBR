@@ -26,9 +26,8 @@ JTree			TCPContentTree;
 int MatchString(char* Candidate, int CLen, char* Packet, int PLen){
 	int 	i;
 	int		j;
-#ifdef DEBUGPATH
-	printf("In MatchString\n");
-#endif
+
+	DEBUGPATH;
 
 	if (CLen<PLen) return FALSE;
 	
@@ -54,13 +53,7 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes){
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestTCPContent\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Content\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -98,13 +91,9 @@ int TestTCPContent(int PacketSlot, TestNode* Nodes){
 int TCPContentAddNode(int TestID, int RuleID, char* Args){
 	TCPContentData*		data;
 
-#ifdef DEBUGPATH
-	printf("In TCPContentAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPContentData),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, Args);
@@ -123,9 +112,7 @@ int TCPContentAddNode(int TestID, int RuleID, char* Args){
 * Called when we're all done adding rules
 ****************************************/
 int TestTCPContentFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestTCPContentFinishedSetup\n");
-#endif
+  DEBUGPATH;
 
 	return FinalizeJTree(&TCPContentTree);
 }

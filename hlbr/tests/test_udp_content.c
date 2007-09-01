@@ -26,9 +26,8 @@ JTree			UDPContentTree;
 int MatchString(char* Candidate, int CLen, char* Packet, int PLen){
 	int 	i;
 	int		j;
-#ifdef DEBUGPATH
-	printf("In MatchString\n");
-#endif
+
+	DEBUGPATH;
 
 	if (CLen<PLen) return FALSE;
 	
@@ -54,13 +53,7 @@ int TestUDPContent(int PacketSlot, TestNode* Nodes){
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestUDPContent\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing UDP Content\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -98,13 +91,9 @@ int TestUDPContent(int PacketSlot, TestNode* Nodes){
 int UDPContentAddNode(int TestID, int RuleID, char* Args){
 	UDPContentData*		data;
 
-#ifdef DEBUGPATH
-	printf("In UDPContentAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(UDPContentData),1);
 	snprintf(data->udp_content, MAX_CONTENT_LEN, Args);
@@ -123,9 +112,7 @@ int UDPContentAddNode(int TestID, int RuleID, char* Args){
 * Called when we're all done adding rules
 ****************************************/
 int TestUDPContentFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestUDPContentFinishedSetup\n");
-#endif
+  DEBUGPATH;
 
 	return FinalizeJTree(&UDPContentTree);
 }
@@ -136,9 +123,7 @@ int TestUDPContentFinishedSetup(){
 int InitTestUDPContent(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestUDPContent\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&UDPContentTree, FALSE);
 

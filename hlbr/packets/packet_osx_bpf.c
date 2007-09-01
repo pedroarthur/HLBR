@@ -84,9 +84,7 @@ int OpenInterfaceOSXBPF(int InterfaceID){
 	struct timeval	timeout;
 	InterfaceRec*	Interface;
 
-#ifdef DEBUGPATH
-	printf("In OpenInterfaceOSXBPF\n");
-#endif
+	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
 
@@ -172,9 +170,7 @@ int ReadPacketOSXBPF(int InterfaceID){
 	PacketRec*		p;
 	int		PacketSlot;
 
-#ifdef DEBUGPATH
-	printf("In ReadPacketOSXBPF\n");
-#endif
+	DEBUGPATH;
 	
 	interface=&Globals.Interfaces[InterfaceID];
 	
@@ -264,9 +260,7 @@ int WritePacketOSXBPF(int InterfaceID, unsigned char* Packet, int PacketLen){
 	InterfaceRec*	interface;
 	int 			cc;
 	
-#ifdef DEBUGPATH
-	printf("In WritePacketOSXBPF\n");
-#endif
+	DEBUGPATH;
 
 	interface=&Globals.Interfaces[InterfaceID];
 
@@ -291,9 +285,7 @@ int WritePacketOSXBPF(int InterfaceID, unsigned char* Packet, int PacketLen){
 void* OSXBPFLoopFunc(void* v){
 	int				InterfaceID;
 
-#ifdef DEBUGPATH
-	printf("In OSXBPFLoopFunc\n");
-#endif
+	DEBUGPATH;
 
 	InterfaceID=(int)v;
 	while (!Globals.Done){
@@ -307,9 +299,7 @@ void* OSXBPFLoopFunc(void* v){
 * Start a thread to continuously read
 **********************************************/
 int LoopThreadOSXBPF(int InterfaceID){
-#ifdef DEBUGPATH
-	printf("In loopThreadOSXBPF\n");
-#endif
+  DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;

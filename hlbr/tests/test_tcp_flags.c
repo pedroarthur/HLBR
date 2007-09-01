@@ -40,13 +40,7 @@ int TestTCPFlags(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestTCPFlags\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Flag\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -118,13 +112,9 @@ int TCPFlagsAddNode(int TestID, int RuleID, char* Args){
 	int						i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TCPFlagsAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPFlagsData),1);
 	
@@ -243,9 +233,7 @@ int TCPFlagsAddNode(int TestID, int RuleID, char* Args){
 int InitTestTCPFlags(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPFlags\n");
-#endif
+	DEBUGPATH;
 
 	TCPFlagsHead=NULL;
 

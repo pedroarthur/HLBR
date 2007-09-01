@@ -28,13 +28,7 @@ int TestUDPNoCase(int PacketSlot, TestNode* Nodes){
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestUDPNoCase\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing UDP NoCase\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -72,13 +66,9 @@ int TestUDPNoCase(int PacketSlot, TestNode* Nodes){
 int UDPNoCaseAddNode(int TestID, int RuleID, char* Args){
 	UDPNoCaseData*		data;
 
-#ifdef DEBUGPATH
-	printf("In UDPNoCaseAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(UDPNoCaseData),1);
 	snprintf(data->udp_content, MAX_CONTENT_LEN, Args);
@@ -97,9 +87,7 @@ int UDPNoCaseAddNode(int TestID, int RuleID, char* Args){
 * Called when we're all done adding rules
 ****************************************/
 int TestUDPNoCaseFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestUDPContentFinishedSetup\n");
-#endif
+  DEBUGPATH;
 
 	return FinalizeJTree(&UDPNoCaseTree);
 }
@@ -111,9 +99,7 @@ int TestUDPNoCaseFinishedSetup(){
 int InitTestUDPNoCase(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestUDPNoCase\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&UDPNoCaseTree, TRUE);
 

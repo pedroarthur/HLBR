@@ -26,9 +26,7 @@ int RouteBroadcast(int PacketSlot){
 	EthernetData*	EData;
 	PacketRec*		p;
 
-#ifdef DEBUGPATH
-	printf("In RouteBroadcast\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -82,13 +80,10 @@ int RouteBroadcast(int PacketSlot){
 * Turn on routing of broadcast packets
 **********************************/
 int RouteBroadcastAddNode(int RouteID, char* Args){	
-#ifdef DEBUGPATH
-	printf("In RouteBroadcastAddNode\n");
-#endif
-	
-#ifdef DEBUG	
-	printf("Adding with args %s\n",Args);
-#endif
+
+  DEBUGPATH;
+
+  DBG( PRINT1("Adding with args %s\n",Args) );
 
 	return TRUE;
 }
@@ -99,9 +94,7 @@ int RouteBroadcastAddNode(int RouteID, char* Args){
 int InitRouteBroadcast(){
 	int RouteID;
 	
-#ifdef DEBUGPATH
-	printf("In InitRoutBroadcast\n");
-#endif	
+	DEBUGPATH;
 
 	if ( (RouteID=CreateRoute("Broadcast"))==ROUTE_NONE){
 		printf("Couldn't create route Broadcast\n");

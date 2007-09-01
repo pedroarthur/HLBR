@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEBUG
+//#define DEBUG
 
 extern GlobalVars	Globals;
 
@@ -13,9 +13,7 @@ extern GlobalVars	Globals;
 int RouteInterface(int PacketSlot){
 	PacketRec*	p;
 	
-#ifdef DEBUGPATH
-	printf("In RouteInterface\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -30,9 +28,7 @@ int RouteInterface(int PacketSlot){
 * Turn on Interface Routing
 **********************************/
 int RouteInterfaceAddNode(int RouteID, char* Args){
-#ifdef DEBUGPATH
-	printf("In RouteInterfaceAddNode\n");
-#endif
+  DEBUGPATH;
 
 	return TRUE;
 }
@@ -42,9 +38,7 @@ int RouteInterfaceAddNode(int RouteID, char* Args){
 **********************************/
 int InitRouteInterface(){
 	int RouteID;
-#ifdef DEBUGPATH
-	printf("In InitRouteInterface\n");
-#endif	
+	DEBUGPATH;
 	
 	if ( (RouteID=CreateRoute("Interface"))==ROUTE_NONE){
 		printf("Couldn't create route Interface\n");

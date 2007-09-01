@@ -1,4 +1,5 @@
 #include "bits.h"
+#include "hlbr.h"
 #include <stdio.h>
 
 /***************************************************
@@ -7,9 +8,7 @@
 inline int GetBit(unsigned char* BitField, int BitFieldLen, int BitNum){
 	char	byte;
 	
-#ifdef DEBUGPATH
-	printf("in GetBit\n");
-#endif
+	DEBUGPATH;
 
 	if (BitNum > BitFieldLen-1) return FALSE;
 
@@ -42,9 +41,7 @@ inline int GetBit(unsigned char* BitField, int BitFieldLen, int BitNum){
 inline void SetBit(unsigned char* BitField, int BitFieldLen, int BitNum, char Value){
 	unsigned char*	byte;
 
-#ifdef DEBUGPATH
-	printf("In SetBit\n");
-#endif	
+	DEBUGPATH;
 	
 	byte=&BitField[BitNum/8];
 	
@@ -109,9 +106,8 @@ inline void SetBit(unsigned char* BitField, int BitFieldLen, int BitNum, char Va
 * Set the value of a range of bits
 ***************************************************/
 inline void SetBits(unsigned char* BitField, int BitFieldLen, int StartBit, int EndBit, char Value){
-#ifdef DEBUGPATH
-	printf("in SetBits\n");
-#endif
+
+  DEBUGPATH;
 
 }
 
@@ -125,9 +121,7 @@ inline void NotAndBitFields(unsigned char* BitField1, unsigned char* BitField2, 
 	register int	i;
 	register int	len;
 	
-#ifdef DEBUGPATH
-	printf("in NotAndBitFields\n");
-#endif
+	DEBUGPATH;
 
 	IntField1=(unsigned int*)BitField1;
 	IntField2=(unsigned int*)BitField2;
@@ -142,9 +136,8 @@ inline void NotAndBitFields(unsigned char* BitField1, unsigned char* BitField2, 
 * Calculate the bitwise AND of the two bitfields
 ***************************************************/
 inline void AndBitFields(unsigned char* BitField1, unsigned char* BitField2, unsigned char* TargetBitField, int BitFieldLen){	
-#ifdef DEBUGPATH
-	printf("in AndBitFields\n");
-#endif
+
+  DEBUGPATH;
 
 }
 
@@ -152,9 +145,9 @@ inline void AndBitFields(unsigned char* BitField1, unsigned char* BitField2, uns
 * Calculate the bitwise OR of the two bitfields
 ***************************************************/
 inline void OrBitFields(unsigned char* BitField1, unsigned char* BitField2, unsigned char* TargetBitField, int BitFieldLen){
-#ifdef DEBUGPATH
-	printf("in OrBitFields\n");
-#endif
+
+  DEBUGPATH;
+
 }
 
 /***************************************************
@@ -165,9 +158,7 @@ int	CountBits(unsigned char* BitField, int BitFieldLen){
 	int	i;
 	int	count;
 	
-#ifdef DEBUGPATH
-	printf("In CountBits\n");
-#endif
+	DEBUGPATH;
 
 	count=0;
 	for (i=0;i<BitFieldLen;i++)
@@ -184,9 +175,7 @@ int	CountBitsNot(unsigned char* BitField, int BitFieldLen){
 	int i;
 	int	count;
 	
-#ifdef DEBUGPATH
-	printf("In CountBits\n");
-#endif
+	DEBUGPATH;
 	
 	count = 0;
 	for (i=0;i<(BitFieldLen/8);i++){
@@ -265,9 +254,7 @@ int BitFieldIsEmpty(unsigned char* BitField, int BitFieldLen){
 	int*	Field;
 	int		i,j;
 	
-#ifdef DEBUGPATH
-	printf("In BitFieldIsEmpty\n");
-#endif
+	DEBUGPATH;
 
 	Field=(int*)BitField;
 

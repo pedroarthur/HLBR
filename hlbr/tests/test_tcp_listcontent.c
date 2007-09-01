@@ -45,13 +45,7 @@ int TestTCPListContent(int PacketSlot, TestNode* Nodes){
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestTCPListContent\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP ListContent\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -97,9 +91,7 @@ int TCPListContentAddNode(int TestID, int RuleID, char* Args){
 	FILE*			listf;
 	char			LineBuff[10240];
 
-#ifdef DEBUGPATH
-	printf("In TCPListContentAddNode\n");
-#endif
+	DEBUGPATH;
 
 	listf = fopen(Args, "r");
 	if (!listf){
@@ -140,9 +132,7 @@ int TCPListContentAddNode(int TestID, int RuleID, char* Args){
  * @return Result of FinalizeJTree()
  */
 int TestTCPListContentFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestTCPListContentFinishedSetup\n");
-#endif
+  DEBUGPATH;
 
 	return FinalizeJTree(&TCPListContentTree);
 }
@@ -157,9 +147,7 @@ int TestTCPListContentFinishedSetup(){
 int InitTestTCPListContent() {
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPListContent\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&TCPListContentTree, FALSE);
 

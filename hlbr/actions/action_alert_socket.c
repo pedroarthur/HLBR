@@ -60,13 +60,7 @@ void* AlertSocketParseArgs(char* Args){
 	struct hostent*		he;
 	struct sockaddr_in	target;
 	
-#ifdef DEBUGPATH
-	printf("In AlertSocketParseArgs\n");
-#endif
-
-#ifdef DEBUG
-	printf("Parsing args for action_alert_socket\n");
-#endif	
+	DEBUGPATH;
 
 	while (*Args==' ') Args++;
 	
@@ -116,13 +110,7 @@ void* AlertSocketParseArgs(char* Args){
 int AlertSocketMessage(char* Message, void* Data){
 	ActionSocketRec*	data;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertSocketMessage\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to the Alert Socket\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -155,13 +143,7 @@ int AlertSocketAction(int RuleNum, int PacketSlot, void* Data){
 	ActionSocketRec*	data;
 	PacketRec*			p;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertSocketAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to the Alert Socket\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -214,9 +196,7 @@ int AlertSocketAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionAlertSocket(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionAlertSocket\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("alert socket");
 	if (ActionID==ACTION_NONE){

@@ -20,13 +20,7 @@ void* DecodeICMP(int PacketSlot){
 	unsigned char	ip_proto;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeICMP\n");
-#endif
-
-#ifdef DEBUG
-	printf("Decoding ICMP Header\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -61,9 +55,7 @@ void* DecodeICMP(int PacketSlot){
 int InitDecoderICMP(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderICMP\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("ICMP"))==DECODER_NONE){
 #ifdef DEBUG

@@ -29,13 +29,7 @@ int TestEthernetType(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestEthernetType\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing Ethernet type\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -110,13 +104,9 @@ int EthernetTypeAddNode(int TestID, int RuleID, char* Args){
 	EthernetTypeData*	data;
 	NumAlias			Aliases[2];
 	
-#ifdef DEBUGPATH
-	printf("In EthernetTypeAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding Node with args %s\n",Args) );
 
 	sprintf(Aliases[0].Alias, "IP");
 	Aliases[0].Num=ETHERNET_TYPE_IP;
@@ -142,9 +132,7 @@ int EthernetTypeAddNode(int TestID, int RuleID, char* Args){
 int InitTestEthernetType(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestInterfaceName\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("EthernetType");
 	if (TestID==TEST_NONE) return FALSE;

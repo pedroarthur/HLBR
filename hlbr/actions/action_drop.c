@@ -14,13 +14,8 @@ int DropAction(int RuleNum, int PacketSlot, void* Data){
 	PacketRec*	p;
 
 
-#ifdef DEBUGPATH
-	printf("In DropAction\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Dropping\n");
-#endif
 	p=&Globals.Packets[PacketSlot];
 	p->PassRawPacket=FALSE;
 //	if (p->Status == PACKET_STATUS_BLOCKED)
@@ -35,9 +30,7 @@ int DropAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionDrop(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionDrop\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("drop");
 	if (ActionID==ACTION_NONE){

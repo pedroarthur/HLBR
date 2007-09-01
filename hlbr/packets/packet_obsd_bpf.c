@@ -85,9 +85,7 @@ int OpenInterfaceOBSDBPF(int InterfaceID){
 	struct timeval	timeout;
 	InterfaceRec*	Interface;
 
-#ifdef DEBUGPATH
-	printf("In OpenInterfaceOBSDBPF\n");
-#endif
+	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
 
@@ -173,9 +171,7 @@ int ReadPacketOBSDBPF(int InterfaceID){
 	PacketRec*		p;
 	int		PacketSlot;
 
-#ifdef DEBUGPATH
-	printf("In ReadPacketOBSDBPF\n");
-#endif
+	DEBUGPATH;
 	
 	interface=&Globals.Interfaces[InterfaceID];
 	
@@ -265,9 +261,7 @@ int WritePacketOBSDBPF(int InterfaceID, unsigned char* Packet, int PacketLen){
 	InterfaceRec*	interface;
 	int 			cc;
 	
-#ifdef DEBUGPATH
-	printf("In WritePacketOBSDBPF\n");
-#endif
+	DEBUGPATH;
 
 	interface=&Globals.Interfaces[InterfaceID];
 
@@ -292,9 +286,7 @@ int WritePacketOBSDBPF(int InterfaceID, unsigned char* Packet, int PacketLen){
 void* OBSDBPFLoopFunc(void* v){
 	int				InterfaceID;
 
-#ifdef DEBUGPATH
-	printf("In OBSDBPFLoopFunc\n");
-#endif
+	DEBUGPATH;
 
 	InterfaceID=(int)v;
 	while (!Globals.Done){
@@ -308,9 +300,8 @@ void* OBSDBPFLoopFunc(void* v){
 * Start a thread to continuously read
 **********************************************/
 int LoopThreadOBSDBPF(int InterfaceID){
-#ifdef DEBUGPATH
-	printf("In loopThreadOBSDBPF\n");
-#endif
+
+  DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;

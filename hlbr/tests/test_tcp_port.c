@@ -30,13 +30,7 @@ int TestTCPPort(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestTCPPort\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Port\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -111,13 +105,9 @@ int TestTCPPort(int PacketSlot, TestNode* Nodes){
 int TCPPortAddNode(int TestID, int RuleID, char* Args){
 	TCPPortData*			data;
 
-#ifdef DEBUGPATH
-	printf("In TCPPortAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPPortData),1);
 
@@ -139,9 +129,7 @@ int TCPPortAddNode(int TestID, int RuleID, char* Args){
 int InitTestTCPPort(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPPort\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("TCPPort");
 	if (TestID==TEST_NONE) return FALSE;

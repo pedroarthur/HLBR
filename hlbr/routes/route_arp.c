@@ -21,9 +21,7 @@ int RouteARP(int PacketSlot){
 	PacketRec*	p;
 	ARPData*	Arp;
 	
-#ifdef DEBUGPATH
-	printf("In RouteARP\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -61,9 +59,7 @@ int RouteARP(int PacketSlot){
 * Turn on explicit ARP handling
 **********************************/
 int RouteARPAddNode(int RouteID, char* Args){
-#ifdef DEBUGPATH
-	printf("In RouteARPAddNode\n");
-#endif
+  DEBUGPATH;
 
 	return TRUE;
 }
@@ -74,9 +70,8 @@ int RouteARPAddNode(int RouteID, char* Args){
 **********************************/
 int InitRouteARP(){
 	int RouteID;
-#ifdef DEBUGPATH
-	printf("In InitARP\n");
-#endif	
+
+	DEBUGPATH;
 	
 	if ( (RouteID=CreateRoute("ARP"))==ROUTE_NONE){
 		printf("Couldn't create route ARP\n");

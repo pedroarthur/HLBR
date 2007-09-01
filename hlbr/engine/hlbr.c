@@ -25,8 +25,8 @@
 #include <fcntl.h>
 
 //#define DEBUGPATH
-#define DEBUG
-#define DEBUGLOCKS
+//#define DEBUG
+//#define DEBUGLOCKS
 
 GlobalVars Globals;
 
@@ -74,9 +74,8 @@ void PrintVersion() {
 **************************************/
 void PrintUsage(){
 
-#ifdef DEBUGPATH
-	printf("In PrintUsage\n");
-#endif
+  DEBUGPATH;
+
 	PrintVersion();
 
 	printf("Utilizacao / Usage:\n");
@@ -148,9 +147,7 @@ int hlbr_daemon(int nochdir, int noclose){
 int ParseArgs(int argc, char **argv){
 	int 	c;
 	
-#ifdef DEBUGPATH
-	printf("In ParseArgs\n");
-#endif
+	DEBUGPATH;
 
 #define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhv"
 
@@ -279,9 +276,8 @@ int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
 * Handle the signals
 *************************************/
 void HandleSignal(int signal){
-#ifdef DEBUGPATH
-	printf("In HandleSignal\n");
-#endif
+
+  DEBUGPATH;
 
 	switch (signal){
 	case SIGINT:
@@ -388,9 +384,8 @@ int main(int argc, char**argv){
 ***************************************/
 int GetListByName(char* Name){
 	int	i;
-#ifdef DEBUGPATH
-	printf("In GetListByName\n");
-#endif
+
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumLists;i++){
 		if (strcasecmp(Globals.Lists[i].Name, Name)==0) return i;
@@ -408,9 +403,7 @@ int AddShutdownHandler(int (*func)(void* data), void* data){
 	FuncList*	f;
 	FuncList*	this;
 	
-#ifdef DEBUGPATH
-	printf("In AddShutdownHandler\n");
-#endif
+	DEBUGPATH;
 
 	f=calloc(sizeof(FuncList),1);
 	f->Func=func;
@@ -433,9 +426,7 @@ int AddShutdownHandler(int (*func)(void* data), void* data){
 int CallShutdownHandlers(){
 	FuncList*	this;
 	
-#ifdef DEBUGPATH
-	printf("In CallShutdownHandlers\n");
-#endif
+	DEBUGPATH;
 
 	this=Globals.ShutdownFuncs;
 	while (this){

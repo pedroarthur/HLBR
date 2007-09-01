@@ -32,13 +32,7 @@ int TestTCPRegExp(int PacketSlot, TestNode* Nodes){
 	/* int result; */
 	int i;
 
-#ifdef DEBUGPATH
-	printf("In TestTCPRegExp\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP RegExp\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -113,13 +107,9 @@ int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 	int errocode;
 	const char *errors;
 
-#ifdef DEBUGPATH
-	printf("In TCPRegExpAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Adding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Adding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPRegExpData),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, "%s", Args);
@@ -149,9 +139,7 @@ int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 int InitTestTCPRegExp(){
 	int TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPRegExp\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("TCPRegExp");
 	if (TestID==TEST_NONE) return FALSE;

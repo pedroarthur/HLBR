@@ -22,13 +22,7 @@ void* DecodeTCPStream(int PacketSlot){
 	PacketRec*		p;
 	
 	
-#ifdef DEBUGPATH
-	printf("In DecodeTCPStream\n");
-#endif
-
-#ifdef DEBUG
-	printf("Decoding TCP Stream\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -76,9 +70,7 @@ void* DecodeTCPStream(int PacketSlot){
 int InitDecoderTCPStream(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderTCPStream\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("TCPStream"))==DECODER_NONE){
 #ifdef DEBUG

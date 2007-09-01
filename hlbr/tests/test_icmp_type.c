@@ -29,13 +29,7 @@ int TestICMPType(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestICMPType\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing ICMP Type\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -110,13 +104,9 @@ int ICMPTypeAddNode(int TestID, int RuleID, char* Args){
 	ICMPTypeData*		data;
 	NumAlias			Aliases[2];
 
-#ifdef DEBUGPATH
-	printf("In ICMPTypeAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	sprintf(Aliases[0].Alias, "Echo");
 	Aliases[0].Num=ICMP_TYPE_ECHO;
@@ -141,9 +131,7 @@ int ICMPTypeAddNode(int TestID, int RuleID, char* Args){
 int InitTestICMPType(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestICMPType\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("ICMPType");
 	if (TestID==TEST_NONE) return FALSE;

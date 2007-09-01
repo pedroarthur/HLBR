@@ -11,7 +11,7 @@ typedef struct ethernet_src_data{
 	unsigned char	EthernetSrc[6];
 } EthernetSrcData;
 
-#define DEBUG
+//#define DEBUG
 //#define DEBUGMATCH
 
 int EthernetDecoderID;
@@ -27,13 +27,7 @@ int TestEthernetSrc(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestEthernetSrc\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing Ethernet Src\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];	
 	
@@ -124,13 +118,9 @@ int EthernetSrcAddNode(int TestID, int RuleID, char* Args){
 	char*				next_byte;
 	char*				next_delim;
 	
-#ifdef DEBUGPATH
-	printf("In EthernetSrcAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(EthernetSrcData),1);	
 	
@@ -155,9 +145,7 @@ int EthernetSrcAddNode(int TestID, int RuleID, char* Args){
 int InitTestEthernetSrc(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestInterfaceName\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("EthernetSrc");
 	if (TestID==TEST_NONE) return FALSE;

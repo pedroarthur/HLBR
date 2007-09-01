@@ -29,9 +29,8 @@ PP*					TimeTail;
 *****************************************/
 int AddSessionCreateHandler(void (*Func) (PP* Port, void* Data), void* Data){
 	SFunc*	F;
-#ifdef DEBUGPATH
-	printf("In AddSessionCreateHandler\n");
-#endif
+
+	DEBUGPATH;
 
 	if (!CreateFuncs){
 		CreateFuncs=calloc(sizeof(SFunc),1);
@@ -57,46 +56,43 @@ int AddSessionCreateHandler(void (*Func) (PP* Port, void* Data), void* Data){
 * session is detroyed
 *****************************************/
 int AddSessionDestroyHandler(void (*Func) (PP* Port, void* Data), void* Data){
-	SFunc*	F;
-	
-#ifdef DEBUGPATH
-	printf("In AddSessionDestroyHandler\n");
-#endif
+        SFunc*  F;
+        
+	DEBUGPATH;
 
-	if (!DestroyFuncs){
-		DestroyFuncs=calloc(sizeof(SFunc),1);
-		DestroyFuncs->Func=Func;
-		DestroyFuncs->Data=Data;
-		
-		return TRUE;
-	}
+        if (!DestroyFuncs){
+                DestroyFuncs=calloc(sizeof(SFunc),1);
+                DestroyFuncs->Func=Func;
+                DestroyFuncs->Data=Data;
+                
+                return TRUE;
+        }
 
-	F=DestroyFuncs;
-	while (F->Next) F=F->Next;
-	
-	F->Next=calloc(sizeof(SFunc),1);
-	F=F->Next;
-	F->Func=Func;
-	F->Data=Data;
-	
-	return TRUE;
+        F=DestroyFuncs;
+        while (F->Next) F=F->Next;
+        
+        F->Next=calloc(sizeof(SFunc),1);
+        F=F->Next;
+        F->Func=Func;
+        F->Data=Data;
+        
+        return TRUE;
 }
 
 /***************************************
 * Tell everyone a new session started
 ***************************************/
 void CallCreateFuncs(PP* Port){
-	SFunc*	F;
-#ifdef DEBUGPATH
-	printf("In CallCreateFuncs\n");
-#endif
+        SFunc*  F;
 
-	F=CreateFuncs;
-	
-	while (F){
-		F->Func(Port, F->Data);
-		F=F->Next;
-	}
+	DEBUGPATH;
+
+        F=CreateFuncs;
+        
+        while (F){
+                F->Func(Port, F->Data);
+                F=F->Next;
+        }
 }
 
 /***************************************
@@ -104,9 +100,8 @@ void CallCreateFuncs(PP* Port){
 ***************************************/
 void CallDestroyFuncs(PP* Port){
 	SFunc*	F;
-#ifdef DEBUGPATH
-	printf("In CallDestroyFuncs\n");
-#endif
+
+	DEBUGPATH;
 
 	F=DestroyFuncs;
 	
@@ -123,9 +118,7 @@ unsigned short GetHash(unsigned int ip1, unsigned int ip2){
 	unsigned short	hash;
 	unsigned short	v1;
 	
-#ifdef DEBUGPATH
-	printf("In GetHash\n");
-#endif
+	DEBUGPATH;
 
 	hash=ip1/65536;
 	v1=(ip1 & 0x0000FFFF);
@@ -150,9 +143,7 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2){
 	int				i;
 	unsigned int	Top, Bottom, Middle;
 	
-#ifdef DEBUGPATH
-	printf("In FindIPPair\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("%s-",inet_ntoa(*(struct in_addr*)&IP1));
@@ -266,9 +257,8 @@ IPP* FindIPPair(unsigned int IP1, unsigned int IP2){
 * Add this to the time list
 ************************************/
 int AddToTime(PP* Port){
-#ifdef DEBUGPATH
-	printf("In AddToTime\n");
-#endif
+
+  DEBUGPATH;
 
 	if (!TimeHead){
 		TimeHead=Port;
@@ -302,9 +292,7 @@ int AddToTime(PP* Port){
 ************************************/
 int UpdateTime(PP* Port){
 
-#ifdef DEBUGPATH
-	printf("In UpdateTime\n");
-#endif
+  DEBUGPATH;
 
 	if (TimeTail==Port){
 		/*already the last*/
@@ -348,9 +336,7 @@ int RemovePort(PP* Port){
 	int				Top, Bottom, Middle;
 	unsigned short	Hash;
 	
-#ifdef DEBUGPATH
-	printf("In RemovePort\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG_TIME
 	printf("Freeing port with SessionID %u\n", Port->SessionID);
@@ -486,9 +472,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 	PP*				Port;
 	int				Top, Bottom, Middle;
 	
-#ifdef DEBUGPATH
-	printf("In FindPortPair\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("%u-%u",Port1, Port2);
@@ -630,9 +614,7 @@ PP* FindPortPair(unsigned short Port1, unsigned short Port2, IPP* Pair, long int
 int TimeoutSessions(long int Now){
 	PP*	TimeNext;
 	
-#ifdef DEBUGPATH
-	printf("In TimeoutSessions\n");
-#endif
+	DEBUGPATH;
 
 	while (TimeHead && 	(TimeHead->LastTime+SESSION_FORCE_TIMEOUT<Now)){
 		TimeNext=TimeHead->TimeNext;	
@@ -656,9 +638,7 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 	IPP*			Pair;
 	PP*				Port;
 	
-#ifdef DEBUGPATH
-	printf("In AssignSessionTCP\n");
-#endif
+	DEBUGPATH;
 
 	GetDataByID(PacketSlot, IPDecoderID, (void**)&IData);
 	if (!IData){
@@ -937,9 +917,7 @@ int AssignSessionTCP(int PacketSlot, void* Data){
 **********************************/
 int InitSession(){
 
-#ifdef DEBUGPATH
-	printf("In InitSession\n");
-#endif
+  DEBUGPATH;
 
 	bzero(Sessions, sizeof(IPB*)*65536);
 	TimeHead=NULL;

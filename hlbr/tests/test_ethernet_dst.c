@@ -27,13 +27,7 @@ int TestEthernetDst(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestEthernetDst\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing Ethernet Dst\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -124,13 +118,9 @@ int EthernetDstAddNode(int TestID, int RuleID, char* Args){
 	char*				next_byte;
 	char*				next_delim;
 	
-#ifdef DEBUGPATH
-	printf("In EthernetDstAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(EthernetDstData),1);	
 	
@@ -155,9 +145,7 @@ int EthernetDstAddNode(int TestID, int RuleID, char* Args){
 int InitTestEthernetDst(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestInterfaceName\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("EthernetDst");
 	if (TestID==TEST_NONE) return FALSE;

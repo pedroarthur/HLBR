@@ -30,13 +30,7 @@ int TestIPCheck(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestIPCheck\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing IP Check\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -108,14 +102,9 @@ int TestIPCheck(int PacketSlot, TestNode* Nodes){
 int IPCheckAddNode(int TestID, int RuleID, char* Args){
 	IPCheckData*		data;
 
-#ifdef DEBUGPATH
-	printf("In IPCheckAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
-	
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(IPCheckData),1);	
 	
@@ -136,9 +125,7 @@ int IPCheckAddNode(int TestID, int RuleID, char* Args){
 int InitTestIPCheck(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestIPCheck\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("IPCheck");
 	if (TestID==TEST_NONE) return FALSE;

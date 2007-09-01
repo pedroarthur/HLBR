@@ -10,9 +10,8 @@ extern GlobalVars	Globals;
 * handle info messages
 ******************************************/
 int AlertConsoleMessage(char* Message, void* Data){
-#ifdef DEBUGPATH
-	printf("In AlertConsoleMessage\n");
-#endif
+
+  DEBUGPATH;
 
 	printf("%s\n",Message);
 	
@@ -26,13 +25,7 @@ int AlertConsoleAction(int RuleNum, int PacketSlot, void* Data){
 	char		Buff[1024];
 	PacketRec*	p;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertConsoleAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to the console\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -59,9 +52,7 @@ int AlertConsoleAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionAlertConsole(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionAlertConsole\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("alert console");
 	if (ActionID==ACTION_NONE){

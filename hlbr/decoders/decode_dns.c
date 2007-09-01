@@ -16,9 +16,8 @@ int	UDPDecoderID;
 **********************************************/
 int DNS2Human(char* DNS, char* Human, int HumanLen){
 	int		i;
-#ifdef DEBUGPATH
-	printf("In DNS2Human\n");
-#endif	
+
+	DEBUGPATH;
 
 	i=1;
 	while (DNS[i] != 0x00){
@@ -57,13 +56,7 @@ void* DecodeDNS(int PacketSlot){
 	int				i;
 	unsigned short	Flags;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeDNS\n");
-#endif
-
-#ifdef DEBUG
-	printf("Decoding DNS Header\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -123,9 +116,7 @@ void* DecodeDNS(int PacketSlot){
 int InitDecoderDNS(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderDNS\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("DNS"))==DECODER_NONE){
 #ifdef DEBUG

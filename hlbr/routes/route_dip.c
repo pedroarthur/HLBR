@@ -31,9 +31,7 @@ int RouteDIP(int PacketSlot){
 	PacketRec*		p;
 	int				i;
 
-#ifdef DEBUGPATH
-	printf("In RouteDIP\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -79,13 +77,9 @@ int RouteDIPAddNode(int RouteID, char* Args){
 	char*	sp;
 	int		InterfaceNum;
 	
-#ifdef DEBUGPATH
-	printf("In RouteDIPAddNode\n");
-#endif
-	
-#ifdef DEBUG	
-	printf("Adding with args %s\n",Args);
-#endif
+	DEBUGPATH;
+
+	DBG( PRINT1("Adding with args %s\n",Args) );
 
 	/*first pop off the interface*/
 	sp=strchr(Args, ' ');
@@ -136,9 +130,7 @@ int RouteDIPAddNode(int RouteID, char* Args){
 int InitRouteDIP(){
 	int RouteID;
 	
-#ifdef DEBUGPATH
-	printf("In InitRoutDIP\n");
-#endif	
+	DEBUGPATH;
 
 	bzero(DInterfaces, sizeof(NumList*) * MAX_INTERFACES);
 	

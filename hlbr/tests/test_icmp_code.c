@@ -29,13 +29,7 @@ int TestICMPCode(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestICMPCode\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing ICMP Code\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -109,13 +103,9 @@ int TestICMPCode(int PacketSlot, TestNode* Nodes){
 int ICMPCodeAddNode(int TestID, int RuleID, char* Args){
 	ICMPCodeData*		data;
 
-#ifdef DEBUGPATH
-	printf("In ICMPCodeAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(ICMPCodeData),1);	
 	data->codes=InitNumList(LIST_TYPE_NORMAL);
@@ -136,9 +126,7 @@ int ICMPCodeAddNode(int TestID, int RuleID, char* Args){
 int InitTestICMPCode(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestICMPCode\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("ICMPCode");
 	if (TestID==TEST_NONE) return FALSE;

@@ -38,15 +38,13 @@
 extern GlobalVars	Globals;
 
 //#define DEBUG
-#define DEBUG1
+//#define DEBUG1
 
 /*******************************
 * Add all the tests to the tree
 *******************************/
 int InitTests(){
-#ifdef DEBUGPATH
-	printf("In InitTests\n");
-#endif
+  DEBUGPATH;
 
 	if (!InitTestInterfaceName()) return FALSE;
 	if (!InitTestEthernetType()) return FALSE;
@@ -84,9 +82,7 @@ int InitTests(){
 int	GetTestByName(char* Name){
 	int	i;
 
-#ifdef DEBUGPATH
-	printf("In GetTestByName\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumTests;i++)
 		if (strcasecmp(Name, Globals.Tests[i].Name)==0) return i;
@@ -100,10 +96,7 @@ int	GetTestByName(char* Name){
 int CreateTest(char* Name){
 	int		TestID;
 	
-#ifdef DEBUGPATH
-	printf("In CreateTest\n");
-#endif	
-
+	DEBUGPATH;
 	
 	TestID=GetTestByName(Name);
 	if (TestID!=TEST_NONE){	
@@ -130,9 +123,7 @@ int CreateTest(char* Name){
 int BindTestToDecoder(int TestID, char* Decoder){
 	int DecoderID;
 	
-#ifdef DEBUGPATH
-	printf("In BindTestToDecoder\n");
-#endif
+	DEBUGPATH;
 
 	DecoderID=GetDecoderByName(Decoder);
 	Globals.Tests[TestID].DecoderID=DecoderID;
@@ -147,10 +138,8 @@ int BindTestToDecoder(int TestID, char* Decoder){
 * Used for fast pruning
 ****************************************************/
 int TestSetDependency(int TestID, int RuleID){
-#ifdef DEBUGPATH
-	printf("In TestSetDependency\n");
-#endif
-	
+  DEBUGPATH;
+
 	if (TestID > Globals.NumTests) return FALSE;
 	
 	SetBit(Globals.Tests[TestID].DependencyMask, Globals.NumRules, RuleID, 1);
@@ -167,9 +156,7 @@ int TestAddNode(int TestID, int RuleNum, void* Data){
 	TestNode*	New;
 	DecoderRec*	Decoder;
 
-#ifdef DEBUGPATH
-	printf("In TestAddNode\n");
-#endif	
+	DEBUGPATH;
 	
 	New=(TestNode*)calloc(sizeof(TestNode),1);
 	New->RuleID=RuleNum;
@@ -210,9 +197,7 @@ int TestAddNode(int TestID, int RuleNum, void* Data){
 int TestsFinishSetup(){
 	int	i;
 	
-#ifdef DEBUGPATH
-	printf("In TestsFinishSetup\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumTests;i++){
 		if (Globals.Tests[i].FinishedSetup) Globals.Tests[i].FinishedSetup();

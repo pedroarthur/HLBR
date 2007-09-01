@@ -37,9 +37,8 @@ extern GlobalVars	Globals;
 *******************************************/
 MacRec* GetMac(unsigned char* Mac, int Create){
 	int i;
-#ifdef DEBUGPATH
-	printf("In MacGetInterface\n");
-#endif	
+
+	DEBUGPATH;
 
 	/*TODO: Make this faster*/
 	for (i=0;i<NumMacs;i++){
@@ -80,9 +79,7 @@ int RouteMacFilter(int PacketSlot){
 	EthernetData*	EData;
 	PacketRec*		p;
 
-#ifdef DEBUGPATH
-	printf("In RouteMacFilter\n");
-#endif
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -171,13 +168,9 @@ int RouteMacFilterAddNode(int RouteID, char* Args){
 	int			i;	
 	int			Count;
 	
-#ifdef DEBUGPATH
-	printf("In RouteMacFilterAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("AddNode was called with args %s\n", Args);
-#endif	    
+	DBG( PRINT1("AddNode was called with args %s\n", Args) );
 
 	if (!Args) return FALSE;
 	
@@ -222,9 +215,8 @@ int RouteMacFilterAddNode(int RouteID, char* Args){
 **********************************/
 int InitMacFilter(){
 	int RouteID;
-#ifdef DEBUGPATH
-	printf("In InitMacFilter\n");
-#endif	
+
+	DEBUGPATH;
 
 	bzero(Macs, sizeof(MacRec) * MAX_MACS);
 	

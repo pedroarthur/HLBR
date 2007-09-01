@@ -660,9 +660,7 @@ int ReadPacketSolarisDLPI(int InterfaceID){
 
 	static char readbuff[MAXDLBUF];
 		
-#ifdef DEBUGPATH
-	printf("In ReadPacketSolarisDLPI\n");
-#endif
+	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
 	
@@ -729,12 +727,10 @@ int ReadPacketSolarisDLPI(int InterfaceID){
 ****************************************************/
 int WritePacketSolarisDLPI(int InterfaceID, unsigned char* Packet, int PacketLen){
 	InterfaceRec*	interface;
-#ifdef DEBUGPATH
-	printf("In WritePacketSolarisDLPI\n");
-#endif
+
+	DEBUGPATH;
 
 	interface=&Globals.Interfaces[InterfaceID];
-	
 	
 	return TRUE;
 }
@@ -745,9 +741,7 @@ int WritePacketSolarisDLPI(int InterfaceID, unsigned char* Packet, int PacketLen
 void* SolarisDLPILoopFunc(void* v){
 	int				InterfaceID;
 
-#ifdef DEBUGPATH
-	printf("In SolarisDLPILoopFunc\n");
-#endif
+	DEBUGPATH;
 
 	InterfaceID=(int)v;
 	while (!Globals.Done){
@@ -761,9 +755,8 @@ void* SolarisDLPILoopFunc(void* v){
 * Start a thread to continuously read
 **********************************************/
 int LoopThreadSolarisDLPI(int InterfaceID){
-#ifdef DEBUGPATH
-	printf("In loopThreadSolarisDLPI\n");
-#endif
+
+  DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;

@@ -194,9 +194,7 @@ int SortFragArray(struct defrag_item* Frags, int NumFrags){
 	int			found;
 	int			last;
 	
-#ifdef DEBUGPATH
-	printf("In SortFragArray\n");
-#endif
+	DEBUGPATH;
 
 	next=0;
 	last=FALSE;
@@ -260,9 +258,7 @@ void* DecodeIPDefrag(int PacketSlot){
 	
 	PacketRec*			p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeIPDefrag\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("----------------------------\n");
@@ -392,9 +388,7 @@ void* DecodeIPDefrag(int PacketSlot){
 int InitDecoderIPDefrag(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderIPDefrag\n");
-#endif
+	DEBUGPATH;
 
 	if ((DecoderID=CreateDecoder("IPDefrag"))==DECODER_NONE){
 #ifdef DEBUG

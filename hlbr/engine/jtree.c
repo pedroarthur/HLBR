@@ -35,9 +35,7 @@ extern GlobalVars	Globals;
 **************************************/
 int InitJTree(JTree* j, char NoCase){
 	
-#ifdef DEBUGPATH
-	printf("In InitJTree\n");
-#endif	
+  DEBUGPATH;
 
 	bzero(j, sizeof(JTree));
 	
@@ -53,9 +51,7 @@ int AddStringJTreeReal(JTree* j, unsigned char* String, int SLen, int RuleID){
 	JNode*	node;
 	int		i;
 
-#ifdef DEBUGPATH
-	printf("In AddStringJTree\n");
-#endif
+	DEBUGPATH;
 
 	if (!j) return FALSE;
 	if (!String) return FALSE;
@@ -131,9 +127,7 @@ int AddStringJTree(JTree* j, unsigned char* String, int SLen, int RuleID){
 	char			BinBuff[6];
 	int				BinChar;
 	
-#ifdef DEBUGPATH
-	printf("In AddStringJTree\n");
-#endif
+	DEBUGPATH;
 
 	/*apply the escape decoding*/
 	IsBinary=FALSE;
@@ -217,9 +211,7 @@ JNode* FindOptimalNode(JTree* j, JNode*	n, unsigned char*	String, int SLen){
 	JNode*			optimal;
 	JNode*			node;
 	
-#ifdef DEBUGPATH
-	printf("In FindOptimalNode\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUGFINAL
 	printf("Finding optimial node for %s\n",String);
@@ -302,9 +294,7 @@ int ConvertNode(JNode* n, JNode** Parent, int NoCase){
 	static int		SCount=0;
 	static int		LCount=0;
 	
-#ifdef DEBUGPATH
-	printf("In CompressJTree\n");
-#endif
+	DEBUGPATH;
 
 	printf("This node has %i subnodes \"%c\"\n",n->Count,n->temp);
 
@@ -379,9 +369,7 @@ int FreeNode(JNode* n){
 ******************************************/
 int CompressJTree(JTree* j){
 
-#ifdef DEBUGPATH
-	printf("In CompressJTree\n");
-#endif
+  DEBUGPATH;
 
 	return ConvertNode(j->Head, NULL, j->NoCase);
 }
@@ -390,16 +378,14 @@ int CompressJTree(JTree* j){
 * Fill in the FailNode 
 * entries
 *******************************************/
-int FinalizeJTree(JTree* j){
+int FinalizeJTree(JTree* j) {
 	
-#ifdef DEBUGPATH
-	printf("In FinalizeJTree\n");
-#endif
+  DEBUGPATH;
 
 	if (!j) return FALSE;
-	if (!j->Head){
-		printf("Tree is empty\n");
-		return FALSE;
+	if (!j->Head) {
+	  DBG( PRINT("Tree is empty\n") );
+	  return FALSE;
 	}
 
 #ifdef DEBUGFINAL
@@ -428,9 +414,7 @@ int MatchStrings(JTree* j, unsigned char* PacketRuleBits, unsigned char* String,
 	int				i;
 	unsigned char	LocalDepend[MAX_RULES/8];
 	
-#ifdef DEBUGPATH
-	printf("In MatchStrings\n");
-#endif
+	DEBUGPATH;
 
 	memcpy(LocalDepend, j->DependMask, MAX_RULES/8);
 

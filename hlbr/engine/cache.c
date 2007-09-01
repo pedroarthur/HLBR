@@ -11,9 +11,7 @@
 Cache* InitCache(int TimeoutLen){
 	Cache*		NewCache;
 	
-#ifdef DEBUGPATH
-	printf("In InitCache\n");
-#endif
+	DEBUGPATH;
 	
 	NewCache=calloc(sizeof(Cache),1);
 	NewCache->TimeoutLen=TimeoutLen;
@@ -46,9 +44,8 @@ int CacheGetBin(Cache* c, unsigned char* Key, int KeyLen){
 * Create a new bin to put stuff in
 *********************************************/
 int CacheCreateBin(Cache* c, unsigned char* Key, int KeyLen){
-#ifdef DEBUGPATH
-	printf("In CacheCreateBin\n");
-#endif
+
+  DEBUGPATH;
 
 	/*check to see if we're full*/
 	if (c->NumKeys>=CACHE_MAX_KEYS){
@@ -74,9 +71,8 @@ int CacheCreateBin(Cache* c, unsigned char* Key, int KeyLen){
 * put a new item in a cache bin
 *********************************************/
 int CacheBinAdd(CacheItems* ci, unsigned char* Data, int DataLen){
-#ifdef DEBUGPATH
-	printf("In CacheBinAdd\n");
-#endif
+
+  DEBUGPATH;
 
 	if (ci->NumItems==CACHE_MAX_ITEMS_PER_KEY){
 #ifdef DEBUG
@@ -100,9 +96,7 @@ int CacheBinAdd(CacheItems* ci, unsigned char* Data, int DataLen){
 void CacheTimeout(Cache* c, int Now){
 	int		i;
 	
-#ifdef DEBUGPATH
-	printf("In CacheTimeout\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<c->NumKeys;i++){
 		if ( (c->Keys[i].LastTime+c->TimeoutLen) < Now){
@@ -118,9 +112,7 @@ void CacheTimeout(Cache* c, int Now){
 int CacheAdd(Cache* c, unsigned char* Key, int KeyLen, unsigned char* Data, int DataLen, int Now){
 	int	BinID;
 	
-#ifdef DEBUGPATH
-	printf("In CacheAdd\n");
-#endif
+	DEBUGPATH;
 
 	/*go find the bin, if it exists*/
 	BinID=CacheGetBin(c, Key, KeyLen);
@@ -159,9 +151,7 @@ int CacheDelKey(Cache* c, unsigned char* Key, int KeyLen, int Now){
 	int			i;
 	CacheItems*	ci;
 	
-#ifdef DEBUGPATH
-	printf("In CacheDelKey\n");
-#endif
+	DEBUGPATH;
 
 	/*go find the bin*/
 	KeyID=CacheGetBin(c, Key, KeyLen);
@@ -201,9 +191,7 @@ int CacheDelKey(Cache* c, unsigned char* Key, int KeyLen, int Now){
 CacheItems* CacheGet(Cache* c, unsigned char* Key, int KeyLen, int Now){
 	int	KeyID;
 	
-#ifdef DEBUGPATH
-	printf("In CacheGet\n");
-#endif
+	DEBUGPATH;
 
 	KeyID=CacheGetBin(c, Key, KeyLen);
 	if (KeyID==CACHE_NONE){
@@ -223,10 +211,8 @@ CacheItems* CacheGet(Cache* c, unsigned char* Key, int KeyLen, int Now){
 ***************************************************/
 void DestroyCache(Cache* c){
 	int i,j;
-#ifdef DEBUGPATH
-	printf("in DestroyCache\n");
-#endif
 
+	DEBUGPATH;
 
 	for (i=0;i<c->NumKeys;i++){
 		for (j=0;j<c->Keys[i].NumItems;j++){

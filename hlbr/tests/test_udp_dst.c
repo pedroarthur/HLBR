@@ -28,13 +28,7 @@ int TestUDPDst(int PacketSlot, TestNode* Nodes){
 	TestNode*			Node;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestUDPDst\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing UDP Dst\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -102,13 +96,9 @@ int TestUDPDst(int PacketSlot, TestNode* Nodes){
 int UDPDstAddNode(int TestID, int RuleID, char* Args){
 	UDPDstData*			data;
 
-#ifdef DEBUGPATH
-	printf("In UDPDstAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Adding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Adding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(UDPDstData),1);	
 	
@@ -129,9 +119,7 @@ int UDPDstAddNode(int TestID, int RuleID, char* Args){
 int InitTestUDPDst(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestUDPDst\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("UDPDst");
 	if (TestID==TEST_NONE) return FALSE;

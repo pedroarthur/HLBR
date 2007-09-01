@@ -20,13 +20,7 @@ void* DecodeTCP(int PacketSlot){
 	unsigned char	ip_proto;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeTCP\n");
-#endif
-
-#ifdef DEBUG
-	printf("Decoding TCP Header\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -65,9 +59,7 @@ void* DecodeTCP(int PacketSlot){
 int InitDecoderTCP(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderTCP\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("TCP"))==DECODER_NONE){
 #ifdef DEBUG

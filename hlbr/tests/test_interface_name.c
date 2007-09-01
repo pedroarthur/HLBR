@@ -11,7 +11,7 @@ typedef struct interface_name_data{
 	int		InterfaceNum;
 } InterfaceNameData;
 
-#define DEBUG
+//#define DEBUG
 
 int InterfaceDecoderID;
 
@@ -25,13 +25,7 @@ int TestInterfaceName(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 	
-#ifdef DEBUGPATH
-	printf("In TestInterfaceName\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing Interface Name\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -100,13 +94,9 @@ int InterfaceNameAddNode(int TestID, int RuleID, char* Args){
 	int 				i;
 	InterfaceNameData*	data;
 	
-#ifdef DEBUGPATH
-	printf("In InterfaceNameAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding Node with args %s\n",Args) );
 
 	/*find the interface*/
 	for (i=0;i<Globals.NumInterfaces;i++){
@@ -128,9 +118,7 @@ int InterfaceNameAddNode(int TestID, int RuleID, char* Args){
 int InitTestInterfaceName(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestInterfaceName\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("InterfaceName");
 	if (TestID==TEST_NONE) return FALSE;

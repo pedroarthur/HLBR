@@ -39,9 +39,7 @@ void* EMailMessageReal(void* data){
 	int					sockfd;
 	char				Buff[MAX_EMAIL_ARG_LEN+128];
 
-#ifdef DEBUGPATH
-	printf("In EMailMessageReal\n");
-#endif
+	DEBUGPATH;
 
 	if (!data) return NULL;
 	Data=(EMailData*)data;
@@ -127,9 +125,7 @@ FreeMe:
 void EMailMessage(EMailData* data, char* Message){
 	pthread_t	email_thread;
 	
-#ifdef DEBUGPATH
-	printf("In EMailMessage\n");
-#endif
+	DEBUGPATH;
 
 	/*Make a copy of the Message Buffer*/
 	data->Message=malloc(1024);
@@ -157,13 +153,7 @@ void* AlertEMailParseArgs(char* Args){
 	char*			c1;
 	char*			c2;
 
-#ifdef DEBUGPATH
-	printf("In AlertEMailParseArgs\n");
-#endif
-
-#ifdef DEBUG
-	printf("Parsing args for action_alert_email\n");
-#endif	
+	DEBUGPATH;
 
 	data=(EMailData*)calloc(sizeof(EMailData),1);
 
@@ -250,9 +240,8 @@ void* AlertEMailParseArgs(char* Args){
 * handle info messages
 ******************************************/
 int AlertEMailMessage(char* Message, void* Data){
-#ifdef DEBUGPATH
-	printf("In AlertEMailMessage\n");
-#endif
+
+  DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Emailing %s\n",Message);
@@ -271,13 +260,7 @@ int AlertEMailAction(int RuleNum, int PacketSlot, void* Data){
 	PacketRec*	p;
 	EMailData*	data;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertEMailAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to email\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data) return FALSE;
 	data=(EMailData*)Data;
@@ -304,9 +287,7 @@ int AlertEMailAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionAlertEMail(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionAlertEMail\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("email");
 	if (ActionID==ACTION_NONE){

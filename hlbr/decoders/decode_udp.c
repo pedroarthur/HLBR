@@ -20,9 +20,7 @@ void* DecodeUDP(int PacketSlot){
 	unsigned char	ip_proto;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeUDP\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Decoding UDP Header\n");
@@ -61,9 +59,7 @@ void* DecodeUDP(int PacketSlot){
 int InitDecoderUDP(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderUDP\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("UDP"))==DECODER_NONE){
 #ifdef DEBUG

@@ -23,7 +23,7 @@ int			IPDecoderID;
 int			ARPDecoderID;
 NumList*	SInterfaces[MAX_INTERFACES];
 
-#define DEBUG
+//#define DEBUG
 
 extern GlobalVars	Globals;
 
@@ -38,9 +38,7 @@ int RouteSIP(int PacketSlot){
 	int				Timeout;
 	unsigned int	IP;
 
-#ifdef DEBUGPATH
-	printf("In RouteSIP\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -111,13 +109,9 @@ int RouteSIPAddNode(int RouteID, char* Args){
 	char*	sp;
 	int		InterfaceNum;
 	
-#ifdef DEBUGPATH
-	printf("In RouteSIPAddNode\n");
-#endif
-	
-#ifdef DEBUG	
-	printf("Adding with args %s\n",Args);
-#endif
+	DEBUGPATH;
+
+	DBG( PRINT1("Adding with args %s\n",Args) );
 
 	/*first pop off the interface*/
 	sp=strchr(Args, ' ');
@@ -168,9 +162,7 @@ int RouteSIPAddNode(int RouteID, char* Args){
 int InitRouteSIP(){
 	int RouteID;
 	
-#ifdef DEBUGPATH
-	printf("In InitRoutSIP\n");
-#endif	
+	DEBUGPATH;
 
 	bzero(SInterfaces, sizeof(NumList*) * MAX_INTERFACES);
 	
@@ -199,13 +191,9 @@ int InitRouteSIP(){
 * Add a temporary/permanent SIP route
 *************************************************/
 int RouteSIPAdd(unsigned int SIP, int Interface, long UntilTime){
-#ifdef DEBUGPATH
-	printf("In RouteSIPAdd\n");
-#endif
-	
-#ifdef DEBUG
-	printf("Rerouting %s\n", inet_ntoa(*(struct in_addr*)&SIP));
-#endif	
+  DEBUGPATH;
+
+  DBG( PRINT1("Rerouting %s\n", inet_ntoa(*(struct in_addr*)&SIP)) );
 	
 	if (!SInterfaces[Interface]){
 		SInterfaces[Interface]=InitNumList(LIST_TYPE_NORMAL);

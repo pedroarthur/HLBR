@@ -41,10 +41,7 @@ int OpenInterfaceTCPDump(int InterfaceID){
 	InterfaceRec*			Interface;
 	struct dump_pcap_file_header	Header;
 
-#ifdef DEBUGPATH
-	printf("In OpenInterfaceTCPDump\n");
-#endif
-
+	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
 
@@ -85,9 +82,7 @@ int ReadPacketTCPDump(int InterfaceID){
 	PacketRec*		p;
 	struct dump_pcap_pkthdr	Header;
 	
-#ifdef DEBUGPATH
-	printf("In ReadPacketTCPDump\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Reading packet from tcpdump file\n");
@@ -140,9 +135,8 @@ int ReadPacketTCPDump(int InterfaceID){
 * Send a packet off to the raw interface
 ****************************************************/
 int WritePacketTCPDump(int InterfaceID, unsigned char* Packet, int PacketLen){	
-#ifdef DEBUGPATH
-	printf("In WritePacketTCPDumpRaw\n");
-#endif
+
+  DEBUGPATH;
 	
 	return FALSE;
 }
@@ -153,9 +147,7 @@ int WritePacketTCPDump(int InterfaceID, unsigned char* Packet, int PacketLen){
 void* TCPDumpLoopFunc(void* v){
 	int				InterfaceID;
 
-#ifdef DEBUGPATH
-	printf("In TCPDumpRawLoopFunc\n");
-#endif
+	DEBUGPATH;
 
 	InterfaceID=(int)v;
 	while (!Globals.Done){
@@ -169,9 +161,8 @@ void* TCPDumpLoopFunc(void* v){
 * Start a thread to continuously read
 **********************************************/
 int LoopThreadTCPDump(int InterfaceID){
-#ifdef DEBUGPATH
-	printf("In loopThreadTCPDumpRaw\n");
-#endif
+
+  DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;

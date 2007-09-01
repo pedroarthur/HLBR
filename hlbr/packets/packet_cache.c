@@ -14,7 +14,7 @@ int					SaveTimeHead;
 int					SaveTimeTail;
 
 //#define DEBUG
-#define DEBUGLOCKS
+//#define DEBUGLOCKS
 
 extern GlobalVars	Globals;
 
@@ -22,9 +22,8 @@ extern GlobalVars	Globals;
 * Get ready for some caching
 *********************************/
 int InitCache(){
-#ifdef DEBUGPATH
-	printf("In InitCache\n");
-#endif
+
+  DEBUGPATH;
 
 	bzero(Saves, sizeof(SaveRec)*MAX_SAVES);
 	bzero(SBins, sizeof(SaveBin)*65536);
@@ -40,9 +39,7 @@ unsigned short HashKey(char* Key, int KeyLen){
 	unsigned short 	KeyHash;
 	int				i;
 	
-#ifdef DEBUGPATH
-	printf("In HashKey\n");
-#endif	
+	DEBUGPATH;
 
 	if (!Key){
 		printf("Internal Error: Key was Null in HashKey\n");
@@ -67,13 +64,7 @@ void FreeSaved(int SaveID){
 	SaveRec*		s;
 	int				i,j;
 	
-#ifdef DEBUGPATH
-	printf("in FreeSaved\n");
-#endif
-
-#ifdef DEBUG
-	printf("Removing a packet\n");
-#endif
+	DEBUGPATH;
 
 	s=&Saves[SaveID];
 
@@ -122,9 +113,8 @@ void FreeSaved(int SaveID){
 ***********************************************************/
 void FreeSaveQuery(SaveQuery* q){
 	int		i;
-#ifdef DEBUGPATH
-	printf("In FreeSaveQuery\n");
-#endif
+
+	DEBUGPATH;
 
 	if (!q) return;
 
@@ -149,9 +139,7 @@ void TimeoutSavedPackets(long CurTime){
 	int			This;
 	int			DelPacket;
 
-#ifdef DEBUGPATH
-	printf("In TimeoutSavedPackets\n");
-#endif
+	DEBUGPATH;
 
 	/*check to see if there is anything to time out*/
 	if (Globals.SavedCount==0) return;
@@ -182,9 +170,9 @@ void TimeoutSavedPackets(long CurTime){
 ********************************************/
 int GetFreeSaved(){
 	int		i;
-#ifdef DEBUGPATH
-	printf("in GetFreeSaved\n");
-#endif
+
+	DEBUGPATH;
+
 	for (i=0;i<MAX_SAVES;i++){
 		if (!Saves[i].InUse) return i;
 	}
@@ -199,9 +187,7 @@ int SavePacket(int PacketSlot, char* Key, int KeyLen, int Timeout){
 	unsigned short	KeyHash;
 	int				SaveID;
 	
-#ifdef DEBUGPATH
-	printf("In SavePacket\n");
-#endif
+	DEBUGPATH;
 
 	hlbr_mutex_lock(&SavedMutex, SAVE_PACKET_1, &SaveLockID);
 	TimeoutSavedPackets(Globals.Packets[PacketSlot].tv.tv_sec);	
@@ -263,9 +249,7 @@ SaveQuery* GetAndLockSavedPackets(char* Key, int KeyLen){
 	int				i;
 	SaveRec*		s;
 	
-#ifdef DEBUGPATH
-	printf("In GetAndLockSavedPackets\n");
-#endif
+	DEBUGPATH;
 	
 	/*Set up the query*/
 	KeyHash=HashKey(Key, KeyLen);
@@ -313,9 +297,8 @@ SaveQuery* GetAndLockSavedPackets(char* Key, int KeyLen){
 ************************************************/
 void UnlockSavedQuery(SaveQuery* q){
 	int		i;
-#ifdef DEBUGPATH
-	printf("in UnlockSavedQuery\n");
-#endif
+
+	DEBUGPATH;
 	
 	if (!q) return;
 	

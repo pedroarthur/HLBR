@@ -25,9 +25,8 @@ extern GlobalVars Globals;
 * Set up all the actions
 **********************************/
 int InitActions(){
-#ifdef DEBUGPATH
-	printf("In InitActions\n");
-#endif
+
+  DEBUGPATH;
 
 	if (!InitActionDrop()) return FALSE;
 	if (!InitActionAlertConsole()) return FALSE;
@@ -50,9 +49,7 @@ int InitActions(){
 int	GetActionByName(char* Name){
 	int	i;
 
-#ifdef DEBUGPATH
-	printf("GetActionByName\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumActionItems;i++){
 		if (strcasecmp(Name, Globals.ActionItems[i].Name)==0){
@@ -69,9 +66,7 @@ int	GetActionByName(char* Name){
 int CreateAction(char* Name){
 	int ActionID;
 	
-#ifdef DEBUGPATH
-	printf("In CreateAction\n");
-#endif
+	DEBUGPATH;
 
 	/*check to see if this name is already used*/
 	ActionID=GetActionByName(Name);
@@ -98,11 +93,8 @@ int CreateAction(char* Name){
 * Expand all the macros for the Message string
 ****************************************************/
 int BuildMessageString(char* Message, int PacketSlot, char* TargetBuff, int TargetBuffLen){
-#ifdef DEBUGPATH
-	printf("In BuildMessageString\n");
-#endif
 
-	
+  DEBUGPATH;
 
 	return FALSE;
 }
@@ -117,9 +109,7 @@ int PerformActions(int PacketSlot){
 	ActionRec*	Action;
 	PacketRec*	p;
 
-#ifdef DEBUGPATH
-	printf("In PerformActions\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	Globals.AlertCount++;

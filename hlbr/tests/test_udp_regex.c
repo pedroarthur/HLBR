@@ -31,13 +31,7 @@ int TestUDPRegExp(int PacketSlot, TestNode* Nodes){
 	int result;
 	int i;
 
-#ifdef DEBUGPATH
-	printf("In TestUDPRegExp\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing UDP RegExp\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -111,13 +105,9 @@ int UDPRegExpAddNode(int TestID, int RuleID, char* Args){
 	int erofset;
 	const char *errors;
 
-#ifdef DEBUGPATH
-	printf("In UDPRegExpAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Adding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Adding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(UDPRegExpData),1);
 	snprintf(data->udp_content, MAX_CONTENT_LEN, "%s", Args);
@@ -147,9 +137,7 @@ int UDPRegExpAddNode(int TestID, int RuleID, char* Args){
 int InitTestUDPRegExp(){
 	int TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestUDPRegExp\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("UDPRegExp");
 	if (TestID==TEST_NONE) return FALSE;

@@ -32,13 +32,7 @@ int TestIPTTL(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestIPTTL\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing IP TTL\n");
-#endif	
+	DEBUGPATH;
 	
 	if (!Nodes) return FALSE;
 	
@@ -103,13 +97,9 @@ int IPTTLAddNode(int TestID, int RuleID, char* Args){
 	int					i;
 #endif
 
-#ifdef DEBUGPATH
-	printf("In IPTTLAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(IPTTLData),1);
 	
@@ -168,9 +158,7 @@ int IPTTLAddNode(int TestID, int RuleID, char* Args){
 int InitTestIPTTL(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestIPTTL\n");
-#endif
+	DEBUGPATH;
 
 	IPTTLHead=NULL;
 

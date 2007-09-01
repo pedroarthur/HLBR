@@ -29,13 +29,7 @@ int TestTCPSrc(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestTCPSrc\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP Src\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -109,13 +103,9 @@ int TestTCPSrc(int PacketSlot, TestNode* Nodes){
 int TCPSrcAddNode(int TestID, int RuleID, char* Args){
 	TCPSrcData*			data;
 
-#ifdef DEBUGPATH
-	printf("In TCPSrcAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPSrcData),1);
 
@@ -136,9 +126,7 @@ int TCPSrcAddNode(int TestID, int RuleID, char* Args){
 int InitTestTCPSrc(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPSrc\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("TCPSrc");
 	if (TestID==TEST_NONE) return FALSE;

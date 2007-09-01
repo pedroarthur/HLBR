@@ -29,13 +29,7 @@ int TestTCPNoCase(int PacketSlot, TestNode* Nodes){
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestTCPNoCase\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP NoCase\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -72,13 +66,9 @@ int TestTCPNoCase(int PacketSlot, TestNode* Nodes){
 int TCPNoCaseAddNode(int TestID, int RuleID, char* Args){
 	TCPNoCaseData*		data;
 
-#ifdef DEBUGPATH
-	printf("In TCPNoCaseAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(TCPNoCaseData),1);
 	snprintf(data->tcp_content, MAX_CONTENT_LEN, "%s", Args);
@@ -97,9 +87,7 @@ int TCPNoCaseAddNode(int TestID, int RuleID, char* Args){
 * Called when we're all done adding rules
 ****************************************/
 int TestTCPNoCaseFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestTCPNocaseFinishedSetup\n");
-#endif
+  DEBUGPATH;
 
 	return FinalizeJTree(&TCPNoCaseTree);
 }
@@ -110,9 +98,7 @@ int TestTCPNoCaseFinishedSetup(){
 int InitTestTCPNoCase(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPNoCase\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&TCPNoCaseTree, TRUE);
 

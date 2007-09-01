@@ -61,9 +61,9 @@ int get_device_id(int fd, char* name){
 * Open an interface via Linux Raw Sockets
 **********************************************/
 int OpenInterfaceLinuxRaw(int InterfaceID){
-#ifdef DEBUGPATH
-	printf("In OpenInterfaceLinuxRaw\n");
-#endif
+
+  DEBUGPATH;
+
 	int 				fd;
 	struct sockaddr_ll	sll;
 	int					ssize;
@@ -121,9 +121,7 @@ int ReadPacketLinuxRaw(int InterfaceID){
 	int				i;
 #endif	
 	
-#ifdef DEBUGPATH
-	printf("In ReadPacketLinuxRaw\n");
-#endif
+	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
 	if ( (PacketSlot=GetEmptyPacket())==-1){
@@ -194,9 +192,7 @@ int WritePacketLinuxRaw(int InterfaceID, unsigned char* Packet, int PacketLen){
 	int count;
 	InterfaceRec* interface;
 	
-#ifdef DEBUGPATH
-	printf("In WritePacketLinuxRaw\n");
-#endif
+	DEBUGPATH;
 
 	interface=&Globals.Interfaces[InterfaceID];
 	
@@ -215,9 +211,7 @@ int WritePacketLinuxRaw(int InterfaceID, unsigned char* Packet, int PacketLen){
 void* LinuxRawLoopFunc(void* v){
 	int				InterfaceID;
 
-#ifdef DEBUGPATH
-	printf("In LinuxRawLoopFunc\n");
-#endif
+	DEBUGPATH;
 
 	InterfaceID=(int)v;
 	while (!Globals.Done){
@@ -231,9 +225,8 @@ void* LinuxRawLoopFunc(void* v){
 * Start a thread to continuously read
 **********************************************/
 int LoopThreadLinuxRaw(int InterfaceID){
-#ifdef DEBUGPATH
-	printf("In loopThreadLinuxRaw\n");
-#endif
+
+  DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;

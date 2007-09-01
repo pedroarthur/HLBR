@@ -7,7 +7,7 @@
 
 int			EthernetDecoderID;
 
-#define DEBUG
+//#define DEBUG
 
 extern GlobalVars	Globals;
 
@@ -16,9 +16,8 @@ extern GlobalVars	Globals;
 **********************************/
 int RouteSBridge(int PacketSlot){
 	PacketRec*	p;
-#ifdef DEBUGPATH
-	printf("In RouteSBridge\n");
-#endif
+
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -31,9 +30,7 @@ int RouteSBridge(int PacketSlot){
 * TODO: make this actually work
 **********************************/
 int RouteSBridgeAddNode(int RouteID, char* Args){
-#ifdef DEBUGPATH
-	printf("In RouteSBridgeAddNode\n");
-#endif
+  DEBUGPATH;
 
 	return TRUE;
 }
@@ -43,9 +40,8 @@ int RouteSBridgeAddNode(int RouteID, char* Args){
 **********************************/
 int InitSBridge(){
 	int RouteID;
-#ifdef DEBUGPATH
-	printf("In InitSBridge\n");
-#endif	
+
+	DEBUGPATH;
 	
 	if ( (RouteID=CreateRoute("SBridge"))==ROUTE_NONE){
 		printf("Couldn't create route SBridge\n");

@@ -29,13 +29,7 @@ int TestTCPListNoCase(int PacketSlot, TestNode* Nodes){
 	int					i;
 #endif	
 
-#ifdef DEBUGPATH
-	printf("In TestTCPListNoCase\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing TCP ListNoCase\n");
-#endif	
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 	
@@ -76,9 +70,7 @@ int TCPListNoCaseAddNode(int TestID, int RuleID, char* Args){
 	FILE*			listf;
 	char			LineBuff[10240];
 
-#ifdef DEBUGPATH
-	printf("In TCPListNoCaseAddNode\n");
-#endif
+	DEBUGPATH;
 
 	listf = fopen(Args, "r");
 	if (!listf){
@@ -116,9 +108,7 @@ int TCPListNoCaseAddNode(int TestID, int RuleID, char* Args){
 * Called when we're all done adding rules
 ****************************************/
 int TestTCPListNoCaseFinishedSetup(){
-#ifdef DEBUGPATH
-	printf("In TestTCPListNoCaseFinishedSetup\n");
-#endif
+  DEBUGPATH;
 
 	return FinalizeJTree(&TCPListNoCaseTree);
 }
@@ -130,9 +120,7 @@ int TestTCPListNoCaseFinishedSetup(){
 int InitTestTCPListNoCase(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPListNoCase\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&TCPListNoCaseTree, TRUE);
 

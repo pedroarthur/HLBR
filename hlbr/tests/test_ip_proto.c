@@ -36,13 +36,7 @@ int TestIPProto(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestIPProto\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing IP Proto\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -119,13 +113,9 @@ int IPProtoAddNode(int TestID, int RuleID, char* Args){
 	IPProtoData*		data;
 	NumAlias			Aliases[6];
 
-#ifdef DEBUGPATH
-	printf("In IPProtoAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 	
 	snprintf(Aliases[0].Alias,512,"TCP");
 	Aliases[0].Num=IP_PROTO_TCP;
@@ -159,9 +149,7 @@ int IPProtoAddNode(int TestID, int RuleID, char* Args){
 int InitTestIPProto(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestIPProto\n");
-#endif
+	DEBUGPATH;
 
 	TestID=CreateTest("IPProto");
 	if (TestID==TEST_NONE) return FALSE;

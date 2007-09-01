@@ -30,9 +30,7 @@ extern GlobalVars	Globals;
 int GetDecoderByName(char* Name){
 	int 	i;
 	
-#ifdef DEBUGPATH
-	printf("In GetDecoderByName\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumDecoders;i++)
 		if (strcasecmp(Name, Globals.Decoders[i].Name)==0) return i;
@@ -46,9 +44,7 @@ int GetDecoderByName(char* Name){
 int InitDecoders(){
 	int	RootDecoder;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoders\n");
-#endif
+	DEBUGPATH;
 
 	if (!InitDecoderInterface()) return FALSE;
 	if (!InitDecoderEthernet()) return FALSE;
@@ -84,9 +80,7 @@ int InitDecoders(){
 int CreateDecoder(char* Name){
 	int DecoderID;
 	
-#ifdef DEBUGPATH
-	printf("In CreateDecoder\n");
-#endif
+	DEBUGPATH;
 
 	/*check to see if this name is already used*/
 	DecoderID=GetDecoderByName(Name);
@@ -117,9 +111,7 @@ int DecoderAddTest(int DecoderID, int TestID){
 	DecoderRec*	Decoder;
 	TestRec*	This;
 
-#ifdef DEBUGPATH
-	printf("In DecoderAddTest\n");
-#endif
+	DEBUGPATH;
 
 	Test=&Globals.Tests[TestID];
 	Decoder=&Globals.Decoders[DecoderID];
@@ -155,9 +147,7 @@ int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID){
 	DecoderRec*	Parent;
 	DecoderRec*	This;
 
-#ifdef DEBUGPATH
-	printf("In DecoderAddDecoder\n");
-#endif
+	DEBUGPATH;
 
 	Parent=&Globals.Decoders[ParentDecoderID];
 	Child=&Globals.Decoders[ChildDecoderID];
@@ -193,9 +183,7 @@ int DecoderAddModule(int DecoderID, int ModuleID){
 	DecoderRec*	Decoder;
 	ModuleRec*	This;
 
-#ifdef DEBUGPATH
-	printf("In ModuleAddTest\n");
-#endif
+	DEBUGPATH;
 
 	Module=&Globals.Modules[ModuleID];
 	Decoder=&Globals.Decoders[DecoderID];
@@ -233,9 +221,8 @@ int Decode(int DecoderID, int PacketSlot){
 	DecoderRec*	child;
 	PacketRec*	p;
 
-#ifdef DEBUGPATH
-	printf("In Decode\n");
-#endif
+	DEBUGPATH;
+
 	/*Don't go there if we don't need to*/
 	if (!Globals.Decoders[DecoderID].Active) return TRUE;
 
@@ -312,9 +299,8 @@ int Decode(int DecoderID, int PacketSlot){
 * Used for fast pruning
 ****************************************************/
 int DecoderSetDependency(int DecoderID, int TestID){
-#ifdef DEBUGPATH
-	printf("In DecoderSetDependency\n");
-#endif
+
+  DEBUGPATH;
 	
 	if (TestID > Globals.NumRules) return FALSE;
 	
@@ -328,9 +314,8 @@ int DecoderSetDependency(int DecoderID, int TestID){
 int GetDataByID(int PacketSlot, int DecoderID, void** data){
 	int 		i;
 	PacketRec*	p;
-#ifdef DEBUGPATH
-	printf("In GetDataByID\n");
-#endif
+
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 

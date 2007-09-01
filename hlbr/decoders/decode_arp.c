@@ -21,13 +21,7 @@ void* DecodeARP(int PacketSlot){
 	unsigned short	etype;
 	PacketRec*		p;
 	
-#ifdef DEBUGPATH
-	printf("In DecodeARP\n");
-#endif
-
-#ifdef DEBUG1
-	printf("Decoding ARP Header\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -113,9 +107,7 @@ void* DecodeARP(int PacketSlot){
 int InitDecoderARP(){
 	int DecoderID;
 
-#ifdef DEBUGPATH
-	printf("In InitDecoderARP\n");
-#endif
+	DEBUGPATH;
 	
 	if ((DecoderID=CreateDecoder("ARP"))==DECODER_NONE){
 #ifdef DEBUG

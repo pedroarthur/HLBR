@@ -30,13 +30,7 @@ void* BNSParseArgs(char* Args){
 	char*				c;
 	char*				c2;
 
-#ifdef DEBUGPATH
-	printf("In BNSParseArgs\n");
-#endif
-
-#ifdef DEBUG
-	printf("Parsing args for action_bns\n");
-#endif	
+	DEBUGPATH;
 
 	data=(ActionBNSRec*)calloc(sizeof(ActionBNSRec),1);
 	data->GreenList=InitNumList(LIST_TYPE_NORMAL);
@@ -78,9 +72,7 @@ void* BNSParseArgs(char* Args){
 ******************************************/
 int BNSMessage(char* Message, void* Data){
 
-#ifdef DEBUGPATH
-	printf("In BNSMessage\n");
-#endif
+  DEBUGPATH;
 
 	return TRUE;
 }
@@ -94,13 +86,7 @@ int BNSAction(int RuleNum, int PacketSlot, void* Data){
 	IPData*				IP;
 	char				Message[512];
 	
-#ifdef DEBUGPATH
-	printf("In BNSAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Applying an BNS action\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -136,9 +122,7 @@ int BNSAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionBNS(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionBNS\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("bns");
 	if (ActionID==ACTION_NONE){

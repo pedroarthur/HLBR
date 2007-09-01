@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-#define DEBUG
+//#define DEBUG
 
 typedef struct action_route_sip{
 	int 		Interface;
@@ -33,13 +33,7 @@ void* RouteSIPParseArgs(char* Args){
 	int					i;
 	int					InterfaceNum;
 
-#ifdef DEBUGPATH
-	printf("In RouteSIPParseArgs\n");
-#endif
-
-#ifdef DEBUG
-	printf("Parsing args for action_route_sip\n");
-#endif	
+	DEBUGPATH;
 
 	/*interface is the first arg*/
 	c=strchr(Args, ',');
@@ -120,9 +114,7 @@ void* RouteSIPParseArgs(char* Args){
 ******************************************/
 int RouteSIPMessage(char* Message, void* Data){
 
-#ifdef DEBUGPATH
-	printf("In RouteSIPMessage\n");
-#endif
+  DEBUGPATH;
 
 	return TRUE;
 }
@@ -135,13 +127,7 @@ int RouteSIPAction(int RuleNum, int PacketSlot, void* Data){
 	PacketRec*			p;
 	IPData*				IP;
 	
-#ifdef DEBUGPATH
-	printf("In RouteSIPAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Applying an SIP action\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -177,9 +163,7 @@ int RouteSIPAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionRouteSIP(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionRouteSIP\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("route sip");
 	if (ActionID==ACTION_NONE){

@@ -26,9 +26,8 @@ int GetLine(FILE* fp, char* buff, int buff_len){
 	char*	Begin;
 	char*	End;
 	
-#ifdef DEBUGPATH
-	printf("In GetLine\n");
-#endif
+	DEBUGPATH;
+
 	bzero(buff, buff_len);
 	Done=FALSE;
 	while (!Done){
@@ -98,9 +97,7 @@ int ParseList(FILE* fp, char* Name, int ListType){
 	int 		ListID;
 	GlobalList*	List;
 	
-#ifdef DEBUGPATH
-	printf("In ParseList\n");
-#endif
+	DEBUGPATH;
 
 	if (!Name) return FALSE;	
 	while (*Name==' ') Name++;
@@ -165,9 +162,7 @@ int ParseAction(FILE* fp, char* Name){
 	char*		Args;
 	char*		Args2;
 	
-#ifdef DEBUGPATH
-	printf("In ParseAction\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Parsing Action\n");
@@ -234,9 +229,7 @@ int ParseSystem(FILE* fp){
 	char		LineBuff[10240];
 	char*		Current;
 	
-#ifdef DEBUGPATH
-	printf("In ParseSystem\n");
-#endif
+	DEBUGPATH;
 
 	/*set the defaults*/
 	if (Globals.SensorName) free(Globals.SensorName);
@@ -311,9 +304,7 @@ int ParseInterface(FILE* fp, char* Name){
 	InterfaceRec*	Interface;
 	char*			Current;
 	
-#ifdef DEBUGPATH
-	printf("In ParseInterface\n");
-#endif
+	DEBUGPATH;
 
 	/*get the next free interface*/
 	if (Globals.NumInterfaces==MAX_INTERFACES){
@@ -376,9 +367,7 @@ int ParseRouting(FILE* fp){
 	char*			Pos;
 	char*			Pos2;
 		
-#ifdef DEBUGPATH
-	printf("In ParseRouting\n");
-#endif
+	DEBUGPATH;
 
 	/*set the defaults*/
 
@@ -434,9 +423,7 @@ int ParseConfig(){
 	char*		End;
 	char*		Start;
 	
-#ifdef DEBUGPATH
-	printf("In ParseConfig\n");
-#endif	
+	DEBUGPATH;
 
 	/*set some defaults*/
 	Globals.UseThreads=TRUE;

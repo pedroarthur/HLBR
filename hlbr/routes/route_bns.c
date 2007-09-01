@@ -69,9 +69,7 @@ int SendARP(unsigned int IP, int Interface){
 	ARPEtherIP*	ArpEth;
 	PacketRec*	p;
 	
-#ifdef DEBUGPATH
-	printf("In SendARP\n");
-#endif
+	DEBUGPATH;
 
 	NewPacketSlot=GetEmptyPacket();
 	if (!NewPacketSlot==PACKET_NONE){
@@ -146,9 +144,7 @@ int SendARP(unsigned int IP, int Interface){
 int FindMac(unsigned char Mac[6]){
 	int i;
 	
-#ifdef DEBUGPATH
-	printf("In FindMac\n");
-#endif	
+	DEBUGPATH;
 
 	for (i=0;i<BNSNumMac;i++){
 		if ( (BMAC[i].Mac[0]==Mac[0]) &&
@@ -168,9 +164,7 @@ int FindMac(unsigned char Mac[6]){
 **************************************/
 int AddMac(unsigned char Mac[6], int Interface){
 
-#ifdef DEBUGPATH
-	printf("In AddMac\n");
-#endif
+  DEBUGPATH;
 
 	if (BNSNumMac==MAX_BNS){
 #ifdef DEBUG
@@ -213,9 +207,7 @@ int AddMac(unsigned char Mac[6], int Interface){
 int FindIP(unsigned int IP){
 	int i;
 	
-#ifdef DEBUGPATH
-	printf("In FindIP\n");
-#endif	
+	DEBUGPATH;
 
 	for (i=0;i<BNSNumIP;i++){
 		if (BIP[i].IP==IP) return i;
@@ -230,9 +222,7 @@ int FindIP(unsigned int IP){
 int UpdateIP(unsigned int IP, unsigned char Mac[6], int Interface){
 	int	IPID;
 	
-#ifdef DEBUGPATH
-	printf("In AddIP\n");
-#endif
+	DEBUGPATH;
 
 	IPID=FindIP(IP);
 
@@ -318,9 +308,8 @@ int HandleIPPacket(int PacketSlot, IPData* IData){
 	int				i;
 	int				IPID;
 	
-#ifdef DEBUGPATH
-	printf("In HandleIPPacket\n");
-#endif
+	DEBUGPATH;
+
 	p=&Globals.Packets[PacketSlot];
 
 	/*pull out the ethernet header*/
@@ -577,9 +566,7 @@ int HandleARPPacket(int PacketSlot, ARPData* AData){
 	EthernetData*	EData;
 	int				IPID;
 	
-#ifdef DEBUGPATH
-	printf("In HandleARPPacket\n");
-#endif
+	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -730,9 +717,7 @@ int RouteBNS(int PacketSlot){
 	IPData*			IData;
 	ARPData*		AData;
 
-#ifdef DEBUGPATH
-	printf("In RouteMacFilter\n");
-#endif
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -768,13 +753,9 @@ int RouteBNSAddNode(int RouteID, char* Args){
 	char*	c1;
 	char*	c2;
 	
-#ifdef DEBUGPATH
-	printf("In RouteBNSAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("AddNode was called with args %s\n", Args);
-#endif	    
+	DBG( PRINT1("AddNode was called with args %s\n", Args) );
 
 	if (!Args) return FALSE;
 	
@@ -875,9 +856,7 @@ int RouteBNSAddNode(int RouteID, char* Args){
 int InitRouteBNS(){
 	int RouteID;
 	
-#ifdef DEBUGPATH
-	printf("In InitBNS\n");
-#endif	
+	DEBUGPATH;
 
 	bzero(BIP, sizeof(BNS_IP) * MAX_BNS);
 	BNSNumIP=0;

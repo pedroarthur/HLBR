@@ -32,13 +32,7 @@ int TestIPSrc(int PacketSlot, TestNode* Nodes){
 	int					i;
 	PacketRec*			p;
 
-#ifdef DEBUGPATH
-	printf("In TestIPSrc\n");
-#endif
-
-#ifdef DEBUG
-	printf("Testing IP Src\n");
-#endif	
+	DEBUGPATH;
 	
 	p=&Globals.Packets[PacketSlot];
 	
@@ -104,13 +98,9 @@ int IPSrcAddNode(int TestID, int RuleID, char* Args){
 	int					i;
 #endif
 
-#ifdef DEBUGPATH
-	printf("In IPSrcAddNode\n");
-#endif
+	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Addding a Node with args %s\n",Args);
-#endif
+	DBG( PRINT1("Addding a Node with args %s\n",Args) );
 
 	data=calloc(sizeof(IPSrcData),1);	
 	
@@ -169,9 +159,7 @@ int IPSrcAddNode(int TestID, int RuleID, char* Args){
 int InitTestIPSrc(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestIPSrc\n");
-#endif
+	DEBUGPATH;
 
 	IPSrcHead=NULL;
 

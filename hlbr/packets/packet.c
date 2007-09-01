@@ -34,9 +34,7 @@ unsigned int 		CurPacketNum=0;
 **************************************/
 int GetPacketTypeByName(char* Name){
 
-#ifdef DEBUGPATH
-	printf("In GetPacketTypeByName\n");
-#endif
+  DEBUGPATH;
 
 	if (strcasecmp(Name, "linux_raw")==0){
 		return PACKET_TYPE_LINUX_RAW;
@@ -62,9 +60,7 @@ int GetPacketTypeByName(char* Name){
 **************************************/
 int GetPacketProtoByName(char* Name){
 
-#ifdef DEBUGPATH
-	printf("In GetPacketProtoByName\n");
-#endif
+  DEBUGPATH;
 
 	if (strcasecmp(Name, "ethernet")==0){
 		return PACKET_PROTO_ETHERNET;
@@ -79,9 +75,7 @@ int GetPacketProtoByName(char* Name){
 **************************************/
 int GetPacketRoleByName(char* Name){
 
-#ifdef DEBUGPATH
-	printf("In GetPacketProtoByName\n");
-#endif
+  DEBUGPATH;
 
 	if (strcasecmp(Name, "normal")==0){
 		return PACKET_ROLE_NORMAL;
@@ -102,9 +96,7 @@ int GetPacketRoleByName(char* Name){
 int OpenInterface(int InterfaceID){
 	InterfaceRec*	Interface;
 
-#ifdef DEBUGPATH
-	printf("In OpenInterface\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Opening Interface %s\n",Globals.Interfaces[InterfaceID].Name);
@@ -145,9 +137,7 @@ int OpenInterface(int InterfaceID){
 int OpenInterfaces(){
 	int 	i;
 
-#ifdef DEBUGPATH
-	printf("In OpenInterfaces\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumInterfaces;i++)
 		if (!OpenInterface(i)) return FALSE;
@@ -162,9 +152,7 @@ int OpenInterfaces(){
 int ReadPacket(int InterfaceID){
 	InterfaceRec*	Interface;
 
-#ifdef DEBUGPATH
-	printf("In ReadPacket\n");
-#endif
+	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
 	
@@ -205,9 +193,7 @@ int WritePacket(int PacketSlot){
 	unsigned char*	Packet;
 	int				PacketLen;
 
-#ifdef DEBUGPATH
-	printf("In WritePacket\n");
-#endif
+	DEBUGPATH;
 
 	InterfaceID=Globals.Packets[PacketSlot].TargetInterface;
 	Packet=Globals.Packets[PacketSlot].RawPacket;
@@ -339,9 +325,7 @@ int WritePacket(int PacketSlot){
 * ReadPacket request.
 ******************************************/
 int AddPacketToPending(int PacketSlot){
-#ifdef DEBUGPATH
-	printf("In AddPacketToPending\n");
-#endif
+  DEBUGPATH;
 
 	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
 	
@@ -362,9 +346,8 @@ int AddPacketToPending(int PacketSlot){
 int PopFromPending(){
 	int		PacketSlot;
 	int		i;
-#ifdef DEBUGPATH
-	printf("In PopFromPending\n");
-#endif
+
+DEBUGPATH;
 	
 	PacketSlot=PACKET_NONE;
 	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
@@ -390,9 +373,8 @@ int PopFromPending(){
 int GetEmptyPacket(){
 	PacketRec*	Packet;
 	int			i;
-#ifdef DEBUGPATH
-	printf("In GetEmptyPacket\n");
-#endif	
+
+	DEBUGPATH;
 
 	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
 
@@ -460,9 +442,7 @@ void ReturnEmptyPacket(int PacketSlot){
 	int 		i;
 	PacketRec*	p;
 	
-#ifdef DEBUGPATH
-	printf("In ReturnEmptyPacket\n");
-#endif	
+	DEBUGPATH;
 
 	hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 	
@@ -514,9 +494,8 @@ void ReturnEmptyPacket(int PacketSlot){
 ************************************/
 int StartInterfaceThread(int InterfaceID){
 	InterfaceRec*	Interface;
-#ifdef DEBUGPATH
-	printf("In StartIntefaceThread\n");
-#endif
+
+	DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;
@@ -555,9 +534,8 @@ int StartInterfaceThread(int InterfaceID){
 * Check to see if a rule is still active
 **********************************************/
 inline int RuleIsActive(int PacketSlot, int RuleNum){
-#ifdef DEBUGPATH
-	printf("in RuleIsActive\n");
-#endif	
+
+  DEBUGPATH;
 
 	return GetBit(Globals.Packets[PacketSlot].RuleBits, Globals.NumRules, RuleNum);	
 }
@@ -566,9 +544,8 @@ inline int RuleIsActive(int PacketSlot, int RuleNum){
 * Mark a rule as no longer active
 **********************************************/
 inline int SetRuleInactive(int PacketSlot, int RuleNum){
-#ifdef DEBUGPATH
-	printf("In SetRuleInactive\n");
-#endif	
+
+  DEBUGPATH;
 	
 	SetBit(Globals.Packets[PacketSlot].RuleBits, Globals.NumRules, RuleNum, 0);
 	
@@ -581,9 +558,7 @@ inline int SetRuleInactive(int PacketSlot, int RuleNum){
 int GetInterfaceByName(char* Name){
 	int	i;
 
-#ifdef DEBUGPATH
-	printf("GetInterfaceByName\n");
-#endif
+	DEBUGPATH;
 
 	for (i=0;i<Globals.NumInterfaces;i++){
 		if (strcasecmp(Name, Globals.Interfaces[i].Name)==0){

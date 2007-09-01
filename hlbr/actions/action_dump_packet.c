@@ -49,9 +49,8 @@ FILE*	fp;
 int InitTCPDumpFile(char* FName){
 	struct dump_pcap_file_header	Header;
 	FILE*							fp;
-#ifdef DEBUGPATH
-	printf("In InitTCPDumpFile\n");
-#endif
+
+	DEBUGPATH;
 
 	fp=fopen(FName, "w+");
 	if (!fp){
@@ -83,13 +82,8 @@ void* DumpPacketParseArgs(char* Args){
 	DumpPacketRec*	data;
 	char			FileName[1024];
 	struct stat		st;
-#ifdef DEBUGPATH
-	printf("In DumpPacketParseArgs\n");
-#endif
 
-#ifdef DEBUG
-	printf("Parsing args for action_dump_packet\n");
-#endif	
+	DEBUGPATH;
 
 	snprintf(FileName,1024,"%s%s",Globals.LogDir, Args);
 	data=(DumpPacketRec*)calloc(sizeof(DumpPacketRec),1);
@@ -118,13 +112,7 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 	PacketRec*				p;
 	struct dump_pcap_pkthdr	Header;
 	
-#ifdef DEBUGPATH
-	printf("In AlsertFileAction\n");
-#endif
-
-#ifdef DEBUG
-	printf("Writing to the Packet Dump File\n");
-#endif
+	DEBUGPATH;
 
 	if (!Data){
 #ifdef DEBUG
@@ -163,9 +151,7 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 int InitActionDumpPacket(){
 	int ActionID;
 
-#ifdef DEBUGPATH
-	printf("In InitActionDumpPacket\n");
-#endif
+	DEBUGPATH;
 
 	ActionID=CreateAction("dump packet");
 	if (ActionID==ACTION_NONE){

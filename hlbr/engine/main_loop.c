@@ -27,9 +27,8 @@ extern int			UDPDecoderID;
 * Called whenever hlbr is idle
 ************************************/
 void IdleFunc(){
-#ifdef DEBUGPATH
-	printf("In IdleFunc\n");
-#endif
+
+  DEBUGPATH;
 
 #ifdef DEBUGPACKETS
 	printf("There are:\n");
@@ -53,9 +52,7 @@ void IdleFunc(){
 int RouteAndSend(int PacketSlot){
 	PacketRec*	p;
 	
-#ifdef DEBUGPATH
-	printf("In RouteAndSend\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Routing the packet\n");
@@ -117,9 +114,7 @@ int HandleTimers(int Now){
 	int			TimeLeft;
 	TimerRec*	t;
 
-#ifdef DEBUGPATH
-	printf("In HandleTimers\n");
-#endif	
+	DEBUGPATH;
 
 	if ( (NextTimer!=0) && (Now<NextTimer) ) return TRUE;
 		
@@ -161,10 +156,7 @@ int ProcessPacket(int PacketSlot){
 	static int	LastTime=0;
 	void*		data;
 	
-#ifdef DEBUGPATH
-	printf("In ProcessPacket\n");
-#endif
-
+	DEBUGPATH;
 
 	if (Globals.PacketLimit==0){
 		printf("Packet Limit Reached\n");
@@ -232,10 +224,7 @@ int ProcessPacket(int PacketSlot){
 void* ProcessPacketThread(void* v){
 	int	PacketSlot;
 	
-#ifdef DEBUGPATH
-	printf("In ProcessPacketThread\n");
-#endif
-	
+	DEBUGPATH;
 
 	while (!Globals.Done){
 		PacketSlot=PopFromPending();		
@@ -261,9 +250,7 @@ int MainLoopPoll(){
 	int				highest;
 	int				PacketSlot;
 	
-#ifdef DEBUGPATH
-	printf("In MainLoopPoll\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Starting loop in poll mode\n");
@@ -322,9 +309,7 @@ int MainLoopThreaded(){
 	int i;
 //	pthread_t	test_thread;
 	
-#ifdef DEBUGPATH
-	printf("In MainLoopThreaded\n");
-#endif
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Starting loop in Threaded mode\n");
@@ -352,9 +337,7 @@ int MainLoopThreaded(){
 int MainLoop(){
 	int i;
 	
-#ifdef DEBUGPATH
-	printf("In MainLoop\n");
-#endif	
+	DEBUGPATH;
 
 	if (!Globals.UseThreads){
 		for (i=0;i<Globals.NumInterfaces;i++){
