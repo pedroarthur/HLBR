@@ -15,7 +15,6 @@
 #include "../config.h"
 #include "../engine/hlbr.h"
 #include "test.h"
-#include "../engine/regex.h"
 
 #define MAX_CONTENT_LEN		256
 
