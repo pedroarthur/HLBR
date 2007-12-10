@@ -117,8 +117,8 @@ int TCPRegExpAddNode(int TestID, int RuleID, char* Args){
 	data->re = pcre_compile2(data->tcp_content, PCRE_MULTILINE, &errocode, &errors, &erofset, NULL);
 
 	if (errocode) {
-		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Errocode=%d Error=\"%s\"\n"\
-				, TestID, RuleID, Args, errocode, errors);
+		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Errocode=%d Error=\"%s\" Erroroffset=%d\n"\
+				, TestID, RuleID, Args, errocode, errors, erofset);
 		return 1;
 	}
 
