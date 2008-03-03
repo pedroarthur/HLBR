@@ -1,6 +1,7 @@
 DEBUG=-g -Wall 
 
 all: hlbr.o  \
+alert_limit.o \
 parse_config.o  \
 parse_rules.o   \
 main_loop.o     \
@@ -18,6 +19,9 @@ clean:
 
 hlbrlib.o: hlbrlib.c hlbrlib.h ../config.h hlbr.h
 	$(CC) -c -o hlbrlib.o hlbrlib.c $(DEBUG)
+
+alert_limit.o: alert_limit.c alert_limit.h ../config.h hlbr.h
+	$(CC) -c -o alert_limit.o alert_limit.c $(DEBUG)
 
 cache.o: cache.c cache.h ../config.h hlbr.h
 	$(CC) -c -o cache.o cache.c $(DEBUG)

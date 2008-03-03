@@ -16,13 +16,17 @@ all: test.o \
   test_tcp_dst.o \
   test_tcp_port.o \
   test_tcp_offset.o \
-  test_udp_src.o \
-  test_udp_dst.o \
+  test_tcp_regex.o \
   test_tcp_content.o \
   test_tcp_nocase.o \
   test_tcp_listcontent.o \
   test_tcp_listnocase.o \
   test_tcp_flags.o \
+  test_uri_content.o \
+  test_uri_nocase.o \
+  test_uri_regex.o \
+  test_udp_src.o \
+  test_udp_dst.o \
   test_udp_content.o \
   test_udp_nocase.o \
 #  test_dns_numquestions.o 
@@ -40,6 +44,15 @@ test_udp_content.o: test_udp_content.c test_udp_content.h ../config.h ../engine/
 
 #test_dns_numquestions.o: test_dns_numquestions.c test_dns_numquestions.h ../config.h ../engine/hlbr.h
 #	$(CC) -c -o test_dns_numquestions.o test_dns_numquestions.c $(DEBUG)
+
+test_uri_content.o: test_uri_content.c test_uri_content.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o test_uri_content.o test_uri_content.c $(DEBUG)
+
+test_uri_nocase.o: test_uri_nocase.c test_uri_nocase.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o test_uri_nocase.o test_uri_nocase.c $(DEBUG)
+
+test_uri_regex.o: test_uri_regex.c test_uri_regex.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o test_uri_regex.o test_uri_regex.c $(DEBUG)
 
 test_tcp_stream_content.o: test_tcp_stream_content.c test_tcp_stream_content.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o test_tcp_stream_content.o test_tcp_stream_content.c $(DEBUG)

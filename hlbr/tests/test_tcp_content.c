@@ -123,9 +123,7 @@ int TestTCPContentFinishedSetup(){
 int InitTestTCPContent(){
 	int	TestID;
 
-#ifdef DEBUGPATH
-	printf("In InitTestTCPContent\n");
-#endif
+	DEBUGPATH;
 
 	InitJTree(&TCPContentTree, FALSE);
 

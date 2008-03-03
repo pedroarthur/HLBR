@@ -5,6 +5,7 @@
 #include "../actions/action.h"
 #include <string.h>
 #include "message.h"
+#include "alert_limit.h"
 #include <stdlib.h>
 
 extern GlobalVars Globals;
@@ -103,6 +104,14 @@ int ParseRule(FILE* fp){
 			Globals.Rules[RuleNum].Revision=atoi(LineBuff+4);
 #ifdef DEBUG
 			printf("Setting Rev To %i\n",Globals.Rules[RuleNum].Revision);
+#endif
+		}else if (strncasecmp(LineBuff, "alert_limit=", 12)==0) {
+			if (Globals.Rules[RuleNum].Limit)
+				printf ("Warning: Rule's alert limit was already set\n");
+
+			Globals.Rules[RuleNum].Limit=ParseRuleAlertLimit(LineBuff+12);
+#ifdef DEBUG
+			printf("Setting Alert Limit to %i/%i\n",Globals.Rules[RuleNum].Limit->matchlimit, Globals.Rules[RuleNum].Limit->interval);
 #endif
 		}else{
 			if (!ParseDecoderLine(LineBuff, RuleNum)){
@@ -254,7 +263,7 @@ int ParseRules(char* FName){
 			}
 			*End=0x00;
 			if (!ParseRules(Start)) return FALSE;
-	}
+		}
 	}
 
 	fclose(fp);

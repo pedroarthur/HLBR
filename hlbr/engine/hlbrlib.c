@@ -8,7 +8,7 @@
 /*********************
  * Log file functions
  *********************/
-
+#define KEEP_LOGFILE_OPEN
 /**
  * If the log file has not been opened yet, open it, otherwise return the 
  * file pointer previously opened.
@@ -161,9 +161,9 @@ QueueList *ListAdd(char *ss, QueueList *q, char separator)
 	 *ptr = 0;
       RmSpace(s);
       RmSpace(ptr);
-      MALLOC_CHECK( ll = (QueueList *) MALLOC(sizeof(QueueList)) );
+      MALLOC_CHECK( (void *)( ll = (QueueList *) MALLOC(sizeof(QueueList)) ) );
       ll->next = NULL;
-      MALLOC_CHECK( ll->item = (char *) MALLOC(strlen(s) + 1) );
+      MALLOC_CHECK( (void *)( ll->item = (char *) MALLOC(strlen(s) + 1) ) );
       strcpy(ll->item, s);
       if (q == NULL)
 	 q = ll;

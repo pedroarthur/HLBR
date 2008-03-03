@@ -17,6 +17,7 @@
 #include "decode_icmp.h"
 #include "decode_udp.h"
 #include "decode_tcp.h"
+#include "decode_uri.h"
 #include "decode_dns.h"
 #include "decode_arp.h"
 
@@ -53,6 +54,7 @@ int InitDecoders(){
 	if (!InitDecoderICMP()) return FALSE;
 	if (!InitDecoderUDP()) return FALSE;
 	if (!InitDecoderTCP()) return FALSE;
+	if (!InitDecoderURI()) return FALSE;
 	if (!InitDecoderDNS()) return FALSE;
 	if (!InitDecoderARP()) return FALSE;
 
@@ -237,7 +239,7 @@ int Decode(int DecoderID, int PacketSlot){
 		printf("Out of room for decoders\n");
 		return FALSE;
 	}
-	
+
 	/*apply this decoder*/
 	p->DecoderInfo[p->NumDecoderData].Data=Globals.Decoders[DecoderID].DecodeFunc(PacketSlot);
 	if (p->DecoderInfo[p->NumDecoderData].Data){
@@ -246,7 +248,7 @@ int Decode(int DecoderID, int PacketSlot){
 		}
 		p->DecoderInfo[p->NumDecoderData].DecoderID=DecoderID;
 		p->NumDecoderData++;
-		
+
 		/*apply the tests*/
 		test=Globals.Decoders[DecoderID].Tests;
 		while (test){
@@ -254,7 +256,7 @@ int Decode(int DecoderID, int PacketSlot){
 			if (test->TestFunc) test->TestFunc(PacketSlot, test->TestNodes);
 			test=test->Next;
 		}
-		
+
 		/*apply the modules*/
 		module=Globals.Decoders[DecoderID].Modules;
 		while (module){
@@ -267,7 +269,7 @@ int Decode(int DecoderID, int PacketSlot){
 		NotAndBitFields(p->RuleBits, Globals.Decoders[DecoderID].DependencyMask, p->RuleBits, Globals.NumRules);
 		return TRUE;
 	}		
-	
+
 	/*check to see if there are any rules left*/
 	if (!BitFieldIsEmpty(p->RuleBits, Globals.NumRules)){
 #ifdef DEBUG	
@@ -288,8 +290,8 @@ int Decode(int DecoderID, int PacketSlot){
 		}
 		child = child->NextChild;
 	}
-	
-	
+
+
 	return TRUE;
 }
 
@@ -300,10 +302,10 @@ int Decode(int DecoderID, int PacketSlot){
 ****************************************************/
 int DecoderSetDependency(int DecoderID, int TestID){
 
-  DEBUGPATH;
-	
+	DEBUGPATH;
+
 	if (TestID > Globals.NumRules) return FALSE;
-	
+
 	SetBit(Globals.Decoders[DecoderID].DependencyMask, Globals.NumRules, TestID, 1);
 	return TRUE;
 }

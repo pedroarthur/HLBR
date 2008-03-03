@@ -283,9 +283,17 @@ typedef struct message_item {
 	struct message_item*	Next;
 } MessageItem;
 
+typedef struct alertlimit {
+	int				match_limit;
+	time_t				interval;
+	time_t				next_match;
+	int				match_count;
+} AlertLimit;
+
 typedef struct rule_rec {
 	int		ID;
 	MessageItem*	MessageFormat;
+	AlertLimit*	Limit;
 	int		GlobalID;
 	int		Revision;
 	int		ModifyDate;

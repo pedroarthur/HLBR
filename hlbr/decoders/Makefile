@@ -8,6 +8,7 @@ decode_ip_defrag.o \
 decode_icmp.o \
 decode_udp.o \
 decode_tcp.o \
+decode_uri.o \
 decode_dns.o \
 decode_arp.o
 
@@ -20,6 +21,9 @@ decode_arp.o: decode_arp.c decode_arp.h ../config.h ../engine/hlbr.h
 
 decode_dns.o: decode_dns.c decode_dns.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o decode_dns.o decode_dns.c $(DEBUG)	
+
+decode_uri.o: decode_uri.c decode_uri.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o decode_uri.o decode_uri.c $(DEBUG)
 
 decode_tcp_stream.o: decode_tcp_stream.c decode_tcp_stream.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o decode_tcp_stream.o decode_tcp_stream.c $(DEBUG)	

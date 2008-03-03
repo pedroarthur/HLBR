@@ -5,6 +5,7 @@ EXTRA_LIBS=-lpcre
 
 HLBR_OBJECTS= \
   engine/hlbr.o \
+  engine/alert_limit.o \
   engine/bits.o \
   engine/parse_config.o \
   engine/parse_rules.o \
@@ -29,6 +30,7 @@ HLBR_OBJECTS= \
   decoders/decode_icmp.o \
   decoders/decode_udp.o \
   decoders/decode_tcp.o \
+  decoders/decode_uri.o \
   decoders/decode_dns.o \
   decoders/decode_arp.o \
   tests/test.o \
@@ -53,6 +55,9 @@ HLBR_OBJECTS= \
   tests/test_tcp_flags.o \
   tests/test_tcp_offset.o \
   tests/test_tcp_regex.o \
+  tests/test_uri_content.o \
+  tests/test_uri_nocase.o \
+  tests/test_uri_regex.o \
   tests/test_udp_regex.o \
   tests/test_udp_src.o \
   tests/test_udp_dst.o \

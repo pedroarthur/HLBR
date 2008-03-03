@@ -28,6 +28,9 @@
 #include "test_tcp_flags.h"
 #include "test_tcp_offset.h"
 #include "test_tcp_regex.h"
+#include "test_uri_content.h"
+#include "test_uri_nocase.h"
+#include "test_uri_regex.h"
 #include "test_udp_regex.h"
 #include "test_udp_src.h"
 #include "test_udp_dst.h"
@@ -38,13 +41,14 @@
 extern GlobalVars	Globals;
 
 //#define DEBUG
-//#define DEBUG1
+#define DEBUG1
 
 /*******************************
 * Add all the tests to the tree
 *******************************/
 int InitTests(){
-  DEBUGPATH;
+
+	DEBUGPATH;
 
 	if (!InitTestInterfaceName()) return FALSE;
 	if (!InitTestEthernetType()) return FALSE;
@@ -66,6 +70,9 @@ int InitTests(){
 	if (!InitTestTCPFlags()) return FALSE;	
 	if (!InitTestTCPOffset()) return FALSE;
 	if (!InitTestTCPRegExp()) return FALSE;
+	if (!InitTestURIContent()) return FALSE;
+	if (!InitTestURINoCase()) return FALSE;
+	if (!InitTestURIRegExp()) return FALSE;
         if (!InitTestUDPRegExp()) return FALSE;
 	if (!InitTestUDPSrc()) return FALSE;
 	if (!InitTestUDPDst()) return FALSE;
@@ -95,21 +102,22 @@ int	GetTestByName(char* Name){
 **************************************/
 int CreateTest(char* Name){
 	int		TestID;
-	
+
 	DEBUGPATH;
+
 	
 	TestID=GetTestByName(Name);
 	if (TestID!=TEST_NONE){	
 		printf("There is already a test named %s\n",Name);
 		return TEST_NONE;
 	}
-	
+
 	TestID=Globals.NumTests;
 	Globals.NumTests++;
-	
+
 	snprintf(Globals.Tests[TestID].Name, MAX_NAME_LEN, "%s", Name);
 	Globals.Tests[TestID].ID=TestID;
-	
+
 #ifdef DEBUG
 	printf("Allocating test \"%s\" in number %i\n",Globals.Tests[TestID].Name, TestID);	
 #endif	
@@ -122,7 +130,7 @@ int CreateTest(char* Name){
 **************************************************/
 int BindTestToDecoder(int TestID, char* Decoder){
 	int DecoderID;
-	
+
 	DEBUGPATH;
 
 	DecoderID=GetDecoderByName(Decoder);
@@ -138,10 +146,11 @@ int BindTestToDecoder(int TestID, char* Decoder){
 * Used for fast pruning
 ****************************************************/
 int TestSetDependency(int TestID, int RuleID){
-  DEBUGPATH;
+
+	DEBUGPATH;
 
 	if (TestID > Globals.NumTests) return FALSE;
-	
+
 	SetBit(Globals.Tests[TestID].DependencyMask, Globals.NumRules, RuleID, 1);
 
 	return TRUE;
@@ -157,11 +166,11 @@ int TestAddNode(int TestID, int RuleNum, void* Data){
 	DecoderRec*	Decoder;
 
 	DEBUGPATH;
-	
+
 	New=(TestNode*)calloc(sizeof(TestNode),1);
 	New->RuleID=RuleNum;
 	New->Data=Data;
-	
+
 	if (!Globals.Tests[TestID].TestNodes){
 		Globals.Tests[TestID].TestNodes=New;
 	}else{
@@ -169,14 +178,14 @@ int TestAddNode(int TestID, int RuleNum, void* Data){
 		while (Node->Next) Node=Node->Next;
 		Node->Next=New;
 	}	
-	
+
 	/*mark the test and decoder as active*/
 #ifdef DEBUG
 	printf("Marking test \"%s\" as active\n",Globals.Tests[TestID].Name);
 #endif	
 	Globals.Tests[TestID].Active=TRUE;
 	TestSetDependency(TestID, RuleNum);
-	
+
 	Decoder=&Globals.Decoders[Globals.Tests[TestID].DecoderID];
 	while (Decoder){
 #ifdef DEBUG
@@ -186,7 +195,7 @@ int TestAddNode(int TestID, int RuleNum, void* Data){
 		DecoderSetDependency(Decoder->ID, RuleNum);
 		Decoder=Decoder->Parent;
 	}
-		
+
 	return TRUE;
 }
 
@@ -196,12 +205,12 @@ int TestAddNode(int TestID, int RuleNum, void* Data){
 **********************************/
 int TestsFinishSetup(){
 	int	i;
-	
+
 	DEBUGPATH;
 
 	for (i=0;i<Globals.NumTests;i++){
 		if (Globals.Tests[i].FinishedSetup) Globals.Tests[i].FinishedSetup();
 	}
-	
+
 	return TRUE;
 }
