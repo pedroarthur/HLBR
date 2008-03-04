@@ -49,17 +49,28 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <pcre.h>
+
 #include "decode.h"
 #include "decode_tcp.h"
 #include "decode_uri.h"
 #include "../packets/packet.h"
+#include "../engine/regex.h"
 
 #define DEBUG
 
 #define DECODE_WEBDAV_METHODS
 #define DECODE_WEBDAV_AUTHVER_METHODS
 #define DECODE_MSWEBDAV_METHODS
+
+typedef struct http_identifying_ds {
+	HLBRRegex			*regex;
+	struct	http_identifying_ds	*next;
+
+#ifdef DEBUG
+	char				*method_name;
+#endif
+
+} HttpIdentifying;
 
 extern GlobalVars	Globals;
 
@@ -140,7 +151,6 @@ void *DecodeURI (int PacketSlot) {
 	int			payloadsize;
 
 	HttpIdentifying		*aux;
-	const char		*errormsg;
 
 	DEBUGPATH;
 
@@ -148,7 +158,7 @@ void *DecodeURI (int PacketSlot) {
 	payloadsize = Globals.Packets[PacketSlot].PacketLen - Globals.Packets[PacketSlot].BeginData;
 
 	for (aux = http_identifying ; aux ; aux = aux->next) {
-		if (pcre_exec(aux->re, aux->ere, payloadbegin, payloadsize, 0, PCRE_NOTEMPTY, NULL, 0) >= 0) {
+		if (RegexExec(aux->regex, payloadbegin, payloadsize)) {
 			URIData			*uri;
 #ifdef DEBUG
 			printf ("In DecodeURI: Packet match %s\n", aux->method_name);
@@ -169,15 +179,12 @@ void *DecodeURI (int PacketSlot) {
 			printf ("In DecodeURI: Packet don't match %s\n", aux->method_name);
 #endif
 	}
-
 	return NULL;
 }
 
 int InitDecoderURI(){
 	int			DecoderID;
 	HttpIdentifying		*aux;
-	const char		*erromsg;
-	int			erroffset;
 
 	DEBUGPATH;
 
@@ -205,8 +212,7 @@ int InitDecoderURI(){
 		return FALSE;
 	}
 
-	http_identifying->re = pcre_compile(HTTP_METHODS_REGEX, 0, &erromsg, &erroffset, NULL);
-	http_identifying->ere = pcre_study (http_identifying->re, 0, &erromsg);
+	http_identifying->regex = RegexCompile(HTTP_METHODS_REGEX, 0, NOTEMPTY, 0);
 
 #ifdef DEBUG
 	http_identifying->method_name = "HTTP Methods";
@@ -228,8 +234,7 @@ int InitDecoderURI(){
 
 	aux = aux->next;
 
-	aux->re = pcre_compile(WEBDAV_METHODS_REGEX, 0, &erromsg, &erroffset, NULL);
-	aux->ere = pcre_study (aux->re, 0, &erromsg);
+	aux->regex = RegexCompile(WEBDAV_METHODS_REGEX, 0, NOTEMPTY, 0);
 
 #ifdef DEBUG
 	aux->method_name = "WebDAV Methods";
@@ -253,8 +258,7 @@ int InitDecoderURI(){
 
 	aux = aux->next;
 
-	aux->re = pcre_compile(WEBDAV_EX_METHODS_REGEX, 0, &erromsg, &erroffset, NULL);
-	aux->ere = pcre_study (aux->re, 0, &erromsg);
+	aux->regex = RegexCompile(WEBDAV_EX_METHODS_REGEX, 0, NOTEMPTY, 0);
 
 #ifdef DEBUG
 	aux->method_name = "WebDAV Authoring and Versioning Methods";
@@ -277,8 +281,7 @@ int InitDecoderURI(){
 
 	aux = aux->next;
 
-	aux->re = pcre_compile(MS_WEBDAV_METHODS_REGEX, 0, &erromsg, &erroffset, NULL);
-	aux->ere = pcre_study (aux->re, 0, &erromsg);
+	aux->regex = RegexCompile(MS_WEBDAV_METHODS_REGEX, 0, NOTEMPTY, 0);
 
 #ifdef DEBUG
 	aux->method_name = "Microsoft(r) WebDAV Methods";
@@ -290,7 +293,7 @@ int InitDecoderURI(){
 #ifdef DEBUG
 		printf ("In InitDecoderURI: checking %s\n", aux->method_name);
 #endif
-		if (!aux->re) {
+		if (!aux->regex) {
 			HttpIdentifying *aux2;
 
 			printf ("Error ocurr while seting up URI Decoder\n");

@@ -11,6 +11,7 @@ num_list.o      \
 message.o       \
 cache.o         \
 jtree.o 	\
+regex.o		\
 hlbrlib.o
 
 clean:
@@ -22,6 +23,9 @@ hlbrlib.o: hlbrlib.c hlbrlib.h ../config.h hlbr.h
 
 alert_limit.o: alert_limit.c alert_limit.h ../config.h hlbr.h
 	$(CC) -c -o alert_limit.o alert_limit.c $(DEBUG)
+
+regex.o: regex.c regex.h ../config.h hlbr.h
+	$(CC) -c -o regex.o regex.c $(DEBUG)
 
 cache.o: cache.c cache.h ../config.h hlbr.h
 	$(CC) -c -o cache.o cache.c $(DEBUG)

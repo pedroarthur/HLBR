@@ -2,18 +2,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <pcre.h>
 
 #include "test_uri_regex.h"
 #include "../decoders/decode_uri.h"
 #include "../packets/packet.h"
+#include "../engine/regex.h"
 
 extern GlobalVars	Globals;
 
 typedef struct uri_regexp_data{
 	char		content[MAX_CONTENT_LEN];
-	pcre		*re;
-	pcre_extra	*ere;
+	HLBRRegex	*regex;
 } URIRegExpData;
 
 /* #define DEBUG */
@@ -26,7 +25,6 @@ int URIDecoderID;
 ******************************************/
 int TestURIRegExp(int PacketSlot, TestNode* Nodes){
 	TestNode	*Node;
-	URIRegExpData	*data;
 	URIData		*uri;
 	
 #ifdef DEBUGMATCH
@@ -58,20 +56,13 @@ int TestURIRegExp(int PacketSlot, TestNode* Nodes){
 
 	while (Node) {
 		if (RuleIsActive(PacketSlot, Node->RuleID)) {
+			URIRegExpData	*data = (URIRegExpData*)Node->Data;
 #ifdef DEBUGMATCH
-			char regex_str[50];
-#endif
-			data=(URIRegExpData*)Node->Data;
-#ifdef DEBUGMATCH
-			if (pcre_exec(data->re, data->ere, uri->decoded, uri->decoded_size, 0, PCRE_NOTEMPTY, regex_str, 50) < 0) {
-				printf ("%s\n", regex_str);
+			if (!RegexExecDebug(data->regex, uri->decoded, uri->decoded_size))
 #else
-			if (pcre_exec(data->re, data->ere, uri->decoded, uri->decoded_size, 0, PCRE_NOTEMPTY, NULL, 0) < 0)
+			if (!RegexExec(data->regex, uri->decoded, uri->decoded_size))
 #endif
 				SetRuleInactive(PacketSlot, Node->RuleID);
-#ifdef DEBUGMATCH
-			}
-#endif
 		}
                 Node=Node->Next;
 	}
@@ -90,9 +81,6 @@ int TestURIRegExp(int PacketSlot, TestNode* Nodes){
 
 int URIRegExpAddNode(int TestID, int RuleID, char* Args){
 	URIRegExpData	*data;
-	const char	*errors;
-	int		erofset;
-	int		errocode;
 
 	DEBUGPATH;
 
@@ -103,21 +91,10 @@ int URIRegExpAddNode(int TestID, int RuleID, char* Args){
 	data=calloc(sizeof(URIRegExpData),1);
 	snprintf(data->content, MAX_CONTENT_LEN, "%s", Args);
 
-	data->re = pcre_compile2(data->content, PCRE_MULTILINE, &errocode, &errors, &erofset, NULL);
+	data->regex = RegexCompile(data->content, MULTILINE, NOTEMPTY, 0);
 
-	if (errocode) {
-		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Errocode=%d Error-Offset=%d Error=\"%s\"\n"\
-				, TestID, RuleID, Args, errocode, erofset, errors);
+	if (!data->regex)
 		return FALSE;
-	}
-
-	data->ere = pcre_study(data->re, 0, &errors);
-
-	if (errors) {
-		printf ("Regular Expression Parse Error: TestID=%d RuleID=%d Args=%s Error=\"%s\"\n"\
-				, TestID, RuleID, Args, errors);
-		return FALSE;
-	}
 
 	return TestAddNode(TestID, RuleID, (void*)data);
 }

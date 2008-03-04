@@ -15,6 +15,7 @@ HLBR_OBJECTS= \
   engine/num_list.o \
   engine/message.o \
   engine/cache.o \
+  engine/regex.o \
   engine/hlbrlib.o \
   packets/packet.o \
   packets/packet_linux_raw.o \

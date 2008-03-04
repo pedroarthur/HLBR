@@ -1,6 +1,5 @@
-#include <pcre.h>
-
-#define DEBUG
+#ifndef _HLBR_DECODE_URI_H_
+#define _HLBR_DECODE_URI_H_
 
 #define HTTP_METHODS		0x0001
 #define WEBDAV_METHODS		0x0010
@@ -21,19 +20,6 @@ typedef struct uridata {
 	int	decoded_size;
 } URIData;
 
-typedef struct http_identifying_ds {
-	pcre				*re;
-	pcre_extra			*ere;
-	struct	http_identifying_ds	*next;
-#ifdef DEBUG
-	char				*method_name;
-#endif
-} HttpIdentifying;
-
-char *url_decode (char *content, int content_len, int *decoded_size);
-void *DecodeURI (int PacketSlot);
 int InitDecodeURI();
 
-#ifdef DEBUG
-#undef DEBUG
 #endif
