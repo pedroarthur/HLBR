@@ -6,8 +6,6 @@
 
 //#define DEBUG
 
-#define KEEP_LOGFILE_OPEN
-
 extern GlobalVars	Globals;
 
 FILE*	fp;

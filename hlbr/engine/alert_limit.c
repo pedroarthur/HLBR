@@ -4,21 +4,27 @@
 #include <pcre.h>
 
 #include "hlbr.h"
+#include "regex.h"
 #include "alert_limit.h"
 
 extern GlobalVars	Globals;
 
-pcre			*opt_identifying_regex;
-
 AlertLimit *ParseRuleAlertLimit (char *Args) {
 	AlertLimit	*Limit;
+	HLBRRegex	*opt_identifying_regex;
 	char 		div;
 	int 		i;
 
-	if (!opt_identifying_regex)
-		opt_identifying_regex = pcre_compile(ARGS_PARSE_REGEX, 0, NULL, NULL, NULL);
+	DEBUGPATH;
 
-	if (pcre_exec(opt_identifying_regex, NULL, Args, strlen(Args), 0, 0, NULL, 0) < 0) {
+	opt_identifying_regex = CompileRegex (ARGS_PARSE_REGEX, ANCHORED, 0, 0);
+
+	if (!opt_identifying_regex) {
+		printf ("Can't allocate memory for Alert Limit parser\n");
+		return NULL;
+	}
+
+	if (!RegexExec(opt_identifying_regex, Args, strlen(Args))) {
 		printf ("Bad alert limit: %s\n", Args);
 		return NULL;
 	}
@@ -65,13 +71,24 @@ AlertLimit *ParseRuleAlertLimit (char *Args) {
 }
 
 int CheckLimit (int RuleNum) {
+
+	DEBUGPATH;
+
 	if (Globals.Rules[RuleNum].Limit) {
 		time_t	time_now = time(NULL);
 
-		if (Globals.Rules[RuleNum].Limit->next_match > time_now)
+		if (Globals.Rules[RuleNum].Limit->next_match > time_now) {
+#ifdef DEBUG
+			printf ("Limit for rule %d reached\n", RuleNum);
+#endif
 			return FALSE;
+		}
 
 		if (++Globals.Rules[RuleNum].Limit->match_count >= Globals.Rules[RuleNum].Limit->match_limit) {
+#ifdef DEBUG
+			printf ("Limit for rule %d reached\n");
+			printf ("Next match in %d seconds\n", Globals.Rules[RuleNum].Lmit->interval);
+#endif
 			Globals.Rules[RuleNum].Limit->next_match = time_now + Globals.Rules[RuleNum].Limit->interval;
 			Globals.Rules[RuleNum].Limit->match_count = 0;
 			return TRUE;

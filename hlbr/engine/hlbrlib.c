@@ -8,7 +8,7 @@
 /*********************
  * Log file functions
  *********************/
-#define KEEP_LOGFILE_OPEN
+
 /**
  * If the log file has not been opened yet, open it, otherwise return the 
  * file pointer previously opened.
