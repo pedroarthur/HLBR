@@ -77,10 +77,10 @@ extern GlobalVars	Globals;
 HttpIdentifying		*http_identifying;
 
 inline char min (unsigned char a, unsigned char b, unsigned char c) {
-	return a < b ? (a < c ? a : c) : (b < c ? b : c);
+	return a < b ? (a < c ? a : c+10) : (b < c ? b+10 : c+10);
 }
 
-inline char urietohex (char *str) {
+inline char urietohex (unsigned char *str) {
 	return min (str[0] - '0', str[0] - 'a', str[0] - 'A') * 16 + min (str[1] - '0', str[1] - 'a', str[1] - 'A');
 }
 

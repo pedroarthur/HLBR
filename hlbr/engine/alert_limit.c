@@ -17,7 +17,7 @@ AlertLimit *ParseRuleAlertLimit (char *Args) {
 
 	DEBUGPATH;
 
-	opt_identifying_regex = CompileRegex (ARGS_PARSE_REGEX, ANCHORED, 0, 0);
+	opt_identifying_regex = RegexCompile (ARGS_PARSE_REGEX, ANCHORED, 0, 0);
 
 	if (!opt_identifying_regex) {
 		printf ("Can't allocate memory for Alert Limit parser\n");
