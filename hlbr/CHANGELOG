@@ -1,0 +1,54 @@
+2008-05-07  Version 1.5 RC1
+
+ * new rules
+ * the POSIX REGEX was replaced by Perl REGEX
+ * officialy we support GNU/Linux only now
+ * added the COPYING file
+ * removed the LICENSE.{en,pt_BR} files
+ * changed man/hlbr.8.gz file to man/hlbr.8
+ * removed CHANGELOG.pt_BR and TODO.pt_BR files
+ * created the CHANGELOG and TODO files (in english)
+ * the changelog format was remade
+ * new detection test: tcp uri (in testing phase...)
+
+2006-05-18  Version 1.1
+
+ * new rules
+
+2006-03-05  Version 1.0
+
+ * new tests: implementation of regular expressions with tcp regex and udp regex
+ * new tests: tcp listcontent and tcp listnocase (to read files lists)
+ * new rules using regular expressions
+ * corrected bug: nocase and content had detection fails
+
+2006-02-09  Version 0.2
+
+ * corrected bug: HLBR didn't start correctly out of the directory of configurations and rules
+ * corrected bug: .dump files getting corrupted
+ * on-line manual created
+ * new rules created
+ * new log rotating system
+ * installation system altered
+
+2005-12-16  Version 0.1
+
+ * retreat some of the comments let into the code
+ * created one action and one log only for e-mail virus
+ * new rules and "tunning" of some rules already existing
+ * implementation of initialization by files in /etc/init.d
+ * log rotate implementation
+
+2005-12-05  Version 0.1 RC2
+
+ * hlbr.config revised
+ * README.pt_BR revised and more stuff added
+ * README.en created
+ * hlbr.config.en created
+ * created: make install, installen and uninstall
+ * first source code standard revision
+ * new rules
+
+2005-11-29  Version 0.1 RC1
+
+ * initial version
