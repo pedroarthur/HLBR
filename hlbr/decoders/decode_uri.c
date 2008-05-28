@@ -77,7 +77,7 @@ extern GlobalVars	Globals;
 HttpIdentifying		*http_identifying;
 
 inline char min (unsigned char a, unsigned char b, unsigned char c) {
-	return a < b ? (a < c ? a : c+10) : (b < c ? b+10 : c+10);
+	return a < b ? (a < c ? a : c + 10) : (b < c ? b + 10 : c + 10);
 }
 
 inline char urietohex (unsigned char *str) {
@@ -109,7 +109,7 @@ char *url_decode (char *content, int content_len, int *decoded_size) {
 	decoded = (char *) calloc (content_len, sizeof(char));
 
 	if (!decoded) {
-		sprintf (stderr, "In DecodeURI(url_decoded): No memory available!");
+		fprintf (stderr, "In DecodeURI(url_decoded): No memory available!");
 		return NULL;
 	}
 
@@ -164,7 +164,7 @@ void *DecodeURI (int PacketSlot) {
 			uri = (URIData *) malloc (sizeof(URIData));
 
 			if (!uri) {
-				sprintf (stderr, "In DecodeURI: No memory available!\n");
+				fprintf (stderr, "In DecodeURI: No memory available!\n");
 				return NULL;
 			}
 
@@ -198,7 +198,7 @@ int InitDecoderURI(){
 	Globals.Decoders[DecoderID].DecodeFunc = DecodeURI;
 
 	if (!DecoderAddDecoder(GetDecoderByName("TCP"), DecoderID)) {
-		sprintf (stderr, "In InitDecoderURI: Failed to bind URI Decoder to TCP Decoder\n");
+		fprintf (stderr, "In InitDecoderURI: Failed to bind URI Decoder to TCP Decoder\n");
 		return FALSE;
 	}
 
@@ -206,7 +206,7 @@ int InitDecoderURI(){
 	http_identifying = (HttpIdentifying *) calloc (1, sizeof(HttpIdentifying));
 
 	if (!http_identifying) {
-		sprintf (stderr, "In InitDecoderURI: No memory available");
+		fprintf (stderr, "In InitDecoderURI: No memory available");
 		return FALSE;
 	}
 
@@ -226,7 +226,7 @@ int InitDecoderURI(){
 	aux->next = (HttpIdentifying *) calloc (1, sizeof(HttpIdentifying));
 
 	if (!aux->next) {
-		sprintf (stderr, "In InitDecoderURI: No memory available");
+		fprintf (stderr, "In InitDecoderURI: No memory available");
 		return FALSE;
 	}
 
@@ -250,7 +250,7 @@ int InitDecoderURI(){
 	aux->next = (HttpIdentifying *) calloc (1, sizeof(HttpIdentifying));
 
 	if (!aux->next) {
-		sprintf (stderr, "In InitDecoderURI: No memory available");
+		fprintf (stderr, "In InitDecoderURI: No memory available");
 		return FALSE;
 	}
 
@@ -273,7 +273,7 @@ int InitDecoderURI(){
 	aux->next = (HttpIdentifying *) calloc (1, sizeof(HttpIdentifying));
 
 	if (!aux->next) {
-		sprintf (stderr, "In InitDecoderURI: No memory available");
+		fprintf (stderr, "In InitDecoderURI: No memory available");
 		return FALSE;
 	}
 
@@ -294,7 +294,7 @@ int InitDecoderURI(){
 		if (!aux->regex) {
 			HttpIdentifying *aux2;
 
-			sprintf (stderr, "Error ocurr while seting up URI Decoder\n");
+			fprintf (stderr, "Error ocurr while seting up URI Decoder\n");
 #ifdef DEBUG
 			printf ("In InitDecoderURI: %s regex compilation failed\n", aux->method_name);
 #endif

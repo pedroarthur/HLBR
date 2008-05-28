@@ -27,7 +27,7 @@ HLBRRegex *RegexCompile (char *Args, int coptions, int eoptions, int offset) {
 		return regex;
 	}
 
-	sprintf(stderr, "Regex Compile error\n Regex: %s\nError Message: %s\nError Offset: %d", Args, erromsg, erroffset);
+	fprintf(stderr, "Regex Compile error\n Regex: %s\nError Message: %s\nError Offset: %d", Args, erromsg, erroffset);
 
 	free (regex);
 
