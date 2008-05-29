@@ -203,6 +203,16 @@ fi
 rm -f conftest.dlopen conftest.dlopen.c
 #end checking for dlopen
 
+#check for libpcre presence
+echo -n "Buscando libpcre / Checking for libpcre............"
+if [ -e /usr/include/pcre.h ]
+then
+	echo "Encontrado / Found"
+else
+        echo "Nao encontrado / Not found"
+        exit 1
+fi
+#end checking for libpcre
 
 #finish off the config.h file
 echo "#ifndef TRUE" >> config.h
@@ -238,11 +248,11 @@ echo "-------------------------------"
 echo
 
 #check svn presence
-if [ -d "./svn" ]; then
+if [ -d "./.svn" ]; then
 echo
 echo -----------------------------------
 echo 'ATENCAO: Estrutura do SVN presente!'
-echo 'WARNING: SVNS structure present!'
+echo 'WARNING: SVN structure present!'
 echo -----------------------------------
 echo
 echo 'Para remover / To remove: "# find|fgrep .svn|xargs rm -rf"'
