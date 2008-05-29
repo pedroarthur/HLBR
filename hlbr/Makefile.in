@@ -135,7 +135,7 @@ portuguese:
 	cp rules/*.rules /etc/hlbr/rules
 	cp VERSION /etc/hlbr
 	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
-	if [ ! -e "/usr/share/man/man8" ]; then cp man/hlbr.8 /usr/share/man/man8; fi
+	if [ ! -e "/usr/share/man/man8/hlbr.8" ]; then cp man/hlbr.8 /usr/share/man/man8; fi
 	#
 	# ---------------------------------------------------------
 	# HLBR instalado.
@@ -164,7 +164,7 @@ english:
 	cp rules/*.rules /etc/hlbr/rules
 	cp VERSION /etc/hlbr
 	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
-	if [ ! -e "/usr/share/man/man8" ]; then cp man/hlbr.8 /usr/share/man/man8; fi
+	if [ ! -e "/usr/share/man/man8/hlbr.8" ]; then cp man/hlbr.8 /usr/share/man/man8; fi
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
@@ -197,7 +197,7 @@ uninstall:
 	#
 	if [ -e "/etc/cron.weekly/hlbr" ]; then rm -f /etc/cron.weekly/hlbr; fi
 	if [ -d "/var/lib/hlbr" ]; then rm -rf /var/lib/hlbr; fi
-	if [ -e "/usr/share/man/man8/hlbr.8" ]; then rm -rf /usr/share/man/man8/hlbr.8; fi
+	if [ -e "/usr/share/man/man8/hlbr.8/hlbr.8" ]; then rm -rf /usr/share/man/man8/hlbr.8; fi
 	#
 	# -------------------------------------------------
 	# HLBR foi desinstalado. HLBR has been uninstalled.
