@@ -26,7 +26,7 @@
 
 
 #define MAJOR_VERSION	1
-#define MINOR_VERSION	1
+#define MINOR_VERSION	5
 
 
 #include "num_list.h"
