@@ -1,7 +1,23 @@
+# PATHs
 
-DEBUG=-g -Wall
-CC=gcc -g
-EXTRA_LIBS=-lpcre
+PREFIX =
+CONFIG_DIR =		$(PREFIX)/etc/hlbr
+OLD_CONFIG_DIR =	$(PREFIX)/etc/hlbr.old
+LOG_DIR =		$(PREFIX)/var/log/hlbr
+OLD_LOG_DIR =		$(PREFIX)/var/log/hlbr.old
+BIN_DIR =		$(PREFIX)/usr/sbin
+INIT_DIR_1 =		$(PREFIX)/etc/init.d
+INIT_DIR_2 =		$(PREFIX)/etc/rc.d/init.d
+CRON_DIR =		$(PREFIX)/etc/cron.weekly
+HEADER_DIR =		$(PREFIX)/var/lib/hlbr
+MAN_DIR =		$(PREFIX)/usr/share/man/man8
+RULES_DIR =		$(CONFIG_DIR)/rules
+
+# GCC Options
+
+DEBUG =			-g -Wall
+CC =			gcc -g
+EXTRA_LIBS =		-lpcre
 
 HLBR_OBJECTS= \
   engine/hlbr.o \
@@ -113,28 +129,27 @@ hlbr: config.h $(HLBR_OBJECTS)
 	# ---------------------------------------
 	#
 
+install: pre-install $(INSTALL_LANG)
 
-install: $(INSTALL_LANG)
+pre-install:
+	if [ -d $(OLD_CONFIG_DIR) ]; then rm -rf $(OLD_CONFIG_DIR); fi
+	if [ -d $(CONFIG_DIR) ]; then mv -f $(CONFIG_DIR) $(OLD_CONFIG_DIR); fi
+	mkdir -p $(RULES_DIR)
+	if [ -d $(OLD_LOG_DIR) ]; then rm -rf $(OLD_LOG_DIR); fi
+	if [ -d $(LOG_DIR) ]; then mv -f $(LOG_DIR) $(OLD_LOG_DIR); fi
+	mkdir $(LOG_DIR)
+	if [ -e $(BIN_DIR)/hlbr ]; then rm -f $(BIN_DIR)/hlbr; fi
+	if [ -d $(INIT_DIR_1) ]; then cp -f scripts/hlbr.init $(INIT_DIR_1)/hlbr; fi
+	if [ -d $(INIT_DIR_2) ]; then cp -f scripts/hlbr.init $(INIT_DIR_2)/hlbr; fi
+	if [ -d $(CRON_DIR) ]; then cp -f scripts/hlbr.rotate $(CRON_DIR)/hlbr; fi
+	cp hlbr $(BIN_DIR)
+	cp empty.rules hlbr.rules $(CONFIG_DIR)
+	cp rules/*.rules $(RULES_DIR)
+	if [ ! -d $(HEADER_DIR) ]; then mkdir $(HEADER_DIR); cp -f hlbr.dump.header $(HEADER_DIR); fi
+	if [ ! -e $(MAN_DIR)/hlbr.8 ]; then cp man/hlbr.8 $(MAN_DIR); fi
 
 portuguese:
-	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
-	if [ -d "/etc/hlbr/" ]; then mv -f /etc/hlbr /etc/hlbr.old; fi
-	mkdir /etc/hlbr
-	mkdir /etc/hlbr/rules
-	if [ -d "/var/log/hlbr.old" ]; then rm -rf /var/log/hlbr.old; fi
-	if [ -d "/var/log/hlbr/" ]; then mv -f /var/log/hlbr /var/log/hlbr.old; fi
-	mkdir /var/log/hlbr
-	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
-	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
-	if [ -d "/etc/init.d" ]; then cp -f scripts/hlbr.init /etc/init.d/hlbr; fi
-	if [ -d "/etc/rc.d/init.d" ]; then cp -f scripts/hlbr.init /etc/rc.d/init.d/hlbr; fi
-	if [ -d "/etc/cron.weekly" ]; then cp -f scripts/hlbr.rotate /etc/cron.weekly/hlbr; fi
-	cp hlbr /usr/sbin
-	cp empty.rules hlbr.rules /etc/hlbr
-	cp hlbr.config.pt_BR /etc/hlbr/hlbr.config
-	cp rules/*.rules /etc/hlbr/rules
-	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
-	if [ ! -e "/usr/share/man/man8/hlbr.8" ]; then cp man/hlbr.8 /usr/share/man/man8; fi
+	cp hlbr.config.pt_BR $(CONFIG_DIR)/hlbr.config
 	#
 	# ---------------------------------------------------------
 	# HLBR instalado.
@@ -145,24 +160,7 @@ portuguese:
 	#
 
 english:
-	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
-	if [ -d "/etc/hlbr/" ]; then mv -f /etc/hlbr /etc/hlbr.old; fi
-	mkdir /etc/hlbr
-	mkdir /etc/hlbr/rules
-	if [ -d "/var/log/hlbr.old" ]; then rm -rf /var/log/hlbr.old; fi
-	if [ -d "/var/log/hlbr/" ]; then mv -f /var/log/hlbr /var/log/hlbr.old; fi
-	mkdir /var/log/hlbr
-	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
-	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
-	if [ -d "/etc/init.d" ]; then cp -f scripts/hlbr.init /etc/init.d/hlbr; fi
-	if [ -d "/etc/rc.d/init.d" ]; then cp -f scripts/hlbr.init /etc/rc.d/init.d/hlbr; fi
-	if [ -d "/etc/cron.weekly" ]; then cp -f scripts/hlbr.rotate /etc/cron.weekly/hlbr; fi
-	cp hlbr /usr/sbin
-	cp empty.rules hlbr.rules /etc/hlbr
 	cp hlbr.config.en /etc/hlbr/hlbr.config
-	cp rules/*.rules /etc/hlbr/rules
-	if [ ! -d "/var/lib/hlbr" ]; then mkdir /var/lib/hlbr; cp -f hlbr.dump.header /var/lib/hlbr; fi
-	if [ ! -e "/usr/share/man/man8/hlbr.8" ]; then cp man/hlbr.8 /usr/share/man/man8; fi
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
@@ -176,29 +174,27 @@ uninstall:
 	# 
 	# Removendo arquivos de configuracao / Removing configuration files
 	#
-	if [ -d "/etc/hlbr/" ]; then rm -rf /etc/hlbr; fi
-	if [ -d "/etc/hlbr.old/" ]; then rm -rf /etc/hlbr.old; fi
+	if [ -d $(CONFIG_DIR) ]; then rm -rf $(CONFIG_DIR); fi
+	if [ -d $(OLD_CONFIG_DIR) ]; then rm -rf $(OLD_CONFIG_DIR); fi
 	#
 	# Removendo logs / Removing logs
 	#
-	if [ -d "/var/log/hlbr/" ]; then rm -rf /var/log/hlbr; fi
-	if [ -d "/var/log/hlbr.old/" ]; then rm -rf /var/log/hlbr.old; fi
+	if [ -d $(LOG_DIR) ]; then rm -rf $(LOG_DIR); fi
+	if [ -d $(OLD_LOG_DIR) ]; then rm -rf $(OLD_LOG_DIR); fi
 	#
 	# Removendo daemon / Removing daemon
 	#
-	if [ -e "/sbin/hlbr" ]; then rm -f /sbin/hlbr; fi
-	if [ -e "/usr/sbin/hlbr" ]; then rm -f /usr/sbin/hlbr; fi
-	if [ -e "/etc/init.d/hlbr" ]; then rm -f /etc/init.d/hlbr; fi
-	if [ -e "/etc/rc.d/init.d/hlbr" ]; then rm -f /etc/rc.d/init.d/hlbr; fi
+	if [ -e $(BIN_DIR)/hlbr ]; then rm -f $(BIN_DIR)/hlbr; fi
+	if [ -e $(INIT_DIR_1)/hlbr ]; then rm -f $(INIT_DIR_1)/hlbr; fi
+	if [ -e $(INIT_DIR_2)/hlbr ]; then rm -f $(INIT_DIR_2)/hlbr; fi
 	#
 	# Removendo cron, libs e manual / Removing cron, libs and man page
 	#
-	if [ -e "/etc/cron.weekly/hlbr" ]; then rm -f /etc/cron.weekly/hlbr; fi
-	if [ -d "/var/lib/hlbr" ]; then rm -rf /var/lib/hlbr; fi
-	if [ -e "/usr/share/man/man8/hlbr.8" ]; then rm -f /usr/share/man/man8/hlbr.8; fi
+	if [ -e $(CRON_DIR)/hlbr ]; then rm -f $(CRON_DIR)/hlbr; fi
+	if [ -d $(HEADER_DIR) ]; then rm -rf $(HEADER_DIR); fi
+	if [ -e $(MAN_DIR)/hlbr.8 ]; then rm -f $(MAN_DIR)/hlbr.8; fi
 	#
 	# -------------------------------------------------
 	# HLBR foi desinstalado. HLBR has been uninstalled.
 	# -------------------------------------------------
 	#
-
