@@ -237,15 +237,15 @@ echo 'Run "# make" to compile.'
 echo "-------------------------------"
 echo
 
-#check cvs presence
-if [ -d "./CVS" ]; then
+#check svn presence
+if [ -d "./svn" ]; then
 echo
 echo -----------------------------------
-echo 'ATENÇÃO: Estrutura do CVS presente!'
-echo 'WARNING: CVS structure present!'
+echo 'ATENCAO: Estrutura do SVN presente!'
+echo 'WARNING: SVNS structure present!'
 echo -----------------------------------
 echo
-echo 'Para remover / To remove: "# find|grep CVS|xargs rm -rf"'
+echo 'Para remover / To remove: "# find|fgrep .svn|xargs rm -rf"'
 echo
 echo 'Saindo... / Exiting...'
 echo
