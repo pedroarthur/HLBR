@@ -6,7 +6,8 @@
  * added the COPYING file
  * removed the LICENSE.{en,pt_BR} files
  * changed man/hlbr.8.gz file to man/hlbr.8
- * fixed a bug in Makefile: the manpage is be installed now.
+ * fixed a bug in Makefile: the manpage is be installed now
+ * optimized the Makefile.in
  * little updates and fixies in manpage
  * removed CHANGELOG.pt_BR and TODO.pt_BR files
  * created the CHANGELOG and TODO files (in english)
