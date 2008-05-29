@@ -2,6 +2,16 @@ HOGWASH LIGHT BR
 
 "Based on Jason Larsen's HOGWASH, availabe at http://hogwash.sf.net".
 
+
+
+DEPENDENCIES
+------------
+
+This program depends libpcre, available at
+ftp.csx.cam.ac.uk:/pub/software/programming/pcre.
+
+
+
 INSTALLATION
 ------------
 
@@ -237,8 +247,8 @@ tcp offset(10,Hello World)
 WARRANTIES
 ----------
 
-All tests were done under Debian GNU/Linux Sarge Stable R0a and R1. It works
-nicely. We recommend DEBIAN!
+All tests were done under Debian GNU/Linux Sarge and Etch Stable + Lenny
+Testing. It works nicely. We recommend DEBIAN!
 
 
 
