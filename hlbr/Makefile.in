@@ -197,7 +197,7 @@ uninstall:
 	#
 	if [ -e "/etc/cron.weekly/hlbr" ]; then rm -f /etc/cron.weekly/hlbr; fi
 	if [ -d "/var/lib/hlbr" ]; then rm -rf /var/lib/hlbr; fi
-	if [ -e "/usr/share/man/man8/hlbr.8/hlbr.8" ]; then rm -rf /usr/share/man/man8/hlbr.8; fi
+	if [ -e "/usr/share/man/man8/hlbr.8" ]; then rm -f /usr/share/man/man8/hlbr.8; fi
 	#
 	# -------------------------------------------------
 	# HLBR foi desinstalado. HLBR has been uninstalled.
