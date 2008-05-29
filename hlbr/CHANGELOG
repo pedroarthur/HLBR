@@ -6,11 +6,12 @@
  * added the COPYING file
  * removed the LICENSE.{en,pt_BR} files
  * changed man/hlbr.8.gz file to man/hlbr.8
+ * fixed a bug in Makefile: the manpage is be installed now.
+ * little updates and fixies in manpage
  * removed CHANGELOG.pt_BR and TODO.pt_BR files
  * created the CHANGELOG and TODO files (in english)
  * the changelog format was remade
  * new detection test: tcp uri (in testing phase...)
- * little updates and fixies in manpage
  * updated the TEAM file
 
 2006-05-18  Version: 1.1
