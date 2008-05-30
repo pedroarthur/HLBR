@@ -2,13 +2,16 @@
 <include rules/bufferoverflow1.rules>
 <include rules/bufferoverflow2.rules>
 <include rules/bufferoverflow3.rules>
+<include rules/cisco.rules>
 <include rules/codered-nimda.rules>
 <include rules/coppermine.rules>
 <include rules/dnsattacks.rules>
+<include rules/joomla.rules>
 <include rules/mailvirus.rules>
 <include rules/mambo-phpnuke.rules>
 <include rules/passwd.rules>
 <include rules/shell.rules>
+<include rules/spam.rules>
 <include rules/webattacks.rules>
 
 
