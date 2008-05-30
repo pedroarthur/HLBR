@@ -253,14 +253,35 @@ tcp offset(10,Hello World)
     Determina a busca de um determinado conteudo, a partir do decimo byte,
     dentro do payload de cada pacote. (ainda nao testado)
 
+uri content
 
+    Similar ao tcp content, mas primeiro verifica o conteúdo do pacote
+    em busca de um cabeçalho HTTP decodificando caracteres que estejam
+    em codificação de URI. Vide RFC 3986 [7].
+
+uri nocase
+
+    Similar ao tcp nocase, mas primeiro verifica o conteúdo do pacote
+    em busca de um cabeçalho HTTP decodificando caracteres que estejam
+    em codificação de URI. Vide RFC 3986 [7].
+
+uri regex
+
+    Similar to tcp regex, mas primeiro verifica o conteúdo do pacote
+    em busca de um cabeçalho HTTP decodificando caracteres que estejam
+    em codificação de URI. Vide RFC 3986 [7].
 
 GARANTIAS
 ---------
 
-Todos os testes foram realizados no GNU/Linux Debian Sarge e Etch Stable + o
-Lenny Testing. Isso funciona perfeitamente. Recomendamos o DEBIAN!
+Distribuições testadas:
++ Debian Sarge		(eriberto)
++ Debian Etch		(eriberto)
++ Debian Lenny Testing	(eriberto)
++ Slackware 11		(pedroarthur)
++ Slackware 12		(pedroarthur)
 
+Recomendamos o DEBIAN!
 
 
 REFERENCIAS
@@ -272,7 +293,7 @@ REFERENCIAS
 [4] http://www.iana.org/assignments/protocol-numbers
 [5] ftp://ftp.rfc-editor.org/in-notes/rfc793.txt
 [6] ftp://ftp.rfc-editor.org/in-notes/rfc3168.txt
-
+[7] http://www.rfc-editor.org/rfc/rfc3986.txt
 
 
 AJUDEM_NOS!

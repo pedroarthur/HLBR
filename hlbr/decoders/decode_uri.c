@@ -47,7 +47,7 @@
 
 */
 
-#define DEBUG
+/* #define DEBUG */
 
 #include <stdlib.h>
 #include <stdio.h>
