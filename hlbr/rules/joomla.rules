@@ -1,0 +1,40 @@
+
+# name:       joomla.rules
+# created by: Joao Eriberto Mota Filho
+# date:       19 Jun 06
+# update:     10 Apr 08
+# target:     block invalid requests.
+
+# SecuityTracker ID 1016269
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp content(/includes/joomla.php?includepath=)
+message=(joomla-1) joomla attack
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(r57.php)
+message=(joomla-2) R57 attack
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(r57.txt)
+message=(joomla-3) R57 attack
+action=action1
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(Config_absolute_path=http://)
+message=(joomla-4) External URL access attempt
+action=action1
+</rule>
+

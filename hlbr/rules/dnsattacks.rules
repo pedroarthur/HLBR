@@ -2,7 +2,7 @@
 # name:       dnsattacks.rules
 # created by: Joao Eriberto Mota Filho
 # date:       25 Feb 06
-# update:     05 Mar 06
+# update:     07 Jun 06
 # target:     block dns attacks.
 
 <rule>
@@ -13,20 +13,27 @@ message=(dnsattacks-1) tsl bind attack
 action=action1
 </rule>
 
-# This rules aren't checked yet.
+<rule>
+ip dst(dns)
+udp dst(53)
+udp nocase(|04|bind|00|)
+message=(dnsattacks-2) get version attempt 
+action=action1
+</rule>
 
-#<rule>
-#ip dst(dns)
-#udp dst(53)
-#udp nocase(|04|bind|00|)
-#message=(dnsattacks-2) get version attempt 
-#action=action1
-#</rule>
+<rule>
+ip dst(dns)
+tcp dst(53)
+tcp nocase(|04|bind|00|)
+message=(dnsattacks-3) get version attempt 
+action=action1
+</rule>
 
-#<rule>
-#ip dst(dns)
-#tcp dst(53)
-#tcp nocase(|04|bind|00|)
-#message=(dnsattacks-3) get version attempt 
-#action=action1
-#</rule>
+<rule>
+ip dst(dns)
+udp dst(53)
+udp content(../../../)
+message=(dnsattacks-4) ntx bind attack 
+action=action1
+</rule>
+

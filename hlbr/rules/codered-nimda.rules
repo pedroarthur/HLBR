@@ -10,7 +10,7 @@
 ip dst(www)
 tcp dst(80)
 tcp nocase(default.ida)
-message=(codered-nimda-1) default.ida request
+message=(codered_nimda-1) default.ida request
 action=action1
 </rule>
 
@@ -18,7 +18,7 @@ action=action1
 ip dst(www)
 tcp dst(80)
 tcp regex((root|cmd|explorer)\.exe)
-message=(codered-nimda-2-re) (root|cmd|explorer) request
+message=(codered_nimda-2-re) (root|cmd|explorer) request
 action=action1
 </rule>
 

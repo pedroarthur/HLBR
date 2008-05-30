@@ -1,0 +1,14 @@
+
+# name:       cisco.rules
+# created by: Joao Eriberto Mota Filho
+# date:       19 Jun 06
+# update:     none
+# target:     block attacks to cisco routers.
+
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(/level/16/exec/)
+message=(cisco-1) cisco discover attempt 
+action=action1
+</rule>
