@@ -7,7 +7,7 @@
 #define MS_WEBDAV_METHODS	0x1000
 
 /* Belive-me, Apache and ISS are very very non-conforming  */
-#define HTTP_CONTENT_REGEX " +[!-~] +[!-~]"
+#define HTTP_CONTENT_REGEX " +[!-~]* +[!-~]*"
 
 #define HTTP_METHODS_REGEX "(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT)"HTTP_CONTENT_REGEX
 
