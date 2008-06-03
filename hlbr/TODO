@@ -2,15 +2,11 @@ To next versions:
 
 - finish documentation at site
 - create faq
-- virus checking with clamav
-- uuencode detection
 - insert logic operations (not, and, or)
 - add possibility of daemon reload
-- create a Snort rules converter
 - implement AI
 - create documentation about AI
 - create a remote GUI?
-- are you suggestions?
 
 The future:
 
