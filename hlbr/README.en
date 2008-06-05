@@ -215,7 +215,7 @@ tcp listnocase(/path/file)
     
 tcp regex((root|cmd|explore)\.exe)
 
-    Uses regular expressions to filter irregular traffic.    
+    Uses regular expressions (Perl) to filter irregular traffic.
 
 udp content(bind|90 90 90|)
 
@@ -246,19 +246,20 @@ uri content
 
     Similar to tcp content, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
-    RFC 3986.
+    RFC 3986 [7].
 
 uri nocase
 
     Similar to tcp nocase, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
-    RFC 3986.
+    RFC 3986 [7].
 
 uri regex
 
     Similar to tcp regex, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
-    RFC 3986.
+    RFC 3986 [7].
+
 
 WARRANTIES
 ----------
@@ -270,7 +271,7 @@ Testes (and working) Distributions:
 + Slackware 11		(pedroarthur)
 + Slackware 12		(pedroarthur)
 
-We recommend DEBIAN!
+We recommend DEBIAN and Slackware!
 
 
 REFERENCES

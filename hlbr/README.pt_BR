@@ -226,7 +226,7 @@ tcp listnocase(/path/arquivo)
 
 tcp regex((root|cmd|explore)\.exe)
 
-    Usa expressoes regulares para filtrar trafego irregular.
+    Usa expressoes regulares (Perl) para filtrar trafego irregular.
 
 udp content(bind|90 90 90|)
 
@@ -255,33 +255,33 @@ tcp offset(10,Hello World)
 
 uri content
 
-    Similar ao tcp content, mas primeiro verifica o conteúdo do pacote
-    em busca de um cabeçalho HTTP decodificando caracteres que estejam
-    em codificação de URI. Vide RFC 3986 [7].
+    Similar ao tcp content, mas primeiro verifica o conteudo do pacote
+    em busca de um cabecalho HTTP decodificando caracteres que estejam
+    em codificacao de URI. Vide RFC 3986 [7].
 
 uri nocase
 
-    Similar ao tcp nocase, mas primeiro verifica o conteúdo do pacote
-    em busca de um cabeçalho HTTP decodificando caracteres que estejam
-    em codificação de URI. Vide RFC 3986 [7].
+    Similar ao tcp nocase, mas primeiro verifica o conteudo do pacote
+    em busca de um cabecalho HTTP decodificando caracteres que estejam
+    em codificacao de URI. Vide RFC 3986 [7].
 
 uri regex
 
-    Similar to tcp regex, mas primeiro verifica o conteúdo do pacote
-    em busca de um cabeçalho HTTP decodificando caracteres que estejam
-    em codificação de URI. Vide RFC 3986 [7].
+    Similar to tcp regex, mas primeiro verifica o conteudo do pacote
+    em busca de um cabecalho HTTP decodificando caracteres que estejam
+    em codificacao de URI. Vide RFC 3986 [7].
 
 GARANTIAS
 ---------
 
-Distribuições testadas:
+Distribuicoes testadas:
 + Debian Sarge		(eriberto)
 + Debian Etch		(eriberto)
 + Debian Lenny Testing	(eriberto)
 + Slackware 11		(pedroarthur)
 + Slackware 12		(pedroarthur)
 
-Recomendamos o DEBIAN!
+Recomendamos o DEBIAN e Slackware!
 
 
 REFERENCIAS
