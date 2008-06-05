@@ -1,9 +1,11 @@
 
 # name:       shell.rules
 # created by: Joao Eriberto Mota Filho
-# date:       14 Dec 05
+# date:       Dec 14, 2005
 # update:     none
 # target:     block remote shell calls.
+
+# TCP
 
 <rule>
 ip dst(servers)
@@ -37,6 +39,8 @@ message=(shell-4) /bin/csh call
 action=action1
 </rule>
 
+# UDP
+
 <rule>
 ip dst(servers)
 udp dst(13,37,53,123)
@@ -68,4 +72,3 @@ udp nocase(/bin/csh)
 message=(shell-8) /bin/csh call
 action=action1
 </rule>
-

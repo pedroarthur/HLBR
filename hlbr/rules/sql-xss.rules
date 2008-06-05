@@ -1,9 +1,9 @@
 
 # name:       sql-xss.rules
 # created by: Hardik Shah
-# date:       10 jan 06
+# date:       Jan 10, 2006
 # updated by: Joao Eriberto Mota Filho
-# update:     13 Abr 06
+# update:     Abr 13, 2006
 # target: sql injection and xss checks.
 
 <rule>

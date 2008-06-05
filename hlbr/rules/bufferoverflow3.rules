@@ -1,7 +1,7 @@
 
 # name:       bufferoverflow3.rules
 # created by: Joao Eriberto Mota Filho
-# date:       14 Dec 05
+# date:       Dec 14, 2005
 # update:     none
 # target:     block udp buffer overflow attempt attempts.
 
@@ -213,4 +213,3 @@ udp nocase(ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ)
 message=(bufferoverflow3-26) buffer overflow attempt
 action=action1
 </rule>
-

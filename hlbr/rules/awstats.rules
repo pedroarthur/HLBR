@@ -1,8 +1,8 @@
 
 # name:       awstats.rules
 # created by: Joao Eriberto Mota Filho
-# date:       26 Dec 05
-# update:     18 Mar 06
+# date:       Dec 26, 2005
+# update:     Mar 18, 2006
 # target:     block invalid requests.
 
 <rule>
@@ -16,8 +16,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp regex(GET +//[^\n]awstats.pl)
+tcp regex(GET [ -~]awstats.pl)
 message=(awstats-2) awstats attack
 action=action1
 </rule>
-

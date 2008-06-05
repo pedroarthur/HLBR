@@ -1,8 +1,8 @@
 
 # name:       http.rules
 # created by: Joao Eriberto Mota Filho
-# date:       29 Nov 05
-# update:     16 Mar 06
+# date:       Nov 29, 2005
+# update:     Mar 16, 2006
 # target:     block http methods (rfc 1945 and 2616).
 
 # For your security SEARCH and CONNECT methods must be blocked.

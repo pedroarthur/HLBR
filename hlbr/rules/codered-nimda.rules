@@ -1,8 +1,8 @@
 
 # name:       codered-nimda.rules
 # created by: Joao Eriberto Mota Filho
-# date:       14 Dec 05
-# update:     15 Feb 06
+# date:       Dec 14, 2005
+# update:     Feb 15, 2006
 # target:     block the Code Red and NIMDA Worms.
 # reference:  http://www.mycert.org.my/advisory/MS-035.102001.html
 
@@ -21,4 +21,3 @@ tcp regex((root|cmd|explorer)\.exe)
 message=(codered_nimda-2-re) (root|cmd|explorer) request
 action=action1
 </rule>
-

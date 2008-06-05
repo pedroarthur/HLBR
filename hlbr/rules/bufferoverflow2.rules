@@ -1,8 +1,8 @@
 
 # name:       bufferoverflow2.rules
 # created by: Joao Eriberto Mota Filho
-# date:       14 Dec 05
-# update:     15 Feb 06
+# date:       Dec 14, 2005
+# update:     Feb 15, 2006
 # target:     block tcp buffer overflow attempt attempts.
 
 
@@ -214,4 +214,3 @@ tcp nocase(ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ)
 message=(bufferoverflow2-26) buffer overflow attempt
 action=action1
 </rule>
-

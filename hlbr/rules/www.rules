@@ -1,8 +1,8 @@
 
 # name:       www.rules
 # created by: Joao Eriberto Mota Filho
-# date:       29 Nov 05
-# update:     26 Dec 05
+# date:       Nov 29, 2005
+# update:     May 30, 2008
 # target:     block invalid www requests.
 
 # Comment the following rule if you have ASP web pages
@@ -72,15 +72,3 @@ tcp nocase(.cgi)
 message=(www-7) cgi request
 action=action1
 </rule>
-
-# Comment the following rule if you have MAMBO web pages
-# If activated this rule releases the use of the mambo.rules archive. 
-
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(mambo)
-message=(www-8) mambo request
-action=action1
-</rule>
-

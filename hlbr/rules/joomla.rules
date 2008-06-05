@@ -1,8 +1,8 @@
 
 # name:       joomla.rules
 # created by: Joao Eriberto Mota Filho
-# date:       19 Jun 06
-# update:     10 Apr 08
+# date:       Jun 19, 2006
+# update:     Apr 10, 2008
 # target:     block invalid requests.
 
 # SecuityTracker ID 1016269
@@ -37,4 +37,3 @@ tcp nocase(Config_absolute_path=http://)
 message=(joomla-4) External URL access attempt
 action=action1
 </rule>
-

@@ -1,7 +1,7 @@
 
 # name:       php.rules
 # created by: Joao Eriberto Mota Filho
-# date:       06 Jan 06
+# date:       Jan 06, 2006
 # update:     none
 # target:     block attacks to php.
 
@@ -12,4 +12,3 @@ tcp nocase(/xmlrpc.php)
 message=(php-1) xmlrpc request
 action=action1
 </rule>
-

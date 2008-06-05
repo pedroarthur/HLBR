@@ -1,8 +1,8 @@
 
 # name:       dnsattacks.rules
 # created by: Joao Eriberto Mota Filho
-# date:       25 Feb 06
-# update:     07 Jun 06
+# date:       Feb 25, 2006
+# update:     Jun 07, 2006
 # target:     block dns attacks.
 
 <rule>
@@ -36,4 +36,3 @@ udp content(../../../)
 message=(dnsattacks-4) ntx bind attack 
 action=action1
 </rule>
-

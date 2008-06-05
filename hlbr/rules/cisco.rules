@@ -1,7 +1,7 @@
 
 # name:       cisco.rules
 # created by: Joao Eriberto Mota Filho
-# date:       19 Jun 06
+# date:       Jun 19, 2006
 # update:     none
 # target:     block attacks to cisco routers.
 

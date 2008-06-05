@@ -1,23 +1,14 @@
 
 # name:       spam.rules
 # created by: Joao Eriberto Mota Filho
-# date:       17 Jul 06
-# update:     none
+# date:       Jul 17, 2006
+# update:     May 30, 2008
 # target:     prevent spam.
 
 <rule>
 ip dst(email)
 tcp dst(25)
-tcp regex(a href="[^[:cntrl:]]+superwel\.com")
+tcp regex(a (href|HREF)="[ -~]+superwel\.com")
 message=(spam-1) cialis, viagra etc
 action=virus
 </rule>
-
-<rule>
-ip dst(email)
-tcp dst(25)
-tcp regex(A HREF="[^[:cntrl:]]+superwel\.com")
-message=(spam-2) cialis, viagra etc
-action=virus
-</rule>
-
