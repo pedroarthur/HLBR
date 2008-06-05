@@ -256,19 +256,19 @@ tcp offset(10,Hello World)
 uri content
 
     Similar ao tcp content, mas primeiro verifica o conteudo do pacote
-    em busca de um cabecalho HTTP decodificando caracteres que estejam
+    em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
 uri nocase
 
     Similar ao tcp nocase, mas primeiro verifica o conteudo do pacote
-    em busca de um cabecalho HTTP decodificando caracteres que estejam
+    em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
 uri regex
 
     Similar to tcp regex, mas primeiro verifica o conteudo do pacote
-    em busca de um cabecalho HTTP decodificando caracteres que estejam
+    em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
 GARANTIAS
@@ -306,6 +306,3 @@ vendo regras ou traduzindo documentos.
 Todo o trabalho realizado por voluntarios serah testado, revisto  e
 homologado pelos lideres do projeto antes de serem liberados para uso em
 maquinas em producao.
-
-
-
