@@ -28,9 +28,9 @@
 #include "test_tcp_flags.h"
 #include "test_tcp_offset.h"
 #include "test_tcp_regex.h"
-#include "test_uri_content.h"
-#include "test_uri_nocase.h"
-#include "test_uri_regex.h"
+#include "test_http_content.h"
+#include "test_http_nocase.h"
+#include "test_http_regex.h"
 #include "test_udp_regex.h"
 #include "test_udp_src.h"
 #include "test_udp_dst.h"
@@ -70,9 +70,9 @@ int InitTests(){
 	if (!InitTestTCPFlags()) return FALSE;	
 	if (!InitTestTCPOffset()) return FALSE;
 	if (!InitTestTCPRegExp()) return FALSE;
-	if (!InitTestURIContent()) return FALSE;
-	if (!InitTestURINoCase()) return FALSE;
-	if (!InitTestURIRegExp()) return FALSE;
+	if (!InitTestHTTPContent()) return FALSE;
+	if (!InitTestHTTPNoCase()) return FALSE;
+	if (!InitTestHTTPRegExp()) return FALSE;
         if (!InitTestUDPRegExp()) return FALSE;
 	if (!InitTestUDPSrc()) return FALSE;
 	if (!InitTestUDPDst()) return FALSE;

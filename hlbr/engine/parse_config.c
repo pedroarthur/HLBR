@@ -4,6 +4,7 @@
 #include "../routes/route.h"
 #include "../actions/action.h"
 #include "../engine/message.h"
+#include "../decoders/decode.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -413,6 +414,26 @@ int ParseRouting(FILE* fp){
 	return FALSE;
 }
 
+int ParseDecoder (FILE *fp, char *decoder) {
+	int			DecoderID;
+
+	DEBUGPATH;
+
+	DecoderID = GetDecoderByName (decoder);
+
+	if (DecoderID == DECODER_NONE) {
+		printf ("There is no decoder called %s\n", decoder);
+		return FALSE;
+	}
+
+	if (Globals.Decoders[DecoderID].ConfigFunction) {
+		if (Globals.Decoders[DecoderID].ConfigFunction(fp))
+			return TRUE;
+	} else
+		printf ("Decoder %s doesn't have configuration options\n", decoder);
+
+	return FALSE;
+}
 
 /*******************************************
 * make sense of the config file
@@ -468,7 +489,7 @@ int ParseConfig(){
 				return FALSE;
 			}
 			*End=0x00;
-			if (!ParseAction(fp, Start)) return FALSE;									
+			if (!ParseAction(fp, Start)) return FALSE;
 		}else if(strncasecmp(LineBuff, "<module ",8)==0){
 			Start=LineBuff+7;
 			while (*Start==' ') Start++;
@@ -496,6 +517,19 @@ int ParseConfig(){
 			}
 			*End=0x00;		
 			if (!ParseList(fp, Start, LIST_TYPE_IP)) return FALSE;			
+		}else if(strncasecmp(LineBuff, "<decoder ", 9) == 0){
+			Start=LineBuff+9;
+			while(*Start == ' ') Start++;
+			if (*Start == '>') {
+				printf ("Error parsing %s\nFormat <decoder NAME>", LineBuff);
+				return FALSE;
+			}
+			End=strchr(LineBuff+9, '>');
+			if (!End) {
+				printf("Expected \">\"\n");
+			}
+			*End=0x00;
+			if (!ParseDecoder(fp, Start)) return FALSE;
 		}else{
 			printf("Unexpected section %s\n",LineBuff);
 			return FALSE;

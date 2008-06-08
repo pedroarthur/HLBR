@@ -33,6 +33,7 @@ HLBR_OBJECTS= \
   engine/cache.o \
   engine/regex.o \
   engine/hlbrlib.o \
+  engine/url.o \
   packets/packet.o \
   packets/packet_linux_raw.o \
   packets/packet_obsd_bpf.o \
@@ -47,7 +48,7 @@ HLBR_OBJECTS= \
   decoders/decode_icmp.o \
   decoders/decode_udp.o \
   decoders/decode_tcp.o \
-  decoders/decode_uri.o \
+  decoders/decode_http.o \
   decoders/decode_dns.o \
   decoders/decode_arp.o \
   tests/test.o \
@@ -72,9 +73,9 @@ HLBR_OBJECTS= \
   tests/test_tcp_flags.o \
   tests/test_tcp_offset.o \
   tests/test_tcp_regex.o \
-  tests/test_uri_content.o \
-  tests/test_uri_nocase.o \
-  tests/test_uri_regex.o \
+  tests/test_http_content.o \
+  tests/test_http_nocase.o \
+  tests/test_http_regex.o \
   tests/test_udp_regex.o \
   tests/test_udp_src.o \
   tests/test_udp_dst.o \

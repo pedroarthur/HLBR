@@ -4,24 +4,24 @@
 #include <arpa/inet.h>
 
 #include "test_tcp_content.h"
-#include "../decoders/decode_uri.h"
+#include "../decoders/decode_http.h"
 #include "../packets/packet.h"
 #include "../engine/jtree.h"
 
 extern GlobalVars	Globals;
 
-typedef struct uri_content_data{
-	unsigned char	uri_content[MAX_CONTENT_LEN];
-} URIContentData;
+typedef struct http_content_data{
+	unsigned char	http_content[MAX_CONTENT_LEN];
+} HTTPContentData;
 
 /* #define DEBUG */
 /* #define DEBUGMATCH */
 
-int	URIDecoderID;
-JTree	URIContentTree;
+int	HTTPDecoderID;
+JTree	HTTPContentTree;
 
-int TestURIContent(int PacketSlot, TestNode* Nodes){
-	URIData		*uri;
+int TestHTTPContent(int PacketSlot, TestNode* Nodes){
+	HTTPData		*http;
 
 #ifdef DEBUGMATCH	
 	int		i;
@@ -30,7 +30,7 @@ int TestURIContent(int PacketSlot, TestNode* Nodes){
 	DEBUGPATH;
 
 #ifdef DEBUG
-	printf("Testing URI Content\n");
+	printf("Testing HTTP Content\n");
 #endif	
 
 	if (!Nodes) return FALSE;
@@ -46,9 +46,9 @@ int TestURIContent(int PacketSlot, TestNode* Nodes){
 	printf("**************************************\n");
 #endif
 
-	GetDataByID (PacketSlot, URIDecoderID, (void **)&uri);
+	GetDataByID (PacketSlot, HTTPDecoderID, (void **)&http);
 
-	MatchStrings(&URIContentTree, Globals.Packets[PacketSlot].RuleBits, uri->decoded, uri->decoded_size);
+	MatchStrings(&HTTPContentTree, Globals.Packets[PacketSlot].RuleBits, http->decoded, http->decoded_size);
 
 #ifdef DEBUGMATCH
 	printf("**************************************\n");
@@ -63,8 +63,8 @@ int TestURIContent(int PacketSlot, TestNode* Nodes){
 	return TRUE;
 }
 
-int URIContentAddNode(int TestID, int RuleID, char* Args){
-	URIContentData*		data;
+int HTTPContentAddNode(int TestID, int RuleID, char* Args){
+	HTTPContentData*		data;
 
 	DEBUGPATH;
 
@@ -72,10 +72,10 @@ int URIContentAddNode(int TestID, int RuleID, char* Args){
 	printf("Addding a Node with args %s\n",Args);
 #endif
 
-	data=calloc(sizeof(URIContentData),1);
-	snprintf(data->uri_content, MAX_CONTENT_LEN, Args);
+	data=calloc(sizeof(HTTPContentData),1);
+	snprintf(data->http_content, MAX_CONTENT_LEN, Args);
 
-	if (!AddStringJTree(&URIContentTree, Args, strlen(Args), RuleID)){
+	if (!AddStringJTree(&HTTPContentTree, Args, strlen(Args), RuleID)){
 		printf("Failed to add to tree\n");
 		free(data);
 		data=NULL;
@@ -85,39 +85,33 @@ int URIContentAddNode(int TestID, int RuleID, char* Args){
 	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
-/****************************************
-* Called when we're all done adding rules
-****************************************/
-int TestURIContentFinishedSetup(){
+int TestHTTPContentFinishedSetup(){
 	DEBUGPATH;
 
-	return FinalizeJTree(&URIContentTree);
+	return FinalizeJTree(&HTTPContentTree);
 }
 
-/****************************************
-* Set up the test of the TCP Content
-*****************************************/
-int InitTestURIContent(){
+int InitTestHTTPContent(){
 	int	TestID;
 
 	DEBUGPATH;
 
-	InitJTree(&URIContentTree, FALSE);
+	InitJTree(&HTTPContentTree, FALSE);
 
-	TestID=CreateTest("URIContent");
+	TestID=CreateTest("HTTPContent");
 	if (TestID==TEST_NONE) return FALSE;
 
-	if (!BindTestToDecoder(TestID, "URI")){
-		printf("Failed to Bind to URI\n");
+	if (!BindTestToDecoder(TestID, "HTTP")){
+		printf("Failed to Bind to HTTP\n");
 		return FALSE;
 	}
 
 	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "content");
-	Globals.Tests[TestID].AddNode=URIContentAddNode;
-	Globals.Tests[TestID].TestFunc=TestURIContent;
-	Globals.Tests[TestID].FinishedSetup=TestURIContentFinishedSetup;
+	Globals.Tests[TestID].AddNode=HTTPContentAddNode;
+	Globals.Tests[TestID].TestFunc=TestHTTPContent;
+	Globals.Tests[TestID].FinishedSetup=TestHTTPContentFinishedSetup;
 
-	URIDecoderID=GetDecoderByName("URI");
+	HTTPDecoderID=GetDecoderByName("HTTP");
 
 	return TRUE;
 }

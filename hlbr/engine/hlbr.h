@@ -255,6 +255,7 @@ typedef struct decoder_rec{
 	struct decoder_rec*	NextChild;
 	
 	void* (*DecodeFunc) (int PacketSlot);
+	int (*ConfigFunction) (FILE *fp);
 	
 	char				Active;	/*true if anything actually uses it*/
 } DecoderRec;

@@ -3,29 +3,29 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 
-#include "test_uri_nocase.h"
-#include "../decoders/decode_uri.h"
+#include "test_http_nocase.h"
+#include "../decoders/decode_http.h"
 #include "../packets/packet.h"
 #include "../engine/jtree.h"
 
 extern GlobalVars	Globals;
 
-typedef struct uri_nocase_data{
-	unsigned char	uri_content[MAX_CONTENT_LEN];
-} URINoCaseData;
+typedef struct http_nocase_data{
+	unsigned char	http_content[MAX_CONTENT_LEN];
+} HTTPNoCaseData;
 
 /* #define DEBUG */
 /* #define DEBUGMATCH */
 
-int 	URIDecoderID;
-JTree	URINoCaseTree;
+int 	HTTPDecoderID;
+JTree	HTTPNoCaseTree;
 
 /******************************************
 * Apply the Test
 ******************************************/
-int TestURINoCase(int PacketSlot, TestNode* Nodes){
-	URIData		*uri;
-	URINoCaseData	*data;
+int TestHTTPNoCase(int PacketSlot, TestNode* Nodes){
+	HTTPData		*http;
+	HTTPNoCaseData	*data;
 
 #ifdef DEBUGMATCH	
 	int					i;
@@ -34,7 +34,7 @@ int TestURINoCase(int PacketSlot, TestNode* Nodes){
 	DEBUGPATH;
 
 #ifdef DEBUG
-	printf("Testing URI NoCase\n");
+	printf("Testing HTTP NoCase\n");
 #endif	
 
 	if (!Nodes) return FALSE;
@@ -50,9 +50,9 @@ int TestURINoCase(int PacketSlot, TestNode* Nodes){
 	printf("**************************************\n");
 #endif
 
-	GetDataByID (PacketSlot, URIDecoderID, (void **)&uri);
+	GetDataByID (PacketSlot, HTTPDecoderID, (void **)&http);
 
-	MatchStrings(&URINoCaseTree, Globals.Packets[PacketSlot].RuleBits, uri->decoded, uri->decoded_size);
+	MatchStrings(&HTTPNoCaseTree, Globals.Packets[PacketSlot].RuleBits, http->decoded, http->decoded_size);
 
 #ifdef DEBUGMATCH
 	printf("**************************************\n");
@@ -70,8 +70,8 @@ int TestURINoCase(int PacketSlot, TestNode* Nodes){
 /******************************************
 * Add a rule node to this test
 ******************************************/
-int URINoCaseAddNode(int TestID, int RuleID, char* Args){
-	URINoCaseData*		data;
+int HTTPNoCaseAddNode(int TestID, int RuleID, char* Args){
+	HTTPNoCaseData*		data;
 
 	DEBUGPATH;
 
@@ -79,10 +79,10 @@ int URINoCaseAddNode(int TestID, int RuleID, char* Args){
 	printf("Addding a Node with args %s\n",Args);
 #endif
 
-	data=calloc(sizeof(URINoCaseData),1);
-	snprintf(data->uri_content, MAX_CONTENT_LEN, "%s", Args);
+	data=calloc(sizeof(HTTPNoCaseData),1);
+	snprintf(data->http_content, MAX_CONTENT_LEN, "%s", Args);
 
-	if (!AddStringJTree(&URINoCaseTree, Args, strlen(Args), RuleID)){
+	if (!AddStringJTree(&HTTPNoCaseTree, Args, strlen(Args), RuleID)){
 		printf("Failed to add to tree\n");
 		free(data);
 		data=NULL;
@@ -92,33 +92,33 @@ int URINoCaseAddNode(int TestID, int RuleID, char* Args){
 	return TestAddNode(TestID, RuleID, (void*)data);
 }
 
-int TestURINoCaseFinishedSetup(){
+int TestHTTPNoCaseFinishedSetup(){
 	DEBUGPATH;
 
-	return FinalizeJTree(&URINoCaseTree);
+	return FinalizeJTree(&HTTPNoCaseTree);
 }
 
-int InitTestURINoCase(){
+int InitTestHTTPNoCase(){
 	int	TestID;
 
 	DEBUGPATH;
 
-	InitJTree(&URINoCaseTree, TRUE);
+	InitJTree(&HTTPNoCaseTree, TRUE);
 
-	TestID=CreateTest("URINoCase");
+	TestID=CreateTest("HTTPNoCase");
 	if (TestID==TEST_NONE) return FALSE;
 	
-	if (!BindTestToDecoder(TestID, "URI")){
-		printf("Failed to Bind to URI\n");
+	if (!BindTestToDecoder(TestID, "HTTP")){
+		printf("Failed to Bind to HTTP\n");
 		return FALSE;
 	} 
 	
 	snprintf(Globals.Tests[TestID].ShortName, MAX_NAME_LEN, "nocase");
-	Globals.Tests[TestID].AddNode=URINoCaseAddNode;
-	Globals.Tests[TestID].TestFunc=TestURINoCase;
-	Globals.Tests[TestID].FinishedSetup=TestURINoCaseFinishedSetup;
+	Globals.Tests[TestID].AddNode=HTTPNoCaseAddNode;
+	Globals.Tests[TestID].TestFunc=TestHTTPNoCase;
+	Globals.Tests[TestID].FinishedSetup=TestHTTPNoCaseFinishedSetup;
 	
-	URIDecoderID=GetDecoderByName("URI");
+	HTTPDecoderID=GetDecoderByName("HTTP");
 
 	return TRUE;
 }

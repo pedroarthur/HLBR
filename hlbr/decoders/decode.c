@@ -17,7 +17,7 @@
 #include "decode_icmp.h"
 #include "decode_udp.h"
 #include "decode_tcp.h"
-#include "decode_uri.h"
+#include "decode_http.h"
 #include "decode_dns.h"
 #include "decode_arp.h"
 
@@ -54,7 +54,7 @@ int InitDecoders(){
 	if (!InitDecoderICMP()) return FALSE;
 	if (!InitDecoderUDP()) return FALSE;
 	if (!InitDecoderTCP()) return FALSE;
-	if (!InitDecoderURI()) return FALSE;
+	if (!InitDecoderHTTP()) return FALSE;
 	if (!InitDecoderDNS()) return FALSE;
 	if (!InitDecoderARP()) return FALSE;
 

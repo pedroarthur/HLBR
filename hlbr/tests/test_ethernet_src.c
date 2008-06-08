@@ -13,6 +13,7 @@ typedef struct ethernet_src_data{
 
 //#define DEBUG
 //#define DEBUGMATCH
+#define NEWSTYLE
 
 int EthernetDecoderID;
 
@@ -33,6 +34,7 @@ int TestEthernetSrc(int PacketSlot, TestNode* Nodes){
 	
 	/*get the src out of the ethernet header*/
 	/*todo: make this more efficient*/
+#ifndef NEWSTYLE
 	for (i=p->NumDecoderData; i>=0;i--){
 		if (p->DecoderInfo[i].DecoderID==EthernetDecoderID){
 			EData=(EthernetData*)p->DecoderInfo[i].Data;
@@ -47,11 +49,21 @@ int TestEthernetSrc(int PacketSlot, TestNode* Nodes){
 	}
 	
 	if (i==-1){
-#ifdef DEBUG	
+#ifdef DEBUG
 		printf("Couldn't find the ethernet header\n");
-#endif		
+#endif
 		return FALSE;
 	}
+#else
+	if (!GetDataByID(PacketSlot, EthernetDecoderID, (void **)&EData)) {
+#ifdef DEBUG
+		printf ("Couldn't find the ethernet header\n");
+#endif
+		return FALSE;
+	}
+
+	memcpy (ESrc, EData->Header->SrcMac, 6);
+#endif
 
 #ifdef DEBUGMATCH
 	printf("\n\n");	
@@ -163,3 +175,7 @@ int InitTestEthernetSrc(){
 
 	return TRUE;
 }
+
+#ifdef NEWSTYLE
+#undef NEWSTYLE
+#endif

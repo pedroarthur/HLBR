@@ -253,19 +253,19 @@ tcp offset(10,Hello World)
     Determina a busca de um determinado conteudo, a partir do decimo byte,
     dentro do payload de cada pacote. (ainda nao testado)
 
-uri content
+http content
 
     Similar ao tcp content, mas primeiro verifica o conteudo do pacote
     em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
-uri nocase
+http nocase
 
     Similar ao tcp nocase, mas primeiro verifica o conteudo do pacote
     em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
-uri regex
+http regex
 
     Similar to tcp regex, mas primeiro verifica o conteudo do pacote
     em busca de um cabecalho HTTP, decodificando caracteres que estejam
