@@ -242,19 +242,19 @@ tcp offset(10,Hello World)
     Test the specified string ("Hello world") inside the TCP payload, 
     starting from the 10th byte. (not tested yet)
 
-uri content
+http content
 
     Similar to tcp content, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
     RFC 3986 [7].
 
-uri nocase
+http nocase
 
     Similar to tcp nocase, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
     RFC 3986 [7].
 
-uri regex
+http regex
 
     Similar to tcp regex, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
