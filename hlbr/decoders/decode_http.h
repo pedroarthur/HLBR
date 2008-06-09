@@ -19,6 +19,6 @@ int InitDecoderHTTP();
 
 /* Auxiliar functions, used externaly */
 inline int BinSearch (int *vec, int n, int value);
-inline void ShellSort(int vet[], int lim_sup);
+inline void ShellSort(int *vec, int n);
 
 #endif

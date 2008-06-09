@@ -34,27 +34,27 @@ inline int BinSearch (int *vec, int n, int value) {
 	return FALSE;
 }
 
-inline void ShellSort(int vet[], int lim_sup) {
+inline void ShellSort(int *vec, int n) {
 	int i, j, val;
 	int gap = 1;
 
 	do
 		gap = 3 * gap + 1;
-	while (gap < lim_sup);
+	while (gap < n);
 	
 	do {
 		gap /= 3;
 		
-		for (i = gap; i < lim_sup ; i++) {
-			val = vet[i];
+		for (i = gap; i < n ; i++) {
+			val = vec[i];
 			j = i - gap;
 
-			while (j >= 0 && val < vet[j]) {
-				vet [j+gap] = vet[j];
+			while (j >= 0 && val < vec[j]) {
+				vec[j+gap] = vec[j];
 				j -= gap;
 			}
 
-			vet [j+gap] = val;
+			vec [j+gap] = val;
 		}
 	} while (gap > 1);
 }
