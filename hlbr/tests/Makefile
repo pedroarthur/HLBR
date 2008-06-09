@@ -23,6 +23,7 @@ all: test.o \
   test_tcp_listnocase.o \
   test_tcp_flags.o \
   test_http_content.o \
+  test_http_method.o \
   test_http_nocase.o \
   test_http_regex.o \
   test_udp_src.o \
@@ -47,6 +48,9 @@ test_udp_content.o: test_udp_content.c test_udp_content.h ../config.h ../engine/
 
 test_http_content.o: test_http_content.c test_http_content.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o test_http_content.o test_http_content.c $(DEBUG)
+
+test_http_method.o: test_http_method.c test_http_method.h ../config.h ../engine/hlbr.h
+	$(CC) -c -o test_http_method.o test_http_method.c $(DEBUG)
 
 test_http_nocase.o: test_http_nocase.c test_http_nocase.h ../config.h ../engine/hlbr.h
 	$(CC) -c -o test_http_nocase.o test_http_nocase.c $(DEBUG)

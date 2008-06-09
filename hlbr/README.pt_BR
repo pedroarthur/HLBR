@@ -253,19 +253,25 @@ tcp offset(10,Hello World)
     Determina a busca de um determinado conteudo, a partir do decimo byte,
     dentro do payload de cada pacote. (ainda nao testado)
 
-http content
+http content(/etc/passwd)
 
     Similar ao tcp content, mas primeiro verifica o conteudo do pacote
     em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
-http nocase
+http method(METHODA,METHODC)
+
+    Casa com métodos HTTP pre-configurados. Os métodos disponiveis são
+    definidos no arquivo hlbr.config. Veja o hlbr.config para maiores
+    informacoes.
+
+http nocase(malware)
 
     Similar ao tcp nocase, mas primeiro verifica o conteudo do pacote
     em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
-http regex
+http regex([aA4]t[aA4]qu[eE3])
 
     Similar to tcp regex, mas primeiro verifica o conteudo do pacote
     em busca de um cabecalho HTTP, decodificando caracteres que estejam

@@ -9,16 +9,83 @@
 #include "../engine/url.h"
 #include "../engine/parse_config.h"
 
-typedef struct http_identifying_ds {
-	int method[MAX_METHODS];
-	int mnum;
-} HTTPIdentifying;
-
 extern GlobalVars	Globals;
 
 HTTPIdentifying		httpi;
 
 int primes[] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71 };
+
+inline int BinSearch (int *vec, int n, int value) {
+	int sta = 0;
+	int end = n - 1;
+	int half;
+
+	while (sta <= end) {
+		half = (sta + end) / 2;
+
+		if (value < vec[half])
+			end = half - 1;
+		else if (value > vec[half])
+			sta = half + 1;
+		else
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+inline void ShellSort(int vet[], int lim_sup) {
+	int i, j, val;
+	int gap = 1;
+
+	do
+		gap = 3 * gap + 1;
+	while (gap < lim_sup);
+	
+	do {
+		gap /= 3;
+		
+		for (i = gap; i < lim_sup ; i++) {
+			val = vet[i];
+			j = i - gap;
+
+			while (j >= 0 && val < vet[j]) {
+				vet [j+gap] = vet[j];
+				j -= gap;
+			}
+
+			vet [j+gap] = val;
+		}
+	} while (gap > 1);
+}
+
+int Sum (char *str, int strsize) {
+	int sum = 0;
+	int i;
+
+	DEBUGPATH;
+
+	if (strsize > MAX_PRIMES) {
+		printf ("%s is too big!\n Max allowed method size is %d", str, MAX_PRIMES);
+		return -1;
+	}
+
+#ifdef DEBUG
+	printf ("Sum: %s", str);
+#endif
+
+	for (i = 0 ; i < strsize ; i++)
+		sum += *str++ * primes[i];
+
+#ifdef DEBUG
+	printf (" (%d)\n", sum);
+#endif
+
+	if (sum)
+		return sum;
+	else
+		return -1;
+}
 
 void *DecodeHTTP (int PacketSlot) {
 	HTTPData		*http;
@@ -45,11 +112,7 @@ void *DecodeHTTP (int PacketSlot) {
 	if (*pbaux != ' ')
 		return NULL;
 
-	for (i = 0 ; i < httpi.mnum ; i++)
-		if (sum == httpi.method[i])
-			break;
-
-	if (i == httpi.mnum)
+	if (!BinSearch(httpi.method, httpi.mnum, sum))
 		return NULL;
 
 	for (i = 0 ; i < psaux ; i++, pbaux++)
@@ -104,40 +167,13 @@ void *DecodeHTTP (int PacketSlot) {
 	return http;
 }
 
-int Sum (char *str, int strsize) {
-	int sum = 0;
-	int i;
-
-	DEBUGPATH;
-
-	if (strsize > MAX_PRIMES) {
-		printf ("%s is too big!\n Max allowed method size is %d", str, MAX_PRIMES);
-		return -1;
-	}
-
-#ifdef DEBUG
-	printf ("Sum: %s", str);
-#endif
-
-	for (i = 0 ; i < strsize ; i++)
-		sum += *str++ * primes[i];
-
-#ifdef DEBUG
-	printf (" (%d)\n", sum);
-#endif
-
-	if (sum)
-		return sum;
-	else
-		return -1;
-}
-
 int ParseMethods (FILE *fp) {
 	char	LineBuff[10240];
 	char	*Start, *End;
 
 	while (GetLine(fp, LineBuff, 10240)) {
 		if (strcasecmp(LineBuff, "</decoder>") == 0) {
+			ShellSort (httpi.method, httpi.mnum);
 #ifdef DEBUG
 			printf ("All done at HTTPDecoder Configuration\n");
 #endif

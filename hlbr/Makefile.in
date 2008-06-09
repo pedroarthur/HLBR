@@ -74,6 +74,7 @@ HLBR_OBJECTS= \
   tests/test_tcp_offset.o \
   tests/test_tcp_regex.o \
   tests/test_http_content.o \
+  tests/test_http_method.o \
   tests/test_http_nocase.o \
   tests/test_http_regex.o \
   tests/test_udp_regex.o \

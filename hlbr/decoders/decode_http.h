@@ -10,7 +10,15 @@ typedef struct httpdata {
 	int	method;
 } HTTPData;
 
+typedef struct http_identifying_ds {
+	int method[MAX_METHODS];
+	int mnum;
+} HTTPIdentifying;
+
 int InitDecoderHTTP();
-int Sum (char *str, int strsize);
+
+/* Auxiliar functions, used externaly */
+inline int BinSearch (int *vec, int n, int value);
+inline void ShellSort(int vet[], int lim_sup);
 
 #endif

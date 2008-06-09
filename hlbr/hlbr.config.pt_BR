@@ -267,5 +267,18 @@ response=drop
 SBridge(eth0, eth1)
 </routing>
 
+############################################################################
+# Secao Decoder
+#
+# Configuracões especiais dos decoders
+############################################################################
 
+# decoder http
+# Defina aqui, separado por vírgulas, os métodos que trafegam em sua rede
 
+<decoder http>
+OPTIONS,GET,HEAD,POST,PUT,DELETE,TRACE,CONNECT
+#COPY,MOVE,PROPFIND,PROPPATCH,UNLOCK,LOCK,MKCOL,NOTIFY,POLL
+#VERSION-CONTROL,REPORT,CHECKIN,UNCHECKOUT,CHECKOUT,UPDATE,LABEL,MERGE,BASELINE-CONTROL,MKACTIVITY
+#BCOPY,BMOVE,BDELETE,BPROPFIND,BPROPPATCH,X-MS-ENUMATTS,UNBPROP,BPROP
+</decoder>

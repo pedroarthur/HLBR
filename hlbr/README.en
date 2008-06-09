@@ -242,19 +242,24 @@ tcp offset(10,Hello World)
     Test the specified string ("Hello world") inside the TCP payload, 
     starting from the 10th byte. (not tested yet)
 
-http content
+http content(/etc/passwd)
 
     Similar to tcp content, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
     RFC 3986 [7].
 
-http nocase
+http method(METHODA,METHODC)
+
+    Match against preconfigured HTTP methods. The available methods are
+    configured at hlbr.config file. See hlbr.config for more information.
+
+http nocase(malware)
 
     Similar to tcp nocase, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See
     RFC 3986 [7].
 
-http regex
+http regex([aA4]tt[aA4]ck)
 
     Similar to tcp regex, but it will first check the packet payload
     for a HTTP header and will decode any URI encoded character. See

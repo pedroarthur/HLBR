@@ -29,6 +29,7 @@
 #include "test_tcp_offset.h"
 #include "test_tcp_regex.h"
 #include "test_http_content.h"
+#include "test_http_method.h"
 #include "test_http_nocase.h"
 #include "test_http_regex.h"
 #include "test_udp_regex.h"
@@ -71,6 +72,7 @@ int InitTests(){
 	if (!InitTestTCPOffset()) return FALSE;
 	if (!InitTestTCPRegExp()) return FALSE;
 	if (!InitTestHTTPContent()) return FALSE;
+	if (!InitTestHTTPMethod()) return FALSE;
 	if (!InitTestHTTPNoCase()) return FALSE;
 	if (!InitTestHTTPRegExp()) return FALSE;
         if (!InitTestUDPRegExp()) return FALSE;

@@ -1,7 +1,9 @@
 2008-06-08  Version: 1.5 RC1.1
 
  * uri test moved to http test (still testing)
+ * added test: http method
  * added uri decoder to engine
+ * now decoders may have config options
  * new (and more efficient!) http header detection
  * updated test_ethernet_{src,dst}.c
  * updated README.{en,pt_BR}

@@ -1,5 +1,5 @@
-#ifndef _HLBR_TEST_URI_RE_H_
-#define _HLBR_TEST_URI_RE_H_
+#ifndef _HLBR_TEST_HTTP_RE_H_
+#define _HLBR_TEST_HTTP_RE_H_
 
 #include "../config.h"
 #include "../engine/hlbr.h"
