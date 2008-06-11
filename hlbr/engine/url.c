@@ -34,7 +34,7 @@ char *URLDecode (char *content, int content_len, int *decoded_size) {
 
 	DEBUGPATH;
 
-	decoded = (char *) calloc (content_len, sizeof(char));
+	decoded = (char *) malloc (content_len * sizeof(char));
 
 	if (!decoded) {
 		fprintf (stderr, "In DecodeURI(url_decoded): No memory available!");
