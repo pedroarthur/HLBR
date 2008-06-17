@@ -162,7 +162,7 @@ portuguese:
 	#
 
 english:
-	cp hlbr.config.en /etc/hlbr/hlbr.config
+	cp hlbr.config.en $(CONFIG_DIR)/hlbr.config
 	#
 	# --------------------------------------------------
 	# HLBR has been installed.
