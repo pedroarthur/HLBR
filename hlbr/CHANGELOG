@@ -1,4 +1,4 @@
-2008-06-08  Version: 1.5 RC1.1
+2008-06-18  Version: 1.5 RC2
 
  * uri test moved to http test (still testing)
  * added test: http method
@@ -7,6 +7,10 @@
  * new (and more efficient!) http header detection
  * updated test_ethernet_{src,dst}.c
  * updated README.{en,pt_BR}
+ * changed tcpdump header from /var/lib/hlbr to /usr/lib/hlbr
+ * added description and force-reload option in init.d to make it compliant
+   with Debian and LSB
+ * new rules
 
 2008-05-29  Version: 1.5 RC1
 

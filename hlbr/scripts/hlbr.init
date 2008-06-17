@@ -2,6 +2,17 @@
 # Inicia/para o daemon hlbr.
 # Start/stop the hlbr daemon.
 
+### BEGIN INIT INFO
+# Provides:             hlbr
+# Required-Start:       $syslog
+# Required-Stop:        $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    Start HLBR at boot time
+# Description:          Used to start/stop/restart HLBR daemon.
+#                       HLBR is an IPS.
+### END INIT INFO
+
 if [ -x "/usr/sbin/hlbr" ]; then echo; else echo Nao instalado / Not installed; exit 0; fi
 
 conf="/etc/hlbr/hlbr.config"
@@ -18,13 +29,13 @@ stop)	echo "Parando o HLBR / Stopping HLBR"
         killall hlbr
 #        echo "Parado / Stoped"
         ;;
-restart) echo "Reinicializando o HLBR / Restarting HLBR"
+restart|force-reload) echo "Reinicializando o HLBR / Restarting HLBR"
 	killall /usr/sbin/hlbr
 	cd /etc/hlbr
 	/usr/sbin/hlbr $opts &
         echo "OK"
         ;;
-*)	echo "Uso / Usage: /etc/init.d/hlbr start|stop|restart"
+*)	echo "Uso / Usage: /etc/init.d/hlbr start|stop|restart|force-reload"
         exit 1 
         ;;
 esac

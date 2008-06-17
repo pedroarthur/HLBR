@@ -267,14 +267,21 @@ response=drop
 SBridge(eth0, eth1)
 </routing>
 
+
+
+
 ############################################################################
 # Secao Decoder
 #
-# Configuracões especiais dos decoders
+# Configuracoes especiais dos decoders
+#
+#
+# decoder http
+# Defina aqui, separado por virgulas, os metodos que trafegam em sua rede
 ############################################################################
 
-# decoder http
-# Defina aqui, separado por vírgulas, os métodos que trafegam em sua rede
+
+
 
 <decoder http>
 OPTIONS,GET,HEAD,POST,PUT,DELETE,TRACE,CONNECT

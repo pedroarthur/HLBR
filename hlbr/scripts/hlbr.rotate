@@ -25,7 +25,7 @@ if [ -d /var/log/hlbr ];
 	    if [ $length -gt 30 ]
 		then
 		    savelog -m 640 -u root -c 52 -l $path/$i > /dev/null
-		    cat /var/lib/hlbr/hlbr.dump.header > /var/log/hlbr/$i
+		    cat /usr/lib/hlbr/hlbr.dump.header > /var/log/hlbr/$i
 	    fi
 	done
 

@@ -264,16 +264,23 @@ response=drop
 SBridge(eth0, eth1)
 </routing>
 
+
+
+
 ############################################################################
 # Secao Decoder
 #
 # Decoders special config options
-############################################################################
-
+#
+#
 # decoder http
 #
 # Define, as a comma separated list of values, the methods that lay around
 # your network
+############################################################################
+
+
+
 
 <decoder http>
 OPTIONS,GET,HEAD,POST,PUT,DELETE,TRACE,CONNECT
@@ -281,4 +288,3 @@ OPTIONS,GET,HEAD,POST,PUT,DELETE,TRACE,CONNECT
 #VERSION-CONTROL,REPORT,CHECKIN,UNCHECKOUT,CHECKOUT,UPDATE,LABEL,MERGE,BASELINE-CONTROL,MKACTIVITY
 #BCOPY,BMOVE,BDELETE,BPROPFIND,BPROPPATCH,X-MS-ENUMATTS,UNBPROP,BPROP
 </decoder>
-

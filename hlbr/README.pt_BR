@@ -261,7 +261,7 @@ http content(/etc/passwd)
 
 http method(METHODA,METHODC)
 
-    Casa com métodos HTTP pre-configurados. Os métodos disponiveis são
+    Casa com metodos HTTP pre-configurados. Os metodos disponiveis sao
     definidos no arquivo hlbr.config. Veja o hlbr.config para maiores
     informacoes.
 

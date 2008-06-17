@@ -9,7 +9,7 @@ BIN_DIR =		$(PREFIX)/usr/sbin
 INIT_DIR_1 =		$(PREFIX)/etc/init.d
 INIT_DIR_2 =		$(PREFIX)/etc/rc.d/init.d
 CRON_DIR =		$(PREFIX)/etc/cron.weekly
-HEADER_DIR =		$(PREFIX)/var/lib/hlbr
+HEADER_DIR =		$(PREFIX)/usr/lib/hlbr
 MAN_DIR =		$(PREFIX)/usr/share/man/man8
 RULES_DIR =		$(CONFIG_DIR)/rules
 
