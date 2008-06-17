@@ -277,15 +277,16 @@ SBridge(eth0, eth1)
 #
 #
 # decoder http
-# Defina aqui, separado por virgulas, os metodos que trafegam em sua rede
+# Defina aqui, separados por virgulas, os metodos que podem trafegar na sua
+# rede.
 ############################################################################
 
 
 
 
 <decoder http>
-OPTIONS,GET,HEAD,POST,PUT,DELETE,TRACE,CONNECT
-#COPY,MOVE,PROPFIND,PROPPATCH,UNLOCK,LOCK,MKCOL,NOTIFY,POLL
+OPTIONS,GET,HEAD,POST
+#CONNECT,PUT,DELETE,TRACE,COPY,MOVE,PROPFIND,PROPPATCH,UNLOCK,LOCK,MKCOL,NOTIFY,POLL
 #VERSION-CONTROL,REPORT,CHECKIN,UNCHECKOUT,CHECKOUT,UPDATE,LABEL,MERGE,BASELINE-CONTROL,MKACTIVITY
 #BCOPY,BMOVE,BDELETE,BPROPFIND,BPROPPATCH,X-MS-ENUMATTS,UNBPROP,BPROP
 </decoder>
