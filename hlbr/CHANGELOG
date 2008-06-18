@@ -10,7 +10,6 @@
  * changed tcpdump header from /var/lib/hlbr to /usr/lib/hlbr
  * added description and force-reload option in init.d to make it compliant
    with Debian and LSB
- * english install was changed to use CONFIG_DIR variable  
  * new rules
 
 2008-05-29  Version: 1.5 RC1

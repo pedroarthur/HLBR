@@ -149,6 +149,7 @@ pre-install:
 	cp rules/*.rules $(RULES_DIR)
 	if [ ! -d $(HEADER_DIR) ]; then mkdir $(HEADER_DIR); cp -f hlbr.dump.header $(HEADER_DIR); fi
 	if [ ! -e $(MAN_DIR)/hlbr.8 ]; then cp man/hlbr.8 $(MAN_DIR); fi
+	if [ -d $(PREFIX)/var/lib/hlbr ]; then rm -rf $(PREFIX)/var/lib/hlbr; fi
 
 portuguese:
 	cp hlbr.config.pt_BR $(CONFIG_DIR)/hlbr.config
