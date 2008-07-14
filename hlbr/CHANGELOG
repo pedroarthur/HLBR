@@ -1,20 +1,20 @@
-2008-07-14  Version: 1.6 RC1
+2008-07-14  Version: 1.6
 
- * BUGFIX: IPDefrag now working!
+ * BUGFIX: IPDefrag now working! (PAJ)
 
 2008-06-18  Version: 1.5 RC2
 
- * uri test moved to http test (still testing)
- * added test: http method
- * added uri decoder to engine
- * now decoders may have config options
- * new (and more efficient!) http header detection
- * updated test_ethernet_{src,dst}.c
- * updated README.{en,pt_BR}
- * changed tcpdump header from /var/lib/hlbr to /usr/lib/hlbr
+ * uri test moved to http test (still testing) (PAJ)
+ * added test: http method (PAJ)
+ * added uri decoder to engine (PAJ)
+ * now decoders may have config options (PAJ)
+ * new (and more efficient!) http header detection (PAJ)
+ * updated test_ethernet_{src,dst}.c (PAJ)
+ * updated README.{en,pt_BR} (ERI)
+ * changed tcpdump header from /var/lib/hlbr to /usr/lib/hlbr (ERI)
  * added description and force-reload option in init.d to make it compliant
-   with Debian and LSB
- * new rules
+   with Debian and LSB (ERI)
+ * new rules (ERI)
 
 2008-05-29  Version: 1.5 RC1
 
@@ -74,3 +74,10 @@
 2005-11-29  Version: 0.1 RC1
 
  * initial version
+
+
+
+------------------
+(ABA) - Andre Bertelli - Brazil
+(ERI) - Eriberto - Brazil
+(PAJ) - Pedro Arthur - Brazil
