@@ -69,12 +69,12 @@ int InitDecoderTCP(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeTCP;
-	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)){
+	if (!DecoderAddDecoder(GetDecoderByName("IPDefrag"), DecoderID)){
 		printf("Failed to Bind TCP Decoder to IPDefrag Decoder\n");
 		return FALSE;
 	}
 
-	IPDecoderID=GetDecoderByName("IP");
+	IPDecoderID=GetDecoderByName("IPDefrag");
 
 	return TRUE;
 }

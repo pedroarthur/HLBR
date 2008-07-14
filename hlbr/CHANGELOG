@@ -1,3 +1,7 @@
+2008-07-14  Version: 1.6 RC1
+
+ * BUGFIX: IPDefrag now working!
+
 2008-06-18  Version: 1.5 RC2
 
  * uri test moved to http test (still testing)
