@@ -55,6 +55,7 @@ int InitDecoderEthernet(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeEthernet;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("Interface"), DecoderID)){
 		printf("Failed to Bind Ethernet Decoder to Interface Decoder\n");
 		return FALSE;

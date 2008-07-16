@@ -39,6 +39,7 @@ int InitDecoderInterface(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeInterface;
+	Globals.Decoders[DecoderID].Free=free;
 
 	return TRUE;
 }

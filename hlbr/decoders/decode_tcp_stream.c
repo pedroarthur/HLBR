@@ -80,6 +80,7 @@ int InitDecoderTCPStream(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeTCPStream;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("TCP"), DecoderID)){
 		printf("Failed to Bind TCP Stream Decoder to TCP Decoder\n");
 		return FALSE;

@@ -126,6 +126,7 @@ int InitDecoderDNS(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeDNS;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("UDP"), DecoderID)){
 		printf("Failed to Bind DNS Decoder to UDP Decoder\n");
 		return FALSE;

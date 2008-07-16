@@ -117,6 +117,7 @@ int InitDecoderARP(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeARP;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("Ethernet"), DecoderID)){
 		printf("Failed to Bind ARP Decoder to Ethernet Decoder\n");
 		return FALSE;

@@ -1,6 +1,7 @@
 2008-07-14  Version: 1.6
 
  * BUGFIX: IPDefrag now working! (PAJ)
+ * Added decoder especific memory deallocation functions
 
 2008-06-18  Version: 1.5 RC2
 

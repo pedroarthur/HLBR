@@ -69,6 +69,7 @@ int InitDecoderTCP(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeTCP;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("IPDefrag"), DecoderID)){
 		printf("Failed to Bind TCP Decoder to IPDefrag Decoder\n");
 		return FALSE;

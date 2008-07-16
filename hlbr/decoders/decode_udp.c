@@ -69,6 +69,7 @@ int InitDecoderUDP(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeUDP;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)){
 		printf("Failed to Bind UDP Decoder to IPDefrag Decoder\n");
 		return FALSE;

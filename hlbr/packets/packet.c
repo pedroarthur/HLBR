@@ -456,7 +456,9 @@ void ReturnEmptyPacket(int PacketSlot){
 		}
 	
 		for (i=0;i<p->NumDecoderData;i++){
-			if (p->DecoderInfo[i].Data) free(p->DecoderInfo[i].Data);
+			if (p->DecoderInfo[i].Data)
+				Globals.Decoders[p->DecoderInfo[i].DecoderID].Free (p->DecoderInfo[i].Data);
+				//free(p->DecoderInfo[i].Data);
 			p->DecoderInfo[i].Data=NULL;
 		}
 		

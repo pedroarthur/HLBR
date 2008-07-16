@@ -65,6 +65,7 @@ int InitDecoderICMP(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeICMP;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)){
 		printf("Failed to Bind ICMP Decoder to IPDefrag Decoder\n");
 		return FALSE;

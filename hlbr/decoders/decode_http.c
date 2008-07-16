@@ -211,6 +211,11 @@ int ParseMethods (FILE *fp) {
 	return FALSE;
 }
 
+void FreeHTTP (void *data) {
+	free (((HTTPData *) data)->decoded);
+	free (data);
+}
+
 int InitDecoderHTTP(){
 	int			DecoderID;
 
@@ -227,6 +232,7 @@ int InitDecoderHTTP(){
 
 	Globals.Decoders[DecoderID].DecodeFunc = DecodeHTTP;
 	Globals.Decoders[DecoderID].ConfigFunction = ParseMethods;
+	Globals.Decoders[DecoderID].Free=FreeHTTP;
 
 	if (!DecoderAddDecoder(GetDecoderByName("TCP"), DecoderID)) {
 		fprintf (stderr, "In InitDecoderHTTP: Failed to bind HTTP Decoder to TCP Decoder\n");

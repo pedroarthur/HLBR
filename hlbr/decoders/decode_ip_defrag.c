@@ -398,6 +398,7 @@ int InitDecoderIPDefrag(){
 	}
 	
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeIPDefrag;
+	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)){
 		printf("Failed to Bind IP Defrag Decoder to IP Decoder\n");
 		return FALSE;
