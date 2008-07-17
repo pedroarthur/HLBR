@@ -2,7 +2,7 @@
 # name:       www.rules
 # created by: Joao Eriberto Mota Filho
 # date:       Nov 29, 2005
-# update:     May 30, 2008
+# update:     Jul 10, 2008
 # target:     block invalid www requests.
 
 # Comment the following rule if you have ASP web pages
@@ -10,27 +10,27 @@
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(.asp)
+tcp regex(GET[ -~]+\.asp($|/|\&|\?))
 message=(www-1) .asp request
 action=action1
 </rule>
 
 # Comment the following rule if you have PHP web pages
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(.php)
-message=(www-2) .php request
-action=action1
-</rule>
+#<rule>
+#ip dst(www)
+#tcp dst(80)
+#tcp nocase(GET[ -~]+\.php($|/|\&|\?))
+#message=(www-2) .php request
+#action=action1
+#</rule>
 
 # Comment the following rule if you have SHTML web pages
 
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(.shtml)
+tcp regex(GET[ -~]+\.shtml($|\|\&|\?))
 message=(www-3) .shtml request
 action=action1
 </rule>
@@ -40,7 +40,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(.xml)
+tcp regex(GET[ -~]+\.xml($|/|\&|\?))
 message=(www-4) .xml request
 action=action1
 </rule>
@@ -50,25 +50,25 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(.pl)
+tcp regex(/[-0-9a-zA-Z]+\.pl(/|\&|\?))
 message=(www-5) .pl request
 action=action1
 </rule>
 
 # Comment the following rules if you have CGI routines
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(/cgi-bin/)
-message=(www-6) cgi request
-action=action1
-</rule>
+#<rule>
+#ip dst(www)
+#tcp dst(80)
+#tcp nocase(/cgi-bin/)
+#message=(www-6) cgi request
+#action=action1
+#</rule>
 
-<rule>
-ip dst(www)
-tcp dst(80)
-tcp nocase(.cgi)
-message=(www-7) cgi request
-action=action1
-</rule>
+#<rule>
+#ip dst(www)
+#tcp dst(80)
+#tcp regex([ -~]+\.cgi($|/|\&|\?))
+#message=(www-7) cgi request
+#action=action1
+#</rule>
