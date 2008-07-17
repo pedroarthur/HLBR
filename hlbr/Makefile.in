@@ -204,4 +204,4 @@ uninstall:
 
 install-daemon:
 #	This target is destinated to development tests only.
-	cp hlbr $(BIN_DIR)
+	cp -f hlbr $(BIN_DIR)
