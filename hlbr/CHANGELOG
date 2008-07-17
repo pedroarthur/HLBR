@@ -1,7 +1,8 @@
 2008-07-14  Version: 1.6
 
  * BUGFIX: IPDefrag now working! (PAJ)
- * Added decoder especific memory deallocation functions (PAJ)
+ * added decoder especific memory deallocation functions (PAJ)
+ * revision and tests (ABA,ERI)
 
 2008-06-18  Version: 1.5 RC2
 
@@ -16,69 +17,75 @@
  * added description and force-reload option in init.d to make it compliant
    with Debian and LSB (ERI)
  * new rules (ERI)
+ * revision and tests (ABA,ERI)
 
 2008-05-29  Version: 1.5 RC1
 
- * new rules
- * the POSIX REGEX was replaced by Perl REGEX
- * officialy we support GNU/Linux only now
- * added the COPYING file
- * removed the LICENSE.{en,pt_BR} files
- * changed man/hlbr.8.gz file to man/hlbr.8
+ * new rules (ERI)
+ * the POSIX REGEX was replaced by Perl REGEX (PAJ)
+ * officialy we support GNU/Linux only now (ERI)
+ * added the COPYING file (ERI)
+ * removed the LICENSE.{en,pt_BR} files (ERI)
+ * changed man/hlbr.8.gz file to man/hlbr.8 (ERI)
  * fixed a bug in Makefile: the manpage is being installed now
- * optimized the Makefile.in
- * little updates and fixies in manpage
- * removed CHANGELOG.pt_BR and TODO.pt_BR files
- * moved {CHANGELOG,TODO}.en files to CHANGELOG and TODO
- * the changelog format was remade
- * new detection test: tcp uri (in testing phase...)
- * updated README.{en,pt_BR} and TEAM files
+ * optimized the Makefile.in (ERI)
+ * little updates and fixies in manpage (ERI)
+ * removed CHANGELOG.pt_BR and TODO.pt_BR files (ERI)
+ * moved {CHANGELOG,TODO}.en files to CHANGELOG and TODO (ERI)
+ * the changelog format was remade (ERI)
+ * new detection test: tcp uri (in testing phase...) (PAJ)
+ * updated README.{en,pt_BR} and TEAM files (ERI)
 
 2006-05-18  Version: 1.1
 
- * new rules
+ * new rules (ERI)
 
 2006-03-05  Version: 1.0
 
- * new tests: implementation of regular expressions with tcp regex and udp regex
- * new tests: tcp listcontent and tcp listnocase (to read files lists)
- * new rules using regular expressions
- * corrected bug: nocase and content had detection fails
+ * new tests: implementation of regular expressions with tcp regex and
+   udp regex (MOR,ROV)
+ * new tests: tcp listcontent and tcp listnocase (to read files lists) (ABA)
+ * new rules using regular expressions (ERI)
+ * corrected bug: nocase and content had detection fails (ABA)
 
 2006-02-09  Version: 0.2
 
- * corrected bug: HLBR didn't start correctly out of the directory of configurations and rules
- * corrected bug: .dump files getting corrupted
- * on-line manual created
- * new rules created
- * new log rotating system
- * installation system altered
+ * corrected bug: HLBR didn't start correctly out of the directory of
+   configurations and rules (GAB)
+ * corrected bug: .dump files getting corrupted (ABA,ERI)
+ * on-line manual created (ERI)
+ * new rules created (ERI)
+ * new log rotating system (ERI)
+ * installation system altered (ERI)
 
 2005-12-16  Version: 0.1
 
- * retreat some of the comments let into the code
- * created one action and one log only for e-mail virus
- * new rules and "tunning" of some rules already existing
- * implementation of initialization by files in /etc/init.d
- * log rotate implementation
+ * retreat some of the comments let into the code (ABA)
+ * created one action and one log only for e-mail virus (ABA)
+ * new rules and "tunning" of some rules already existing (ERI)
+ * implementation of initialization by files in /etc/init.d (ERI)
+ * log rotate implementation (ERI)
 
 2005-12-05  Version: 0.1 RC2
 
- * hlbr.config revised
- * README.pt_BR revised and more stuff added
- * README.en created
- * hlbr.config.en created
- * created: make install, installen and uninstall
- * first source code standard revision
- * new rules
+ * hlbr.config revised (ERI)
+ * README.pt_BR revised and more stuff added (ERI)
+ * README.en created (ABA,ERI)
+ * hlbr.config.en created (ABA,ERI)
+ * created: make install, installen and uninstall (ERI)
+ * first source code standard revision (ABA)
+ * new rules (ERI)
 
 2005-11-29  Version: 0.1 RC1
 
- * initial version
+ * initial version (from Hogwash - hogwash.sf.net) (ABA)
 
 
 
 ------------------
 (ABA) - Andre Bertelli - Brazil
 (ERI) - Eriberto - Brazil
+(GAB) - Gabriel Arellano - Argentina
+(MOR) - Morpheuz - Brazil
 (PAJ) - Pedro Arthur - Brazil
+(ROV) - Rodrigo Vivi - Brazil
