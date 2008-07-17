@@ -201,3 +201,7 @@ uninstall:
 	# HLBR foi desinstalado. HLBR has been uninstalled.
 	# -------------------------------------------------
 	#
+
+install-daemon:
+#	This target is destinated to development tests only.
+	cp hlbr $(BIN_DIR)
