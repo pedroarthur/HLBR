@@ -436,15 +436,10 @@ int MatchStrings(JTree* j, unsigned char* PacketRuleBits, unsigned char* String,
 				SetBit(LocalDepend, Globals.NumRules, node->TerminalRuleID, 0);
 			}
 		}else{
+			node=node->FailNode;
 
-		  // original code! including Boyer moore optimization:
-		        //node=node->FailNode;
-                        //if (node!=j->Head) i--;
-
-		        node=j->Head;
-                        if(node->Bytes[String[i]]) i--;
-
-
+			if (node!=j->Head)
+				i--;
 		}
 	}
 

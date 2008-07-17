@@ -1,6 +1,7 @@
 2008-07-14  Version: 1.6
 
  * BUGFIX: IPDefrag now working! (PAJ)
+ * BUGFIX: JTree issues (PAJ)
  * added decoder especific memory deallocation functions (PAJ)
  * revision and tests (ABA,ERI)
 
