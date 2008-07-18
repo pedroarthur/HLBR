@@ -266,6 +266,7 @@ http regex([aA4]tt[aA4]ck)
     RFC 3986 [7].
 
 
+
 WARRANTIES
 ----------
 
@@ -279,6 +280,7 @@ Testes (and working) Distributions:
 We recommend DEBIAN and Slackware!
 
 
+
 REFERENCES
 -----------
 
@@ -289,6 +291,7 @@ REFERENCES
 [5] ftp://ftp.rfc-editor.org/in-notes/rfc793.txt
 [6] ftp://ftp.rfc-editor.org/in-notes/rfc3168.txt
 [7] http://www.rfc-editor.org/rfc/rfc3986.txt
+
 
 
 HELP US!

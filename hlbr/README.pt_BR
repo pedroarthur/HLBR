@@ -4,7 +4,7 @@ HOGWASH LIGHT BR
 
 
 
-DEPENDENCIES
+DEPENDENCIAS
 ------------
 
 Este programa depende da libpcre, disponivel em
@@ -277,6 +277,9 @@ http regex([aA4]t[aA4]qu[eE3])
     em busca de um cabecalho HTTP, decodificando caracteres que estejam
     em codificacao de URI. Vide RFC 3986 [7].
 
+
+
+
 GARANTIAS
 ---------
 
@@ -290,6 +293,7 @@ Distribuicoes testadas:
 Recomendamos o DEBIAN e Slackware!
 
 
+
 REFERENCIAS
 -----------
 
@@ -300,6 +304,7 @@ REFERENCIAS
 [5] ftp://ftp.rfc-editor.org/in-notes/rfc793.txt
 [6] ftp://ftp.rfc-editor.org/in-notes/rfc3168.txt
 [7] http://www.rfc-editor.org/rfc/rfc3986.txt
+
 
 
 AJUDEM_NOS!
