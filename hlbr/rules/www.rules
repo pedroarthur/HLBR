@@ -2,7 +2,7 @@
 # name:       www.rules
 # created by: Joao Eriberto Mota Filho
 # date:       Nov 29, 2005
-# update:     Jul 10, 2008
+# update:     Jul 18, 2008
 # target:     block invalid www requests.
 
 # Comment the following rule if you have ASP web pages
