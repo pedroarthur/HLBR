@@ -2,7 +2,7 @@
 # name:       webattacks.rules
 # created by: Joao Eriberto Mota Filho
 # date:       Dec 26, 2005
-# update:     Ago 04, 2008
+# update:     Jul 18, 2008
 # target:     block www attacks.
 
 <rule>
