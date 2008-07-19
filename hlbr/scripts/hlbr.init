@@ -1,6 +1,7 @@
 #!/bin/sh
 # Inicia/para o daemon hlbr.
 # Start/stop the hlbr daemon.
+# C 2005-2008 Joao Eriberto Mota Filho
 
 ### BEGIN INIT INFO
 # Provides:             hlbr
@@ -13,27 +14,48 @@
 #                       HLBR is an IPS.
 ### END INIT INFO
 
-if [ -x "/usr/sbin/hlbr" ]; then echo; else echo Nao instalado / Not installed; exit 0; fi
+# Presence check
+if [ -x "/usr/sbin/hlbr" ]
+then
+    echo
+else
+    echo "ERRO: Nao instalado / ERROR: Not installed"
+    exit 1
+fi
 
-conf="/etc/hlbr/hlbr.config"
-rules="/etc/hlbr/hlbr.rules"
-opts="-c $conf -r $rules"
+# Variables
+CONF="/etc/hlbr/hlbr.config"
+RULES="/etc/hlbr/hlbr.rules"
+OPTS="-c $CONF -r $RULES"
+PIDFILE=$(cat $CONF|grep PidFile|cut -d"=" -f2)
 
+# Actions
 case "$1" in
-start)	echo "Inicializando o HLBR / Starting HLBR"
-        cd /etc/hlbr
-	/usr/sbin/hlbr $opts &
-#        echo "OK" 
+start)	if [ -f $PIDFILE ]
+	then
+	    echo "ERRO: HLBR jah ativo / ERROR: HLBR alread running"
+	    echo $PIDFILE
+	    exit 1
+	else     
+	    echo "Inicializando o HLBR / Starting HLBR"
+    	    cd /etc/hlbr
+	    /usr/sbin/hlbr $OPTS &
+	    sleep 1
+	    echo "OK"
+	fi
 	;;
-stop)	echo "Parando o HLBR / Stopping HLBR"
-        killall hlbr
-#        echo "Parado / Stoped"
+stop)	if [ ! -f $PIDFILE ]; then echo "ERRO: HLBR estava parado / ERROR: HLBR was stoped"; exit 1; fi
+	echo "Parando o HLBR / Stopping HLBR"
+        if [ -f /sbin/start-stop-daemon ]
+        then
+    	    start-stop-daemon --stop --quiet --pidfile $PIDFILE --name hlbr
+    	else
+    	    killall hlbr
+    	fi    
+	if [ -f $PIDFILE ]; then rm -f $PIDFILE; fi
         ;;
 restart|force-reload) echo "Reinicializando o HLBR / Restarting HLBR"
-	killall /usr/sbin/hlbr
-	cd /etc/hlbr
-	/usr/sbin/hlbr $opts &
-        echo "OK"
+	"$0" stop && sleep 3 && "$0" start
         ;;
 *)	echo "Uso / Usage: /etc/init.d/hlbr start|stop|restart|force-reload"
         exit 1 

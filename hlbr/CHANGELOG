@@ -1,9 +1,14 @@
+2008-07-19  Version: 1.6 RC2
+
+ * added pid file (PAJ)
+ * rebuilt init.d script to make it compliant with Debian
+   (using start-stop-daemon, if it exists, to stop HLBR) (ERI)
+
 2008-07-18  Version: 1.6 RC1
 
  * BUGFIX: IPDefrag now working! (PAJ)
  * BUGFIX: JTree issues (PAJ)
  * added decoder especific memory deallocation functions (PAJ)
- * added pid file (PAJ)
  * added install-daemon in Makefile.in (for tests only) (ERI)
  * changed some rules (ERI)
  * revision and tests (ABA,ERI)

@@ -41,6 +41,10 @@
 #    (hora), %min (minuto), %s (segundos), %usec (microsegundos), %pn
 #    (sequencia do pacote), %ac (numero do alerta - comeca em 1 sempre que o
 #    HLBR eh reiniciado).
+#
+# PidFile=PID file :)
+#
+#    Define o caminho (path) e o nome do arquivo que conterah o PID.
 ############################################################################
 
 

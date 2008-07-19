@@ -41,6 +41,10 @@
 #    %min (minute), %s (seconds), %usec (microseconds), %pn (sequential
 #    packet number), %ac (alert number - starts with 1 every time HLBR is
 #    restarted).
+#
+# PidFile=PID file :)
+#
+#    Define the path and name of the PID file.
 ############################################################################
 
 
