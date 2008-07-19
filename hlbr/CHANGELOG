@@ -3,6 +3,7 @@
  * BUGFIX: IPDefrag now working! (PAJ)
  * BUGFIX: JTree issues (PAJ)
  * added decoder especific memory deallocation functions (PAJ)
+ * added pid file (PAJ)
  * added install-daemon in Makefile.in (for tests only) (ERI)
  * changed some rules (ERI)
  * revision and tests (ABA,ERI)

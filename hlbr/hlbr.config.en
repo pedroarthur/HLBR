@@ -51,6 +51,7 @@ Name=HLBR_1
 ID=1
 Threads=1
 AlertHeader=%ac %m/%d/%y %h:%min:%s %sip:%sp->%dip:%dp
+PidFile=/var/run/hlbr.pid
 </system>
 
 
