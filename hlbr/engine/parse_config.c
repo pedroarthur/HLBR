@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #ifdef _SOLARIS_
 #include <strings.h>
 #endif
@@ -222,6 +224,23 @@ int ParseAction(FILE* fp, char* Name){
 	return FALSE;
 }
 
+int ParsePidFile (char *fname) {
+	FILE *fp;
+	struct stat buffer;
+
+	if (stat(fname, &buffer) == 0){
+		printf ("Removing old PID file at %s\n",fname);
+		unlink (fname);
+	}
+
+	fp = fopen (fname, "a");
+
+	fprintf (fp, "%d\n", getpid());
+
+	fclose (fp);
+
+	return 0;
+}
 
 /*******************************************
 * make sense of the system options
@@ -247,7 +266,9 @@ int ParseSystem(FILE* fp){
 			return TRUE;
 		}else if (strncasecmp(LineBuff, "name=",5)==0){
 			Current=LineBuff+strlen("name=");
-			if (Globals.SensorName) free(Globals.SensorName);
+
+			if (Globals.SensorName)
+				free(Globals.SensorName);
 			Globals.SensorName=(char*)calloc(strlen(Current)+2, sizeof(char));
 			snprintf(Globals.SensorName, strlen(Current)+1, Current);
 #ifdef DEBUG
@@ -288,7 +309,11 @@ int ParseSystem(FILE* fp){
 			}
 #ifdef DEBUG
 			printf("UseThreads is %i\n",Globals.UseThreads);
-#endif			
+#endif
+		}else if (strncasecmp(LineBuff, "PidFile=", 8) == 0) {
+			Current=LineBuff+8;
+
+			ParsePidFile(Current);
 		}else{
 			printf("Warning: Unknown System Option: %s\n",LineBuff);
 		}
