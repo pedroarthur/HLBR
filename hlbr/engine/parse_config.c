@@ -229,17 +229,15 @@ int ParsePidFile (char *fname) {
 	struct stat buffer;
 
 	if (stat(fname, &buffer) == 0){
-		printf ("Removing old PID file at %s\n",fname);
-		unlink (fname);
+		fprintf (stderr, "Pid file found at %s. Please remove it.\n", fname);
+		return FALSE;
 	}
 
 	fp = fopen (fname, "a");
-
 	fprintf (fp, "%d\n", getpid());
-
 	fclose (fp);
 
-	return 0;
+	return TRUE;
 }
 
 /*******************************************
@@ -313,7 +311,8 @@ int ParseSystem(FILE* fp){
 		}else if (strncasecmp(LineBuff, "PidFile=", 8) == 0) {
 			Current=LineBuff+8;
 
-			ParsePidFile(Current);
+			if (!ParsePidFile(Current))
+				return FALSE;
 		}else{
 			printf("Warning: Unknown System Option: %s\n",LineBuff);
 		}
