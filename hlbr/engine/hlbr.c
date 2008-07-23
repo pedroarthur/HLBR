@@ -280,12 +280,17 @@ void HandleSignal(int signal){
 
   DEBUGPATH;
 
-	switch (signal){
+	switch (signal) {
 	case SIGINT:
 	case SIGQUIT:
 	case SIGTERM:
-		printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());	
-		Globals.Done=TRUE;
+		printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());
+		
+		// Removing the pid file
+		if (remove(Globals.PidFilename))
+			fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
+
+		Globals.Done = TRUE;
 		break;
 	}
 }

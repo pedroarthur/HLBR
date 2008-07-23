@@ -1,3 +1,5 @@
+//#define DEBUG
+
 #include "bits.h"
 #include "hlbr.h"
 #include <stdio.h>
@@ -42,6 +44,9 @@ inline void SetBit(unsigned char* BitField, int BitFieldLen, int BitNum, char Va
 	unsigned char*	byte;
 
 	DEBUGPATH;
+#ifdef DEBUG
+	printf("BitFieldLen %i BitNum %i Value %c\n", BitFieldLen, BitNum, Value);
+#endif
 	
 	byte=&BitField[BitNum/8];
 	
@@ -268,3 +273,7 @@ int BitFieldIsEmpty(unsigned char* BitField, int BitFieldLen){
 	
 	return TRUE;
 }
+
+#ifdef DEBUG
+#undef DEBUG
+#endif

@@ -1,3 +1,7 @@
+//#define DEBUGBUILD
+//#define DEBUGMATCH
+//#define DEBUGFINAL
+//#define DEBUGESCAPE
 /**************************************
 * This is a multi-string matching
 * algorithm based on a Boyer-Moore
@@ -13,11 +17,6 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "bits.h"
-
-//#define DEBUGBUILD
-//#define DEBUGMATCH
-//#define DEBUGFINAL
-//#define DEBUGESCAPE
 
 #ifdef DEBUGFINAL
 int		node_count=0;

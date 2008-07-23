@@ -75,7 +75,7 @@ int InitTests(){
 	if (!InitTestHTTPMethod()) return FALSE;
 	if (!InitTestHTTPNoCase()) return FALSE;
 	if (!InitTestHTTPRegExp()) return FALSE;
-        if (!InitTestUDPRegExp()) return FALSE;
+	if (!InitTestUDPRegExp()) return FALSE;
 	if (!InitTestUDPSrc()) return FALSE;
 	if (!InitTestUDPDst()) return FALSE;
 //	if (!InitTestDNSNumQ()) return FALSE;
