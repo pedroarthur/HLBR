@@ -237,6 +237,9 @@ int ParsePidFile (char *fname) {
 	fprintf (fp, "%d\n", getpid());
 	fclose (fp);
 
+	Globals.PidFilename = (char *) calloc (strlen(fname), sizeof(char));
+	strcpy (Globals.PidFilename, fname);
+
 	return TRUE;
 }
 

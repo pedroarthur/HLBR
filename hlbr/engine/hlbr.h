@@ -351,7 +351,8 @@ typedef struct global_vars{
 	char			UseThreads;	
 	char			ParseOnly;
 	char*			ConfigFilename;
-	char*			RulesFilename;	
+	char*			RulesFilename;
+	char*			PidFilename;
 	char*			LogDir;
 	int			PacketLimit;
 	MessageItem*		AlertHeader;
