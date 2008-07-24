@@ -27,32 +27,24 @@ fi
 CONF="/etc/hlbr/hlbr.config"
 RULES="/etc/hlbr/hlbr.rules"
 OPTS="-c $CONF -r $RULES"
-PIDFILE=$(cat $CONF|grep PidFile|cut -d"=" -f2)
+PIDFILE=$(cat $CONF|grep ^PidFile|cut -d"=" -f2)
 
 # Actions
 case "$1" in
-start)	if [ -f $PIDFILE ]
-	then
-	    echo "ERRO: HLBR jah ativo / ERROR: HLBR alread running"
-	    echo $PIDFILE
-	    exit 1
-	else     
-	    echo "Inicializando o HLBR / Starting HLBR"
-    	    cd /etc/hlbr
-	    /usr/sbin/hlbr $OPTS &
-	    sleep 1
-	    echo "OK"
-	fi
+start)	if [ -f $PIDFILE ]; then echo -e "HLBR:\n\nERRO: existe um PID ativo / ERROR: already exist an active PID\nTente parar o daemon ou remover o arquivo PID \ Try to stop the daemon or remove the PID file\n\n$PIDFILE\n"; exit 1; fi
+	echo "Inicializando o HLBR / Starting HLBR"
+    	cd /etc/hlbr
+	hlbr $OPTS &
+	sleep 1
+	echo "OK"
 	;;
-stop)	if [ ! -f $PIDFILE ]; then echo "ERRO: HLBR estava parado / ERROR: HLBR was stoped"; exit 1; fi
-	echo "Parando o HLBR / Stopping HLBR"
+stop)	echo "Parando o HLBR / Stopping HLBR"
         if [ -f /sbin/start-stop-daemon ]
         then
     	    start-stop-daemon --stop --quiet --pidfile $PIDFILE --name hlbr
     	else
     	    killall hlbr
-    	fi    
-	if [ -f $PIDFILE ]; then rm -f $PIDFILE; fi
+    	fi
         ;;
 restart|force-reload) echo "Reinicializando o HLBR / Restarting HLBR"
 	"$0" stop && sleep 3 && "$0" start

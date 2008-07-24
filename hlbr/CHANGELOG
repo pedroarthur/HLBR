@@ -1,5 +1,7 @@
-2008-07-19  Version: 1.6 RC2
+2008-07 24  Version: 1.6
 
+ * added README.tcpdump (ERI)
+ * improved pid file process (ABA)
  * added pid file (PAJ)
  * rebuilt init.d script to make it compliant with Debian
    (using start-stop-daemon, if it exists, to stop HLBR) (ERI)
