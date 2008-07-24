@@ -2,7 +2,7 @@
 # name:       webattacks.rules
 # created by: Joao Eriberto Mota Filho
 # date:       Dec 26, 2005
-# update:     Ago 04, 2008
+# update:     Ago 24, 2008
 # target:     block www attacks.
 
 <rule>
@@ -13,7 +13,7 @@ message=(webattacks-1-re) directory change attempt (unicode,asc,plain)
 action=action1
 </rule>
 
-# Rule 2????
+# Rule 2: removed.
 
 <rule>
 ip dst(www)
@@ -136,19 +136,10 @@ message=(webattacks-16-re) //README or //chat call
 action=action1
 </rule>
 
-#<rule>
-#ip dst(www)
-#tcp dst(80)
-#tcp content(GET /java/utils.js)
-#message=(webattacks-17) /java/utils.js call 
-#action=action1
-#</rule>
-
 <rule>
 ip dst(www)
 tcp dst(80)
 tcp content(GET /cacti/cmd.php)
-message=(webattacks-18) cmd.php attack to Cacti 
+message=(webattacks-17) cmd.php attack to Cacti 
 action=action1
 </rule>
-

@@ -2,7 +2,7 @@
 # name:       www.rules
 # created by: Joao Eriberto Mota Filho
 # date:       Nov 29, 2005
-# update:     Jul 10, 2008
+# update:     Ago 24, 2008
 # target:     block invalid www requests.
 
 # Comment the following rule if you have ASP web pages
@@ -17,13 +17,13 @@ action=action1
 
 # Comment the following rule if you have PHP web pages
 
-#<rule>
-#ip dst(www)
-#tcp dst(80)
-#tcp nocase(GET[ -~]+\.php($|/|\&|\?))
-#message=(www-2) .php request
-#action=action1
-#</rule>
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(GET[ -~]+\.php($|/|\&|\?))
+message=(www-2) .php request
+action=action1
+</rule>
 
 # Comment the following rule if you have SHTML web pages
 
@@ -57,18 +57,18 @@ action=action1
 
 # Comment the following rules if you have CGI routines
 
-#<rule>
-#ip dst(www)
-#tcp dst(80)
-#tcp nocase(/cgi-bin/)
-#message=(www-6) cgi request
-#action=action1
-#</rule>
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp nocase(/cgi-bin/)
+message=(www-6) cgi request
+action=action1
+</rule>
 
-#<rule>
-#ip dst(www)
-#tcp dst(80)
-#tcp regex([ -~]+\.cgi($|/|\&|\?))
-#message=(www-7) cgi request
-#action=action1
-#</rule>
+<rule>
+ip dst(www)
+tcp dst(80)
+tcp regex([ -~]+\.cgi($|/|\&|\?))
+message=(www-7) cgi request
+action=action1
+</rule>
