@@ -5,6 +5,7 @@ To next versions:
 - insert logic operations (not, and, or)
 - add possibility of daemon reload
 - implement AI
+- integration with clamav
 - create documentation about AI
 - create a remote GUI?
 - rules, rules and more rules...

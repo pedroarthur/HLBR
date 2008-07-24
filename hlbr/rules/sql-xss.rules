@@ -1,9 +1,9 @@
 
 # name:       sql-xss.rules
-# created by: Hardik Shah
+# created by: Hardik Shah and Pedro Arthur Jedi
 # date:       Jan 10, 2006
-# updated by: Joao Eriberto Mota Filho
-# update:     Abr 13, 2006
+# updated by: Pedro Arthur Jedi
+# update:     Jul 21, 2008
 # target: sql injection and xss checks.
 
 <rule>
@@ -38,4 +38,22 @@ tcp dst(80)
 tcp nocase(<script>)
 message=(sql-xss-4) request XSS
 action=action1
+</rule>
+
+# These rules are in test and uses action2... 
+
+<rule>
+ip dst(www)
+tcp dst(80)
+http regex((?i)' *(/\*[^[:cntrl:]]*\*/)+? *o(/\*[^[:cntrl:]]*\*/)+?r *[^[:cntrl:]]*(<|=|>)[^[:cntrl:]]*(--|#|/\*))
+message=(sql-xss-5) Disjunction Tried (TESTING)
+action=action2
+</rule>
+
+<rule>
+ip dst(www)
+tcp dst(80)
+http regex((?i)< *script.*?>)
+message=(sql-xss-6) <script> injected (TESTING)
+action=action2
 </rule>

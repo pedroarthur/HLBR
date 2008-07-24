@@ -2,7 +2,7 @@
 # name:       webattacks.rules
 # created by: Joao Eriberto Mota Filho
 # date:       Dec 26, 2005
-# update:     Jul 18, 2008
+# update:     Ago 04, 2008
 # target:     block www attacks.
 
 <rule>
@@ -99,7 +99,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp content(/_vti_bin/)
+http content(/_vti_bin/)
 message=(webattacks-12) fp call attempt 
 action=action1
 </rule>
