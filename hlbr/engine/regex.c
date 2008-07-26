@@ -43,7 +43,9 @@ int RegexExec (HLBRRegex *regex, char *data, int data_size) {
 		return FALSE;
 }
 
-int RegexExecDebug (HLBRRegex *regex, char *data, int data_size) {
+
+int RegexExecDebug (HLBRRegex *regex, char *data, int data_size) 
+{
 	int 	rvalue;
 	int	svector[SVECTOR_SIZE];
 	int 	i,j;
@@ -59,6 +61,7 @@ int RegexExecDebug (HLBRRegex *regex, char *data, int data_size) {
 			putchar (data[svector[0]+j]);
 		putchar ('\n');
 		rvalue = pcre_exec(regex->re, regex->ere, data, data_size, svector[1], regex->options, svector, SVECTOR_SIZE);
+		printf(data);
 	}
 
 	if (i)

@@ -1,3 +1,6 @@
+//#define DEBUG
+//#define DEBUGMATCH
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -14,9 +17,6 @@ typedef struct tcp_regexp_data{
 	unsigned char	tcp_content[MAX_CONTENT_LEN];
 	HLBRRegex	*regex;
 } TCPRegExpData;
-
-//#define DEBUG
-//#define DEBUGMATCH
 
 int TCPDecoderID;
 
@@ -120,3 +120,10 @@ int InitTestTCPRegExp(){
 
 	return TRUE;
 }
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
+#ifdef DEBUGMATCH
+#undef DEBUGMATCH
+#endif
