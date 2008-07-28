@@ -20,7 +20,7 @@ action=action1
 <rule>
 ip dst(www)
 tcp dst(80)
-tcp nocase(GET[ -~]+\.php($|/|\&|\?))
+tcp regex(GET[ -~]+\.php($|/|\&|\?))
 message=(www-2) .php request
 action=action1
 </rule>
