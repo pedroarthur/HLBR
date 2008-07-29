@@ -16,7 +16,7 @@
 #include "../engine/hlbr.h"
 #include "test.h"
 
-#define MAX_CONTENT_LEN		256
+#define MAX_CONTENT_LEN		1024
 
 //Function that starts the process of creating this test
 int InitTestUDPRegExp();

@@ -5,7 +5,7 @@
 #include "../engine/hlbr.h"
 #include "test.h"
 
-#define MAX_CONTENT_LEN		256
+#define MAX_CONTENT_LEN		1024
 
 int InitTestHTTPRegExp();
 
