@@ -26,8 +26,8 @@ typedef struct alert_email_data{
 	char* 	Message;
 } EMailData;
 
-
-pthread_mutex_t	EMailMutex=PTHREAD_MUTEX_INITIALIZER;
+// Until today, a useless Mutex...
+//pthread_mutex_t	EMailMutex=PTHREAD_MUTEX_INITIALIZER;
 
 /******************************************
 * Send off an e-mail 

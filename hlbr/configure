@@ -43,8 +43,8 @@ if [ "$THIS_OS" == "SunOS" ]; then
 fi
 if [ "$THIS_OS" == "OpenBSD" ]; then
 	OS="OBSD"
-	echo "typedef pthread_mutex_t int;" >> config.h
-	echo "typedef pthread_t int;" >> config.h
+	echo "typedef int pthread_mutex_t;" >> config.h
+	echo "typedef int pthread_t;" >> config.h
 	echo "THREAD=-pthread" >> Makefile
 fi
 
@@ -197,6 +197,13 @@ then
         echo "Encontrado / Found"
 	echo "LIB_DL=-ldl" >> Makefile
 	echo "LATE_BINDING=-rdynamic" >> Makefile
+elif $CCompiler -o conftest.dlopen conftest.dlopen.c -dl -rdynamic > /dev/null 2>&1
+then
+        echo "#define HAS_DLOPEN" >> config.h
+        echo "" >> config.h
+        echo "Encontrado / Found"
+	echo "LIB_DL=-dl" >> Makefile
+	echo "LATE_BINDING=-rdynamic" >> Makefile
 else
         echo "Nao encontrado / Not found"
 fi
@@ -204,14 +211,22 @@ rm -f conftest.dlopen conftest.dlopen.c
 #end checking for dlopen
 
 #check for libpcre presence
+
+cat > conftest.pcre.c <<EOF
+#include <pcre.h>
+int main () { return 0; }
+EOF
+
 echo -n "Buscando libpcre / Checking for libpcre............"
-if [ -e /usr/include/pcre.h ]
+if $CCompiler -o conftest.pcre conftest.pcre.c > /dev/null 2>&1
 then
 	echo "Encontrado / Found"
 else
         echo "Nao encontrado / Not found"
         exit 1
 fi
+
+rm conftest.pcre.c conftest.pcre
 #end checking for libpcre
 
 #finish off the config.h file
