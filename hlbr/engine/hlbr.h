@@ -409,6 +409,9 @@ typedef struct global_vars{
 	unsigned char			logSession_StartEnd;
 	unsigned char			logSession_All;
 	LogFileRec			logSessionFile;
+#ifdef KEEP_LOGFILE_OPEN
+	pthread_t			logThread;
+#endif
 } GlobalVars;
 
 

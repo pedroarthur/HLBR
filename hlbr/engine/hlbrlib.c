@@ -33,15 +33,19 @@ FILE* LogFile(LogFileRec* log)
 
 /**
  * If the log file is still opened - and we're opening/closing it at every
- * access - then close it.
+ * access - then close it, otherwise just flush the data.
  * The KEEP_LOGFILE_OPEN define controls how this function works.
  */
 void CloseLogFile(LogFileRec* log)
 {
-#ifndef KEEP_LOGFILE_OPEN
 	if (log->fp != NULL)
-		fclose(log->fp);
+#ifndef KEEP_LOGFILE_OPEN
+		if (!fclose(log->fp))
+#else
+		if (!fflush(log->fp))
 #endif
+			fprintf(stderr, "Error closing/flushing log file %s\n",
+					log->fname);
 } 
 
 /**

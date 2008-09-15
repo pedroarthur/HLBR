@@ -221,20 +221,20 @@ int ProcessPacket(int PacketSlot){
 * There may be more than one of
 * these.
 *******************************/
-void* ProcessPacketThread(void* v){
+void* ProcessPacketThread(void* v)
+{
 	int	PacketSlot;
 	
 	DEBUGPATH;
 
-	while (!Globals.Done){
-		PacketSlot=PopFromPending();		
-		if (PacketSlot!=PACKET_NONE){
+	while (!Globals.Done) {
+		PacketSlot = PopFromPending();
+		if (PacketSlot != PACKET_NONE) {
 			ProcessPacket(PacketSlot);
-		}else{
+		} else {
 			IdleFunc();
-		}	
+		}
 	}
-
 
 	return NULL;
 }
@@ -317,14 +317,19 @@ int MainLoopThreaded(){
 
 	Globals.Done=FALSE;
 	
-	/*start up the interface threads*/
+	/* start up the interface threads */
 	for (i=0;i<Globals.NumInterfaces;i++)
 		if (!StartInterfaceThread(i)){
 			printf("Couldn't start thread for interface\n");
 			return FALSE;
 		}
-	
-	/*start up the first process packet thread*/
+
+#ifdef KEEP_LOGFILE_OPEN	
+	/* start up the log files keeper thread */
+	pthread_create(&Globals.logThread, NULL, ProcessLogFilesThread, NULL);
+#endif
+
+	/* start up the first process packet thread */
 	//pthread_create(&test_thread, NULL, ProcessPacketThread, NULL);
 	ProcessPacketThread(NULL);
 

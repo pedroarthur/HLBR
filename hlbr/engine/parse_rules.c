@@ -24,7 +24,7 @@ int SetAction(int RuleID, char* ActionName){
 	DEBUGPATH;
 
 	for (i=0;i<Globals.NumActions;i++){
-		if (strcasecmp(ActionName, Globals.Actions[i].Name)==0){
+		if (strcasecmp(ActionName, Globals.Actions[i].Name) == 0) {
 			return i;
 		}
 	}

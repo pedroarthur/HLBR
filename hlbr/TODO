@@ -1,5 +1,6 @@
 To next versions:
 
+- finish implementation of the logThread (keeps/updates all logfiles)
 - finish documentation at site
 - create faq
 - insert logic operations (not, and, or)

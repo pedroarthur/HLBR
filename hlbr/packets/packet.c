@@ -490,11 +490,11 @@ void ReturnEmptyPacket(int PacketSlot){
 #endif	
 }
 
-/************************************
-* Start a new dedicated thread to
-* read the interface
-************************************/
-int StartInterfaceThread(int InterfaceID){
+/**
+ * Start a new dedicated thread to read the network interface.
+ */
+int StartInterfaceThread(int InterfaceID)
+{
 	InterfaceRec*	Interface;
 
 	DEBUGPATH;
@@ -502,9 +502,9 @@ int StartInterfaceThread(int InterfaceID){
 #ifndef HAS_THREADS
 	return FALSE;
 #else
-	Interface=&Globals.Interfaces[InterfaceID];
+	Interface = &Globals.Interfaces[InterfaceID];
 	
-	switch(Interface->Type){
+	switch(Interface->Type) {
 #ifdef _LINUX_	
 	case PACKET_TYPE_LINUX_RAW:
 		return LoopThreadLinuxRaw(InterfaceID);

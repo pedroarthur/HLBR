@@ -221,12 +221,12 @@ void* LinuxRawLoopFunc(void* v){
 	return NULL;
 }
 
-/**********************************************
-* Start a thread to continuously read
-**********************************************/
-int LoopThreadLinuxRaw(int InterfaceID){
-
-  DEBUGPATH;
+/**
+ * Start a thread to continuously read (for Linux systems)
+ */
+int LoopThreadLinuxRaw(int InterfaceID)
+{
+	DEBUGPATH;
 
 #ifndef HAS_THREADS
 	return FALSE;
@@ -236,7 +236,7 @@ int LoopThreadLinuxRaw(int InterfaceID){
 	printf("Starting Thread for interface %s\n",Globals.Interfaces[InterfaceID].Name);
 #endif
 
-	Globals.Interfaces[InterfaceID].ThreadID=pthread_create(
+	Globals.Interfaces[InterfaceID].ThreadID = pthread_create(
 		&Globals.Interfaces[InterfaceID].Thread,
 		NULL,
 		LinuxRawLoopFunc,
