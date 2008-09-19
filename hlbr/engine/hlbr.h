@@ -54,7 +54,7 @@
 #define MAX_MODULES		16
 #define MAX_LISTS		16
 #define MAX_TIMERS		16
-#define MAX_PACKETS		512
+#define MAX_PACKETS		1024
 
 #define DEFAULT_SENSOR_NAME	"Default Sensor"
 #define DEFAULT_SENSOR_ID	0

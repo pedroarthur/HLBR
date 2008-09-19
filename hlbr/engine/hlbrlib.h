@@ -31,7 +31,7 @@ typedef struct log_file_rec {
 /**************/
 FILE* LogFile(LogFileRec*);
 void CloseLogFile(LogFileRec*);
-int LogMessage(char*, LogFileRec*);
+int LogMessage(char*, void*);
 
 char *ParseCmp(char *,char *);
 char *RmSpace(char *);

@@ -25,9 +25,9 @@ extern GlobalVars	Globals;
 
 //#define DEBUG
 
-/**************************************
-* Give a Decoder's name, return it's ID
-**************************************/
+/**
+ * Given a Decoder's name, return its ID.
+ */
 int GetDecoderByName(char* Name){
 	int 	i;
 	
@@ -39,9 +39,9 @@ int GetDecoderByName(char* Name){
 	return DECODER_NONE;
 }
 
-/*************************************
-* Set up the initial decoder tree
-*************************************/
+/**
+ * Set up the initial decoder tree.
+ */
 int InitDecoders(){
 	int	RootDecoder;
 
@@ -76,9 +76,9 @@ int InitDecoders(){
 	return TRUE;
 }
 
-/*************************************
-* Allocate a decoder
-**************************************/
+/**
+ * Allocate a decoder.
+ */
 int CreateDecoder(char* Name){
 	int DecoderID;
 	
@@ -105,9 +105,12 @@ int CreateDecoder(char* Name){
 	return DecoderID;
 }
 
-/************************************************
-* Add a new test to a decoder
-************************************************/
+/**
+ * Add a new test to a decoder.
+ * Each test defined in the rules files is read in the appropriate struct
+ * and then linked to the corresponding decoder struct.
+ * @return TRUE if test was added succesfully, otherwise FALSE
+ */
 int DecoderAddTest(int DecoderID, int TestID){
 	TestRec*	Test;
 	DecoderRec*	Decoder;
@@ -141,10 +144,14 @@ int DecoderAddTest(int DecoderID, int TestID){
 	return TRUE;
 }
 
-/************************************************
-* Add a decoder to another decoder
-************************************************/
-int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID){
+/**
+ * Add (link) a decoder to another decoder.
+ * Link a decoder to a previous created decoder, so it's called after it.
+ * Example: the TCP decoder should be linked to the IP decoder
+ * @return TRUE if decoder was added succesfully, otherwise FALSE
+ */
+int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID)
+{
 	DecoderRec*	Child;
 	DecoderRec*	Parent;
 	DecoderRec*	This;
@@ -177,9 +184,12 @@ int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID){
 
 }
 
-/************************************************
-* Add a new module to a decoder
-************************************************/
+/**
+ * Add a new module to a decoder.
+ * Modules are linked to decoders, so they're called after the decoder
+ * finishes its job.
+ * @return TRUE if module was added succesfully, otherwise FALSE
+ */
 int DecoderAddModule(int DecoderID, int ModuleID){
 	ModuleRec*	Module;
 	DecoderRec*	Decoder;
@@ -214,10 +224,32 @@ int DecoderAddModule(int DecoderID, int ModuleID){
 }
 
 
-/*******************************************
-* Apply a decoder to a packet
-*******************************************/
-int Decode(int DecoderID, int PacketSlot){
+/**
+ * Apply a decoder (and child decoders, rules, and modules) to a packet.
+ * This is one of the main functions responsible for everything HLBR does;
+ * the other is ProcessPacket().
+ * Decode will travel down the decoder tree, starting at the given
+ * decoder, and applying the child decoders, as well as tests and modules.
+ * @return FALSE if an error occurs (but not if a child decoder fails)
+ * @remarks Basically this is what Decode does:
+ * @li Gets the function for the requested decoder (DecodeFunc) and applies it;
+ * the data produced by this function will be accessible by a pointer in the
+ * corresponding DecoderData structure (every packet have an array of
+ * DecoderData structs so the decoders can put their data there).
+ * @li If the decoder generated data: applies all tests linked to this decoder
+ * (see BindTestToDecoder() ), and then run the linked modules (currently
+ * not used in HLBR).
+ * @li If the decoder did NOT generate data: mark all rules 
+ * (packet_rec::RuleBits) that depend on this decoder as inactive (that means,
+ * didn't match the packet), without testing them, and leaves
+ * @li Then, test if all rules were already tested (RuleBits), and if so, 
+ * leaves (there is no need to apply more decoders)
+ * @li Traverse the list of child decoders, calling them with this same function
+ * @remarks Note that the actions defined in the configuration aren't 
+ * executed here. They're executed by ProcessPacket(), after calling Decode().
+ */
+int Decode(int DecoderID, int PacketSlot)
+{
 	TestRec*	test;
 	ModuleRec*	module;
 	DecoderRec*	child;
@@ -225,81 +257,83 @@ int Decode(int DecoderID, int PacketSlot){
 
 	DEBUGPATH;
 
-	/*Don't go there if we don't need to*/
-	if (!Globals.Decoders[DecoderID].Active) return TRUE;
-
+	// Don't go there if we don't need to
+	if (!Globals.Decoders[DecoderID].Active) 
+		return TRUE;
 
 #ifdef DEBUG
 	printf("Applying decoder %s\n",Globals.Decoders[DecoderID].Name);
 #endif
 
-	p=&Globals.Packets[PacketSlot];
+	p = &Globals.Packets[PacketSlot];
 
-	if (p->NumDecoderData==MAX_DECODER_DEPTH){
-		printf("Out of room for decoders\n");
+	if (p->NumDecoderData == MAX_DECODER_DEPTH) {
+		sprintf(stderr, "Out of room for decoders\n");
 		return FALSE;
 	}
 
-	/*apply this decoder*/
-	p->DecoderInfo[p->NumDecoderData].Data=Globals.Decoders[DecoderID].DecodeFunc(PacketSlot);
-	if (p->DecoderInfo[p->NumDecoderData].Data){
-		if (!p->DecoderInfo[p->NumDecoderData].Data){
+	// apply this decoder
+	p->DecoderInfo[p->NumDecoderData].Data = Globals.Decoders[DecoderID].DecodeFunc(PacketSlot);
+	if (p->DecoderInfo[p->NumDecoderData].Data) {
+		if (!p->DecoderInfo[p->NumDecoderData].Data) {
 			printf("What the hell is going on?\n");
 		}
-		p->DecoderInfo[p->NumDecoderData].DecoderID=DecoderID;
+		p->DecoderInfo[p->NumDecoderData].DecoderID = DecoderID;
 		p->NumDecoderData++;
 
-		/*apply the tests*/
-		test=Globals.Decoders[DecoderID].Tests;
-		while (test){
+		// apply the tests
+		test = Globals.Decoders[DecoderID].Tests;
+		while (test) {
 			if (test->Active)
-			if (test->TestFunc) test->TestFunc(PacketSlot, test->TestNodes);
-			test=test->Next;
+				if (test->TestFunc) 
+					test->TestFunc(PacketSlot, test->TestNodes);
+			test = test->Next;
 		}
 
-		/*apply the modules*/
-		module=Globals.Decoders[DecoderID].Modules;
-		while (module){
+		// apply the modules
+		module = Globals.Decoders[DecoderID].Modules;
+		while (module) {
 			if (module->Active)
-			if (module->ModuleFunc) module->ModuleFunc(PacketSlot);
+				if (module->ModuleFunc) 
+					module->ModuleFunc(PacketSlot);
 			module=module->Next;
 		}
-	}else{
-		/*mark all the rules that depend on this decoder as inactive*/
+ 	} else {
+		// mark all the rules that depend on this decoder as inactive
 		NotAndBitFields(p->RuleBits, Globals.Decoders[DecoderID].DependencyMask, p->RuleBits, Globals.NumRules);
 		return TRUE;
 	}		
 
-	/*check to see if there are any rules left*/
-	if (!BitFieldIsEmpty(p->RuleBits, Globals.NumRules)){
+	// check to see if there are any rules left
+	if (!BitFieldIsEmpty(p->RuleBits, Globals.NumRules)) {
 #ifdef DEBUG	
 		printf("There are rules left\n");
 #endif		
-	}else{
+	} else {
 #ifdef DEBUG
 		printf("All rules have been eliminated\n");
 #endif				
 		return TRUE;
 	}
 
-	/*apply the bound decoders*/
-	child=Globals.Decoders[DecoderID].Children;
-	while (child){
-		if (!Decode(child->ID, PacketSlot)){
-			printf("Decoder %s failed\n",child->Name);
+	// apply the bound decoders
+	child = Globals.Decoders[DecoderID].Children;
+	while (child) {
+		if (!Decode(child->ID, PacketSlot)) {
+			sprintf(stderr, "Decoder %s failed\n",child->Name);
 		}
 		child = child->NextChild;
 	}
 
-
 	return TRUE;
 }
 
-/****************************************************
-* Add a dependency to the decoder
-* If a decoder fails, all the dependencies fail also
-* Used for fast pruning
-****************************************************/
+
+/**
+ * Add a dependency to the decoder.
+ * If a decoder fails, all the dependencies fail also. 
+ * Used for fast pruning
+ */
 int DecoderSetDependency(int DecoderID, int TestID){
 
 	DEBUGPATH;
@@ -310,9 +344,9 @@ int DecoderSetDependency(int DecoderID, int TestID){
 	return TRUE;
 }
 
-/******************************************
-* Get a particular decoder's data record
-*******************************************/
+/**
+ * Get a particular decoder's data record
+ */
 int GetDataByID(int PacketSlot, int DecoderID, void** data){
 	int 		i;
 	PacketRec*	p;
