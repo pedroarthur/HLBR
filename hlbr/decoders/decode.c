@@ -79,19 +79,25 @@ int InitDecoders(){
 /**
  * Allocate a decoder.
  */
-int CreateDecoder(char* Name){
+int CreateDecoder(char* Name)
+{
 	int DecoderID;
 	
 	DEBUGPATH;
 
-	/*check to see if this name is already used*/
-	DecoderID=GetDecoderByName(Name);
-	if (DecoderID!=DECODER_NONE){
-		printf("Decoder %s already exists\n",Name);
+	/* check to see if this name is already used */
+	DecoderID = GetDecoderByName(Name);
+	if (DecoderID != DECODER_NONE) {
+		printf("Decoder %s already exists\n", Name);
+		return DECODER_NONE;
+	}
+
+	if (Globals.NumDecoders == MAX_DECODER_DEPTH) {
+		sprintf(stderr, "Out of room for decoders\n");
 		return DECODER_NONE;
 	}
 	
-	DecoderID=Globals.NumDecoders;
+	DecoderID = Globals.NumDecoders;
 	Globals.NumDecoders++;
 	
 	bzero(&Globals.Decoders[DecoderID], sizeof(DecoderRec));
@@ -267,21 +273,16 @@ int Decode(int DecoderID, int PacketSlot)
 
 	p = &Globals.Packets[PacketSlot];
 
-	if (p->NumDecoderData == MAX_DECODER_DEPTH) {
-		sprintf(stderr, "Out of room for decoders\n");
-		return FALSE;
-	}
-
-	// apply this decoder
-	p->DecoderInfo[p->NumDecoderData].Data = Globals.Decoders[DecoderID].DecodeFunc(PacketSlot);
-	if (p->DecoderInfo[p->NumDecoderData].Data) {
-		if (!p->DecoderInfo[p->NumDecoderData].Data) {
+	/* apply this decoder */
+	p->DecoderInfo[DecoderID].Data = Globals.Decoders[DecoderID].DecodeFunc(PacketSlot);
+	if (p->DecoderInfo[DecoderID].Data) {
+		if (!p->DecoderInfo[DecoderID].Data) {
 			printf("What the hell is going on?\n");
 		}
-		p->DecoderInfo[p->NumDecoderData].DecoderID = DecoderID;
+		p->DecoderInfo[DecoderID].DecoderID = DecoderID; // now this is redundant...
 		p->NumDecoderData++;
 
-		// apply the tests
+		/* apply the tests */
 		test = Globals.Decoders[DecoderID].Tests;
 		while (test) {
 			if (test->Active)
@@ -345,32 +346,27 @@ int DecoderSetDependency(int DecoderID, int TestID){
 }
 
 /**
- * Get a particular decoder's data record
+ * Get a particular decoder's data record.
+ * Before the data records were added sequentially, now we're putting the data record
+ * of a decoder right at that decoder's id index.
  */
-int GetDataByID(int PacketSlot, int DecoderID, void** data){
-	int 		i;
+inline int GetDataByID(int PacketSlot, int DecoderID, void** data){
 	PacketRec*	p;
 
 	DEBUGPATH;
 
-	p=&Globals.Packets[PacketSlot];
+	p = &Globals.Packets[PacketSlot];
 
-	for (i=p->NumDecoderData-1;i>=0;i--){
-		if (p->DecoderInfo[i].DecoderID==DecoderID){
-			if (!p->DecoderInfo[i].Data){
-				printf("Decoder Data %i was NULL\n", DecoderID);
-				*data=NULL;
-				return FALSE;
-			}else{
-				*data=p->DecoderInfo[i].Data;
-				return TRUE;
-			}
-		}
+	/*
+	if (!p->DecoderInfo[DecoderID].Data){
+		printf("Decoder Data %i was NULL\n", DecoderID);
+		*data = NULL;
+		return FALSE;
+	} else {
+	*/
+		*data = p->DecoderInfo[DecoderID].Data;
+		return TRUE;
+	/*
 	}
-
-#ifdef DEBUG
-	printf("Decoder Data %i not found\n",DecoderID);
-#endif
-	
-	return FALSE;
+	*/
 }
