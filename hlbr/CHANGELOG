@@ -1,4 +1,11 @@
-2008-07 24  Version: 1.6
+2008-09-28
+
+ * BUGFIX: Packet allocation status in GetEmptyPacket at packet.c (PAJ)
+ * BUGFIX: Memory leak in the new decoder data indexing schema (PAJ)
+ * PacketMutex optmization (PAJ)
+ * New decoder data indexing schema (ABA)
+
+2008-07-24  Version: 1.6
 
  * added README.tcpdump (ERI)
  * Tests arguments resized (ABA,PAJ)

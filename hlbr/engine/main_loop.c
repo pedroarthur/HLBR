@@ -20,15 +20,15 @@
 //#define DEBUG1
 
 extern GlobalVars	Globals;
-extern int			TCPDecoderID;
-extern int			UDPDecoderID;
+extern int		TCPDecoderID;
+extern int		UDPDecoderID;
 
 /************************************
 * Called whenever hlbr is idle
 ************************************/
 void IdleFunc(){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 #ifdef DEBUGPACKETS
 	printf("There are:\n");
@@ -61,13 +61,16 @@ int RouteAndSend(int PacketSlot){
 	p=&Globals.Packets[PacketSlot];
 	
 	/*No routing Protocols*/
-	if (Globals.NumRoutes==0) return TRUE;
+	if (Globals.NumRoutes==0)
+		return TRUE;
+
 	/*dropped by rules*/
-	if (!p->PassRawPacket) return TRUE;
-	
+	if (!p->PassRawPacket)
+		return TRUE;
+
 	p->TargetInterface=-1;
-	
-#ifdef DEBUG1	
+
+#ifdef DEBUG1
 	if (p->InterfaceNum==2)
 	printf("Routing %02X:%02X:%02X:%02X:%02X:%02X->%02X:%02X:%02X:%02X:%02X:%02X\n",
 		p->RawPacket[6],
@@ -82,67 +85,77 @@ int RouteAndSend(int PacketSlot){
 		p->RawPacket[3],
 		p->RawPacket[4],
 		p->RawPacket[5]);
-#endif	
+#endif
 	
 	if (!Route(PacketSlot)){
-#ifdef DEBUG	
+#ifdef DEBUG
 		printf("Routing rules dropped the packet\n");
-#endif		
+#endif
 		return TRUE;
 	}
 
 	if (p->TargetInterface==-1){
 #ifdef DEBUG
 		printf("No Packet Handler set a route. Dropping.\n");
-#endif	
+#endif
 		return FALSE;
 	}
 
 #ifdef DEBUG1
 	if (p->InterfaceNum==2)
-	printf("Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
-#endif	
-	return WritePacket(PacketSlot);	
+		printf("Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
+#endif
+
+	return WritePacket(PacketSlot);
 }
 
 /************************************
 * Handle any timers that fire
 ************************************/
 int HandleTimers(int Now){
-	int			i;
+	int		i;
 	static int	NextTimer=0;
-	int			TimeLeft;
+	int		TimeLeft;
 	TimerRec*	t;
 
 	DEBUGPATH;
 
-	if ( (NextTimer!=0) && (Now<NextTimer) ) return TRUE;
-		
-	for (i=0;i<MAX_TIMERS;i++){
+	if ((NextTimer != 0) && (Now < NextTimer))
+		return TRUE;
+
+	for (i = 0 ; i < MAX_TIMERS ; i++){
 		t=&Globals.Timers[i];
+
 		if (t->InUse && t->TimerFunc){
-			if ((t->Interval+t->LastTime)<=Now){
-				t->InUse=t->TimerFunc(i, Now, t->User);
-				t->LastTime=Now;
+			if ((t->Interval + t->LastTime) <= Now){
+				t->InUse = t->TimerFunc(i, Now, t->User);
+				t->LastTime = Now;
 			}
 		}
 	}
 
 	NextTimer=-65535;
-	for (i=0;i<MAX_TIMERS;i++){
+
+	for (i = 0 ; i < MAX_TIMERS ; i++){
 		t=&Globals.Timers[i];
+
 		if (t->InUse && t->TimerFunc){
-			TimeLeft=t->Interval - (Now - t->LastTime);
-			if ( TimeLeft>NextTimer) NextTimer=TimeLeft;
+			TimeLeft= t->Interval - (Now - t->LastTime);
+
+			if (TimeLeft > NextTimer)
+				NextTimer = TimeLeft;
 		}
 	}
-	
-	if (NextTimer==-65535) NextTimer=60;
-	if (NextTimer>60) NextTimer=60;
-	
-	NextTimer+=Now;
-		
-	return TRUE;	
+
+	if (NextTimer==-65535)
+		NextTimer=60;
+
+	if (NextTimer>60)
+		NextTimer=60;
+
+	NextTimer += Now;
+
+	return TRUE;
 }
 
 /************************************
@@ -155,15 +168,16 @@ int ProcessPacket(int PacketSlot){
 	static int	UDPSec=0;
 	static int	LastTime=0;
 	void*		data;
-	
+
 	DEBUGPATH;
 
-	if (Globals.PacketLimit==0){
+	if (Globals.PacketLimit == 0){
 		printf("Packet Limit Reached\n");
 		Globals.Done=TRUE;
 	}
-	
-	if (Globals.PacketLimit>0) Globals.PacketLimit--;
+
+	if (Globals.PacketLimit > 0)
+		Globals.PacketLimit--;
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -171,34 +185,33 @@ int ProcessPacket(int PacketSlot){
 	printf("++++++++++++++++++++++++++++++++%u\n",p->PacketNum);
 #endif
 
-	if (p->tv.tv_sec) HandleTimers(p->tv.tv_sec);
+	if (p->tv.tv_sec)
+		HandleTimers(p->tv.tv_sec);
 
-	if (!Decode(Globals.DecoderRoot,PacketSlot)){
+	if (!Decode(Globals.DecoderRoot, PacketSlot)){
 		printf("Error Processing Packet\n");
 	}
 
 	/*update the packet statistics*/
 	PacketSec++;
+
 	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
 		TCPSec++;
 	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
 		UDPSec++;
-		
-	if (Globals.Packets[PacketSlot].tv.tv_sec!=LastTime){
-		Globals.PacketsPerSec=PacketSec;
-		Globals.TCPPerSec=TCPSec;
-		Globals.UDPPerSec=UDPSec;
-	
-		//printf("%i packet, %i tcp, %i udp %i other\n",PacketSec, TCPSec, UDPSec, PacketSec-(TCPSec+UDPSec));	
-		
-		PacketSec=0;
-		TCPSec=0;
-		UDPSec=0;
-		LastTime=Globals.Packets[PacketSlot].tv.tv_sec;
+
+	if (Globals.Packets[PacketSlot].tv.tv_sec != LastTime){
+		Globals.PacketsPerSec = PacketSec;
+		Globals.TCPPerSec = TCPSec;
+		Globals.UDPPerSec = UDPSec;
+
+		PacketSec = 0;
+		TCPSec = 0;
+		UDPSec = 0;
+
+		LastTime = Globals.Packets[PacketSlot].tv.tv_sec;
 	}
 
-	
-	
 	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
 #ifdef DEBUG
 		printf("There are rule matches\n");
@@ -207,11 +220,10 @@ int ProcessPacket(int PacketSlot){
 			printf("Failed to execute the actions\n");
 		}
 	}
-	
-	
+
 	RouteAndSend(PacketSlot);
 	ReturnEmptyPacket(PacketSlot);
-	
+
 	return TRUE;
 }
 
@@ -224,11 +236,12 @@ int ProcessPacket(int PacketSlot){
 void* ProcessPacketThread(void* v)
 {
 	int	PacketSlot;
-	
+
 	DEBUGPATH;
 
 	while (!Globals.Done) {
 		PacketSlot = PopFromPending();
+
 		if (PacketSlot != PACKET_NONE) {
 			ProcessPacket(PacketSlot);
 		} else {
@@ -243,13 +256,13 @@ void* ProcessPacketThread(void* v)
 * Poll the FD's to get packets
 *******************************/
 int MainLoopPoll(){
-	struct timeval	timeout;
-	int				result;
+	struct timeval		timeout;
+	int			result;
 	fd_set			set;
-	int				i;
-	int				highest;
-	int				PacketSlot;
-	
+	int			i;
+	int			highest;
+	int			PacketSlot;
+
 	DEBUGPATH;
 
 #ifdef DEBUG
@@ -258,36 +271,40 @@ int MainLoopPoll(){
 #endif
 
 	Globals.Done=FALSE;
+
 	while (!Globals.Done){
-		timeout.tv_sec=0;
-		timeout.tv_usec=IDLE_TIMEOUT;
-	
+		timeout.tv_sec = 0;
+		timeout.tv_usec = IDLE_TIMEOUT;
+
 		FD_ZERO(&set);
-		highest=-1;
-		for (i=0;i<Globals.NumInterfaces;i++){
+		highest = -1;
+
+		for (i = 0 ; i < Globals.NumInterfaces ; i++){
 			FD_SET(Globals.Interfaces[i].FD, &set);
-			if (Globals.Interfaces[i].FD>highest)
-				highest=Globals.Interfaces[i].FD;
+
+			if (Globals.Interfaces[i].FD > highest)
+				highest = Globals.Interfaces[i].FD;
 		}
+
 		highest++;
-			
+
 		result = select(highest, &set, NULL, NULL, &timeout);
+
 		if (result){
 #ifdef DEBUG
 			printf("A packet is waiting\n");
-#endif	
+#endif
 			/*pull the packets off*/
 			for (i=0;i<Globals.NumInterfaces;i++){
 				if (FD_ISSET(Globals.Interfaces[i].FD, &set)){
 #ifdef DEBUG
 					printf("Reading interface %s\n",Globals.Interfaces[i].Name);
-#endif				
+#endif
 					ReadPacket(i);
-				}	
+				}
 			}
-			
 			/*Now Process them*/
-			while( (PacketSlot=PopFromPending())!=-1 ){
+			while((PacketSlot=PopFromPending()) != -1){
 				if (!ProcessPacket(PacketSlot)){
 					printf("Couldn't process packet\n");
 				}
@@ -296,7 +313,6 @@ int MainLoopPoll(){
 			//printf("Calling the idle func\n");
 			IdleFunc();
 		}
-	
 	}
 
 	return TRUE;
@@ -308,7 +324,7 @@ int MainLoopPoll(){
 int MainLoopThreaded(){
 	int i;
 //	pthread_t	test_thread;
-	
+
 	DEBUGPATH;
 
 #ifdef DEBUG
@@ -316,19 +332,18 @@ int MainLoopThreaded(){
 #endif
 
 	Globals.Done=FALSE;
-	
+
 	/* start up the interface threads */
-	for (i=0;i<Globals.NumInterfaces;i++)
+	for (i = 0 ; i < Globals.NumInterfaces ; i++)
 		if (!StartInterfaceThread(i)){
 			printf("Couldn't start thread for interface\n");
 			return FALSE;
 		}
 
-#ifdef KEEP_LOGFILE_OPEN	
+#ifdef KEEP_LOGFILE_OPEN
 	/* start up the log files keeper thread */
 	pthread_create(&Globals.logThread, NULL, ProcessLogFilesThread, NULL);
 #endif
-
 	/* start up the first process packet thread */
 	//pthread_create(&test_thread, NULL, ProcessPacketThread, NULL);
 	ProcessPacketThread(NULL);
@@ -345,7 +360,7 @@ int MainLoop(){
 	DEBUGPATH;
 
 	if (!Globals.UseThreads){
-		for (i=0;i<Globals.NumInterfaces;i++){
+		for (i = 0 ; i < Globals.NumInterfaces ; i++){
 			if (!Globals.Interfaces[i].IsPollable){
 				printf("Error. All interfaces must be able to poll in single thread mode.\n");
 				return FALSE;
@@ -355,6 +370,6 @@ int MainLoop(){
 	}else{
 		return MainLoopThreaded();
 	}
-	
+
 	return FALSE;
 }

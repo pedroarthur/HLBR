@@ -160,47 +160,49 @@ typedef struct decoder_data {
 typedef struct packet_rec {
 	int			PacketSlot; /* position in the packet array */
 	unsigned int		PacketNum;  /* used to track the packet through the system */
-	
+
 	int			InterfaceNum;
 	int			TargetInterface;
-	
+
 	unsigned char*		RawPacket;
 	char			Pad[2];  /* to make word aligment work out on Solaris */
 	unsigned char		TypicalPacket[TYPICAL_PACKET_SIZE];
 	char			LargePacket;
 	int			PacketLen;
-	
+
 	unsigned char		RuleBits[MAX_RULES/8];
 	struct timeval		tv;
-	
+
 	DecoderData		DecoderInfo[MAX_DECODER_DEPTH];
+	int			DecodersUsed[MAX_DECODERS];
 	int			NumDecoderData;
+
 	int			BeginData;	/* first byte not decoded yet */
-	
+
 	/** true if we pass this one as is (route it), false to be dropped */
 	char			PassRawPacket; 
 	int			SaveCount;
 
 	/** where the packet is in the processing loop (see packet.h) */
 	char			Status;
-	
+
 	pthread_mutex_t		Mutex;
 	int			LockID;	
-	
+
 	struct port_pair*	Stream;
 } PacketRec;
 
 typedef struct interface_rec{
 	char		Name[MAX_INTERFACE_NAME_LEN];
-	int			ID;
-	int			Type;	/*defined in packet.h*/
-	int			Proto;
-	int			MTU;
-	int			FD;
+	int		ID;
+	int		Type;	/*defined in packet.h*/
+	int		Proto;
+	int		MTU;
+	int		FD;
 	char		IsPollable;
 	char		Role;
 	pthread_t	Thread;
-	int			ThreadID;
+	int		ThreadID;
 	void*		User;
 } InterfaceRec;
 
@@ -233,11 +235,11 @@ typedef struct test_rec{
 
 typedef struct module_rec{
 	char				Name[MAX_NAME_LEN];
-	int					ID;
-	int					DecoderID;
+	int				ID;
+	int				DecoderID;
 	char				Active;	/*true if anything actually uses it*/
 	
-	struct module_rec* Next;	
+	struct module_rec* Next;
 	
 	int (*ParseArg) (char* Arg);
 	void (*ModuleFunc) (int PacketSlot);
@@ -245,8 +247,8 @@ typedef struct module_rec{
 
 
 typedef struct decoder_rec{
-	char				Name[MAX_NAME_LEN];
-	int					ID;
+	char			Name[MAX_NAME_LEN];
+	int			ID;
 	unsigned char		DependencyMask[MAX_RULES/8];		
 	struct test_rec*	Tests;
 	struct module_rec*	Modules;
@@ -258,15 +260,15 @@ typedef struct decoder_rec{
 	void (*Free) (void *pointer);
 	int (*ConfigFunction) (FILE *fp);
 	
-	char				Active;	/*true if anything actually uses it*/
+	char			Active; /*true if anything actually uses it*/
 } DecoderRec;
 
 typedef struct action_item{
 	char				Name[MAX_NAME_LEN];
-	int					ID;
+	int				ID;
 	
 	int 	(*ActionFunc)(int RuleNum, int PacketSlot, void* Data);
-	int		(*MessageFunc)(char* Message, void* Data);
+	int	(*MessageFunc)(char* Message, void* Data);
 	void* 	(*ParseArgs)(char* Args);
 } ActionItem;
 
@@ -312,7 +314,7 @@ typedef struct route_rec{
 } RouteRec;
 
 typedef struct mangle_rec{
-	int					ID;
+	int				ID;
 	char				Name[MAX_NAME_LEN];
 	char				Active;
 	
@@ -323,20 +325,20 @@ typedef struct mangle_rec{
 typedef struct global_list{
 	NumList*	List;
 	char		Name[MAX_NAME_LEN];
-	int			Type;
+	int		Type;
 } GlobalList;
 
 typedef struct func_list{
-	int					(*Func) (void* Data);
-	void*				Data;
+	int			(*Func) (void* Data);
+	void*			Data;
 	struct func_list*	Next;
 } FuncList;
 
 typedef struct timer_rec{
 	char			InUse;
 	char			Name[MAX_NAME_LEN];
-	unsigned int	Interval;
-	int				LastTime;
+	unsigned int		Interval;
+	int			LastTime;
 	void*			User;
 	/*return TRUE to repeat the timer*/
 	int (*TimerFunc) (int TimerID, int Time, void* User);
@@ -348,7 +350,7 @@ typedef struct global_vars{
 	int			SensorID;
 
 	char			Done;
-	char			UseThreads;	
+	char			UseThreads;
 	char			ParseOnly;
 	char*			ConfigFilename;
 	char*			RulesFilename;
@@ -357,60 +359,60 @@ typedef struct global_vars{
 	int			PacketLimit;
 	MessageItem*		AlertHeader;
 	unsigned int		AlertCount;
-	
+
 	PacketRec		Packets[MAX_PACKETS];
 	int			IdleCount;
 	int			PendingCount;
 	int			SavedCount;
 	int			AllocatedCount;
 	int			ProcessingCount;
-	
+
 	RuleRec			Rules[MAX_RULES];
 	int			NumRules;
-	
+
 	InterfaceRec		Interfaces[MAX_INTERFACES];
 	int			NumInterfaces;
-	
+
 	DecoderRec		Decoders[MAX_DECODERS];
 	int			NumDecoders;
 	int			DecoderRoot;
-	
+
 	ModuleRec		Modules[MAX_MODULES];
 	int			NumModules;
-	
+
 	TestRec			Tests[MAX_TESTS];
 	int			NumTests;	
-	
+
 	ActionItem		ActionItems[MAX_ACTION_ITEMS];
 	int			NumActionItems;
-	
+
 	ActionRec		Actions[MAX_ACTIONS];
 	int			NumActions;
-	
+
 	RouteRec		Routes[MAX_ACTIONS];
 	int			NumRoutes;
 
 	MangleRec		Mangles[MAX_ACTIONS];
 	int			NumMangles;
-	
+
 	GlobalList		Lists[MAX_LISTS];
 	int			NumLists;
 
 	TimerRec		Timers[MAX_TIMERS];
 
-	FuncList*		ShutdownFuncs;	
-	
+	FuncList*		ShutdownFuncs;
+
 	/*statistical counts*/
-	int				PacketsPerSec;
-	int				TCPPerSec;
-	int				UDPPerSec;
+	int			PacketsPerSec;
+	int			TCPPerSec;
+	int			UDPPerSec;
 
 	/* logging flags */
-	unsigned char			logSession_StartEnd;
-	unsigned char			logSession_All;
-	LogFileRec			logSessionFile;
+	unsigned char		logSession_StartEnd;
+	unsigned char		logSession_All;
+	LogFileRec		logSessionFile;
 #ifdef KEEP_LOGFILE_OPEN
-	pthread_t			logThread;
+	pthread_t		logThread;
 #endif
 } GlobalVars;
 
@@ -429,11 +431,11 @@ typedef struct global_vars{
 #define TIMEOUT_SAVED_2		7002
 #define SAVE_PACKET_1		8001
 #define SAVE_PACKET_2		8002
-#define GET_SAVED_1			9001
-#define GET_SAVED_2			9002
-#define GET_SAVED_3			9003
+#define GET_SAVED_1		9001
+#define GET_SAVED_2		9002
+#define GET_SAVED_3		9003
 #define UNLOCK_SAVED_1		10001
-#define FRAG_LOCK_1			11001
+#define FRAG_LOCK_1		11001
 
 int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID);
 int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID);

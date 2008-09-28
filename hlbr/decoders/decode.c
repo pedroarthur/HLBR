@@ -93,7 +93,7 @@ int CreateDecoder(char* Name)
 	}
 
 	if (Globals.NumDecoders == MAX_DECODER_DEPTH) {
-		sprintf(stderr, "Out of room for decoders\n");
+		fprintf(stderr, "Out of room for decoders\n");
 		return DECODER_NONE;
 	}
 	
@@ -275,15 +275,18 @@ int Decode(int DecoderID, int PacketSlot)
 
 	/* apply this decoder */
 	p->DecoderInfo[DecoderID].Data = Globals.Decoders[DecoderID].DecodeFunc(PacketSlot);
+
 	if (p->DecoderInfo[DecoderID].Data) {
 		if (!p->DecoderInfo[DecoderID].Data) {
 			printf("What the hell is going on?\n");
 		}
+
 		p->DecoderInfo[DecoderID].DecoderID = DecoderID; // now this is redundant...
-		p->NumDecoderData++;
+		p->DecodersUsed[p->NumDecoderData++] = DecoderID;
 
 		/* apply the tests */
 		test = Globals.Decoders[DecoderID].Tests;
+
 		while (test) {
 			if (test->Active)
 				if (test->TestFunc) 
@@ -299,11 +302,11 @@ int Decode(int DecoderID, int PacketSlot)
 					module->ModuleFunc(PacketSlot);
 			module=module->Next;
 		}
- 	} else {
+	} else {
 		// mark all the rules that depend on this decoder as inactive
 		NotAndBitFields(p->RuleBits, Globals.Decoders[DecoderID].DependencyMask, p->RuleBits, Globals.NumRules);
 		return TRUE;
-	}		
+	}
 
 	// check to see if there are any rules left
 	if (!BitFieldIsEmpty(p->RuleBits, Globals.NumRules)) {
@@ -321,7 +324,7 @@ int Decode(int DecoderID, int PacketSlot)
 	child = Globals.Decoders[DecoderID].Children;
 	while (child) {
 		if (!Decode(child->ID, PacketSlot)) {
-			sprintf(stderr, "Decoder %s failed\n",child->Name);
+			fprintf(stderr, "Decoder %s failed\n", child->Name);
 		}
 		child = child->NextChild;
 	}

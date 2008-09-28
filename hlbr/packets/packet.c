@@ -325,15 +325,15 @@ int WritePacket(int PacketSlot){
 * ReadPacket request.
 ******************************************/
 int AddPacketToPending(int PacketSlot){
-  DEBUGPATH;
+	DEBUGPATH;
 
 	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
-	
-	Globals.Packets[PacketSlot].Status=PACKET_STATUS_PENDING;
-	LastPendingSlot=PacketSlot;
+
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
+	LastPendingSlot = PacketSlot;
 	Globals.PendingCount++;
 	Globals.AllocatedCount--;
-	
+
 	hlbr_mutex_unlock(&PacketMutex);
 
 	return TRUE;
@@ -347,23 +347,25 @@ int PopFromPending(){
 	int		PacketSlot;
 	int		i;
 
-DEBUGPATH;
-	
+	DEBUGPATH;
+
 	PacketSlot=PACKET_NONE;
 	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
-	
-	for (i=0;i<MAX_PACKETS;i++){
-		if (Globals.Packets[i].Status==PACKET_STATUS_PENDING){
-			Globals.Packets[i].Status=PACKET_STATUS_PROCESSING;
-			hlbr_mutex_unlock(&PacketMutex);
+
+	for (i = 0 ; i < MAX_PACKETS ; i++){
+		if (Globals.Packets[i].Status == PACKET_STATUS_PENDING){
+			Globals.Packets[i].Status = PACKET_STATUS_PROCESSING;
+
 			Globals.PendingCount--;
 			Globals.ProcessingCount++;
+
+			hlbr_mutex_unlock(&PacketMutex);
 			return i;
 		}
 	}
-	
+
 	hlbr_mutex_unlock(&PacketMutex);
-	
+
 	return PACKET_NONE;
 }
 
@@ -372,66 +374,68 @@ DEBUGPATH;
 ********************************************/
 int GetEmptyPacket(){
 	PacketRec*	Packet;
-	int			i;
+	int		i;
 
 	DEBUGPATH;
 
+	Packet=NULL;
+
 	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
 
-	Packet=NULL;
-	for (i=LastFreeSlot; i<MAX_PACKETS;i++){
-		if (Globals.Packets[i].Status==PACKET_STATUS_IDLE){
+	for (i = LastFreeSlot; i < MAX_PACKETS ; i++){
+		if (Globals.Packets[i].Status == PACKET_STATUS_IDLE){
 #ifdef DEBUG
 			printf("Found IDLE packet in slot %i\n",i);
-#endif		
-			Globals.Packets[i].SaveCount=0;
-			Globals.Packets[i].Status=PACKET_STATUS_ALLOCATED;
-			Packet=&Globals.Packets[i];
-			Packet->PacketSlot=i;
+#endif
+			Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
+			Packet = Packet = &Globals.Packets[i];
+
+			Globals.AllocatedCount++;
+			Globals.IdleCount--;
+
 			break;
 		}
 	}
 
-	if (!Packet)	
-	for (i=0; i<LastFreeSlot;i++){
-		if (Globals.Packets[i].Status==PACKET_STATUS_IDLE){
+	if (!Packet)
+		for (i = 0 ; i < LastFreeSlot ; i++){
+			if (Globals.Packets[i].Status==PACKET_STATUS_IDLE){
 #ifdef DEBUG
-			printf("Found IDLE packet in slot %i\n",i);
-#endif		
-			Globals.Packets[i].SaveCount=0;
-			Globals.Packets[i].Status=PACKET_STATUS_PENDING;
-			Packet=&Globals.Packets[i];
-			Packet->PacketSlot=i;
-			break;
+				printf("Found IDLE packet in slot %i\n",i);
+#endif
+				Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
+				Packet = Packet = &Globals.Packets[i];
+
+				Globals.AllocatedCount++;
+				Globals.IdleCount--;
+
+				break;
+			}
 		}
-	}
+
+	hlbr_mutex_unlock(&PacketMutex);
 
 	if (!Packet){
 #ifdef DEBUG
 		printf("There were no free packets\n");
-#endif	
-		hlbr_mutex_unlock(&PacketMutex);
+#endif
 		return PACKET_NONE;
 	}
-	
-	/*initialize the packet*/
-	Packet->PacketLen=0;
-	memset(Packet->RuleBits, 0xFF, MAX_RULES/8);
-	Packet->tv.tv_sec=0;
-	Packet->tv.tv_usec=0;
-	Packet->NumDecoderData=0;
-	Packet->PassRawPacket=TRUE;
-	Packet->PacketNum=CurPacketNum++;
-	Packet->PacketSlot=i;
-	Packet->RawPacket=Packet->TypicalPacket;
-	Packet->LargePacket=FALSE;
-	
-	Globals.AllocatedCount++;
-	Globals.IdleCount--;
 
-	hlbr_mutex_unlock(&PacketMutex);
-	
-	return i;	
+	/*initialize the packet*/
+	memset(Packet->RuleBits, 0xFF, MAX_RULES/8);
+	Packet->PacketLen = 0;
+	Packet->SaveCount = 0;
+	Packet->tv.tv_sec = 0;
+	Packet->tv.tv_usec = 0;
+	Packet->NumDecoderData = 0;
+	Packet->PassRawPacket = TRUE;
+	Packet->PacketNum = CurPacketNum++;
+	Packet->PacketSlot = i;
+	Packet->RawPacket = Packet->TypicalPacket;
+	Packet->LargePacket = FALSE;
+
+	return i;
 }
 
 /************************************
@@ -441,39 +445,40 @@ int GetEmptyPacket(){
 void ReturnEmptyPacket(int PacketSlot){
 	int 		i;
 	PacketRec*	p;
-	
+
 	DEBUGPATH;
 
 	hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
-	
-	if (Globals.Packets[PacketSlot].SaveCount<1){
+
+	if (Globals.Packets[PacketSlot].SaveCount < 1){
 		p=&Globals.Packets[PacketSlot];
-	
+
 		if  (p->LargePacket){
 			free(p->RawPacket);
-			p->RawPacket=p->TypicalPacket;
-			p->LargePacket=FALSE;
+			p->RawPacket = p->TypicalPacket;
+			p->LargePacket = FALSE;
 		}
-	
-		for (i=0;i<p->NumDecoderData;i++){
-			if (p->DecoderInfo[i].Data)
-				Globals.Decoders[p->DecoderInfo[i].DecoderID].Free (p->DecoderInfo[i].Data);
-				//free(p->DecoderInfo[i].Data);
-			p->DecoderInfo[i].Data=NULL;
+
+		for (i = 0 ; i < p->NumDecoderData ; i++){
+			if (p->DecoderInfo[p->DecodersUsed[i]].Data)
+				Globals.Decoders[p->DecodersUsed[i]].Free (p->DecoderInfo[p->DecodersUsed[i]].Data);
+
+			p->DecoderInfo[p->DecodersUsed[i]].Data=NULL;
 		}
-		
+
 		switch(Globals.Packets[PacketSlot].Status){
-		case PACKET_STATUS_ALLOCATED:
-			Globals.AllocatedCount--;
-			break;
-		case PACKET_STATUS_PROCESSING:
-			Globals.ProcessingCount--;
-			break;
+			case PACKET_STATUS_ALLOCATED:
+				Globals.AllocatedCount--;
+				break;
+			case PACKET_STATUS_PROCESSING:
+				Globals.ProcessingCount--;
+				break;
 		}
+
 		Globals.IdleCount++;
-		Globals.Packets[PacketSlot].Status=PACKET_STATUS_IDLE;		
+		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
 	}else{
-		Globals.Packets[PacketSlot].Status=PACKET_STATUS_SAVED;
+		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
 		Globals.ProcessingCount--;
 		Globals.SavedCount++;
 	}
@@ -487,7 +492,7 @@ void ReturnEmptyPacket(int PacketSlot){
 	printf("  %i Saved\n",Globals.SavedCount);
 	printf("  %i Allocated\n",Globals.AllocatedCount);
 	printf("  %i Processing\n",Globals.ProcessingCount);
-#endif	
+#endif
 }
 
 /**
@@ -503,41 +508,40 @@ int StartInterfaceThread(int InterfaceID)
 	return FALSE;
 #else
 	Interface = &Globals.Interfaces[InterfaceID];
-	
+
 	switch(Interface->Type) {
-#ifdef _LINUX_	
-	case PACKET_TYPE_LINUX_RAW:
-		return LoopThreadLinuxRaw(InterfaceID);
+#ifdef _LINUX_
+		case PACKET_TYPE_LINUX_RAW:
+			return LoopThreadLinuxRaw(InterfaceID);
 #endif
-#ifdef _OBSD_		
-	case PACKET_TYPE_OBSD_BPF:
-		return LoopThreadOBSDBPF(InterfaceID);		
+#ifdef _OBSD_
+		case PACKET_TYPE_OBSD_BPF:
+			return LoopThreadOBSDBPF(InterfaceID);
 #endif
-#ifdef _OSX_		
-	case PACKET_TYPE_OSX_BPF:
-		return LoopThreadOSXBPF(InterfaceID);		
+#ifdef _OSX_
+		case PACKET_TYPE_OSX_BPF:
+			return LoopThreadOSXBPF(InterfaceID);
 #endif
-	case PACKET_TYPE_TCPDUMP:
-		return LoopThreadTCPDump(InterfaceID);		
-#ifdef _SOLARIS_		
-	case PACKET_TYPE_SOLARIS_DLPI:
-		return LoopThreadSolarisDLPI(InterfaceID);		
-#endif		
-	default:
-		printf("I can't start a thread for that interface type\n");
-		return FALSE;
+		case PACKET_TYPE_TCPDUMP:
+			return LoopThreadTCPDump(InterfaceID);
+#ifdef _SOLARIS_
+		case PACKET_TYPE_SOLARIS_DLPI:
+			return LoopThreadSolarisDLPI(InterfaceID);
+#endif
+		default:
+			printf("I can't start a thread for that interface type\n");
+			return FALSE;
 	}
 
 	return TRUE;
-#endif	
+#endif
 }
 
 /**********************************************
 * Check to see if a rule is still active
 **********************************************/
 inline int RuleIsActive(int PacketSlot, int RuleNum){
-
-  DEBUGPATH;
+	DEBUGPATH;
 
 	return GetBit(Globals.Packets[PacketSlot].RuleBits, Globals.NumRules, RuleNum);	
 }
@@ -546,11 +550,10 @@ inline int RuleIsActive(int PacketSlot, int RuleNum){
 * Mark a rule as no longer active
 **********************************************/
 inline int SetRuleInactive(int PacketSlot, int RuleNum){
+	DEBUGPATH;
 
-  DEBUGPATH;
-	
 	SetBit(Globals.Packets[PacketSlot].RuleBits, Globals.NumRules, RuleNum, 0);
-	
+
 	return TRUE;
 }
 
@@ -562,8 +565,8 @@ int GetInterfaceByName(char* Name){
 
 	DEBUGPATH;
 
-	for (i=0;i<Globals.NumInterfaces;i++){
-		if (strcasecmp(Name, Globals.Interfaces[i].Name)==0){
+	for (i = 0 ; i < Globals.NumInterfaces ; i++){
+		if (strcasecmp(Name, Globals.Interfaces[i].Name) == 0){
 			return i;
 		}
 	}

@@ -38,22 +38,26 @@ int CallShutdownHandlers();
 int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID, int Time, void* User), void* User){
 	int	TimerID;
 
-	if (!TimerFunc) return TIMER_NONE;
-	if (!Name) return TIMER_NONE;
-	if (Interval==0) return TIMER_NONE;
+	if (!TimerFunc)
+		return TIMER_NONE;
+	if (!Name)
+		return TIMER_NONE;
+	if (Interval==0)
+		return TIMER_NONE;
 
-	for (TimerID=0;TimerID<MAX_TIMERS;TimerID++){
-		if (Globals.Timers[TimerID].InUse==FALSE) break;
-	}
+	for ( TimerID = 0 ; TimerID < MAX_TIMERS ; TimerID++)
+		if (Globals.Timers[TimerID].InUse==FALSE)
+			break;
 	
-	if (TimerID==MAX_TIMERS) return TIMER_NONE;
+	if (TimerID == MAX_TIMERS)
+		return TIMER_NONE;
 
-	Globals.Timers[TimerID].InUse=TRUE;
+	Globals.Timers[TimerID].InUse = TRUE;
 	snprintf(Globals.Timers[TimerID].Name, MAX_NAME_LEN, "%s", Name);
-	Globals.Timers[TimerID].Interval=Interval;
-	Globals.Timers[TimerID].LastTime=0;
-	Globals.Timers[TimerID].User=User;
-	Globals.Timers[TimerID].TimerFunc=TimerFunc;
+	Globals.Timers[TimerID].Interval = Interval;
+	Globals.Timers[TimerID].LastTime = 0;
+	Globals.Timers[TimerID].User = User;
+	Globals.Timers[TimerID].TimerFunc = TimerFunc;
 
 	return TimerID;
 }
@@ -73,7 +77,7 @@ void PrintVersion() {
 **************************************/
 void PrintUsage(){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	PrintVersion();
 
@@ -121,24 +125,27 @@ int hlbr_daemon(int nochdir, int noclose){
 	}
 #else	/* !HAS_DAEMON */
 	switch (fork()){
-	case -1:
-		printf("fork() failed\n");
-		exit(1);
-	case 0:
-		break;
-	default:
-		exit(0);
+		case -1:
+			printf("fork() failed\n");
+			exit(1);
+		case 0:
+			break;
+		default:
+			exit(0);
 	}
 	
-	if (setsid() == -1) exit(0);
+	if (setsid() == -1)
+		exit(0);
+
 	if (!noclose && (fd=open("/dev/null", O_RDWR, 0))!=-1){
 		dup2(fd, 0);
 		dup2(fd, 1);
 		dup2(fd, 2);
-		if (fd>2) close(fd);
+
+		if (fd>2)
+			close(fd);
 	}
 #endif	/* HAS_DAEMON */
-
 	return TRUE;
 }
 
@@ -146,7 +153,7 @@ int hlbr_daemon(int nochdir, int noclose){
 * Make sense of the command line
 ************************************/
 int ParseArgs(int argc, char **argv){
-	int 	c;
+	int c;
 	
 	DEBUGPATH;
 
@@ -172,46 +179,52 @@ int ParseArgs(int argc, char **argv){
 		c = getopt_long (argc, argv, HOG_PARSEARGS_FLAGS,
                         long_options, &option_index);
 #endif						
-		if (c == -1) break;
+		if (c == -1)
+			break;
 
 		switch (c) {
-		case 'c':
-			printf("Config file is %s\n",optarg);
+			case 'c':
+				printf("Config file is %s\n",optarg);
 
-			Globals.ConfigFilename=(char*)calloc(strlen(optarg)+1,sizeof(char));
-			memcpy(Globals.ConfigFilename, optarg, strlen(optarg));
-			break;
-		case 'l':
-			Globals.LogDir=(char*)calloc(strlen(optarg)+2,sizeof(char));
-			memcpy(Globals.LogDir, optarg, strlen(optarg));
-			if (Globals.LogDir[strlen(Globals.LogDir)-1]!='/'){
-				Globals.LogDir[strlen(Globals.LogDir)]='/';
-			}
-			printf("Log directory is %s\n",Globals.LogDir);			
-			break;			
-		case 'r':
-			printf("Rules file is %s\n",optarg);
+				Globals.ConfigFilename=(char*)calloc(strlen(optarg)+1,sizeof(char));
+				memcpy(Globals.ConfigFilename, optarg, strlen(optarg));
 
-			Globals.RulesFilename=(char*)calloc(strlen(optarg)+1,sizeof(char));
-			memcpy(Globals.RulesFilename, optarg, strlen(optarg));			
-			break;	
-		case 't':
-			Globals.ParseOnly=TRUE;
-			break;
-		case 'n':
-			Globals.PacketLimit=atoi(optarg);
-			break;
-		case 'd':
-			hlbr_daemon(0,0);
-			break;
-		case 'h':
-			PrintUsage();
-			exit(0);
-		case 'v':
-			PrintVersion();
-			exit(0);
-		default:
-			printf("Unknown option\n");	
+				break;
+			case 'l':
+				Globals.LogDir=(char*)calloc(strlen(optarg)+2,sizeof(char));
+				memcpy(Globals.LogDir, optarg, strlen(optarg));
+
+				if (Globals.LogDir[strlen(Globals.LogDir)-1]!='/'){
+					Globals.LogDir[strlen(Globals.LogDir)]='/';
+				}
+
+				printf("Log directory is %s\n",Globals.LogDir);
+
+				break;
+			case 'r':
+				printf("Rules file is %s\n",optarg);
+
+				Globals.RulesFilename=(char*)calloc(strlen(optarg)+1,sizeof(char));
+				memcpy(Globals.RulesFilename, optarg, strlen(optarg));
+
+				break;
+			case 't':
+				Globals.ParseOnly=TRUE;
+				break;
+			case 'n':
+				Globals.PacketLimit=atoi(optarg);
+				break;
+			case 'd':
+				hlbr_daemon(0,0);
+				break;
+			case 'h':
+				PrintUsage();
+				exit(0);
+			case 'v':
+				PrintVersion();
+				exit(0);
+			default:
+				printf("Unknown option\n");
 		}	
 	}
 
@@ -232,7 +245,9 @@ int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID){
 #else
 	int	result;
 	
-	if (!Globals.UseThreads) return TRUE;	
+	if (!Globals.UseThreads)
+		return TRUE;
+
 	result = pthread_mutex_lock(mutex);
 #ifdef DEBUGLOCKS	
 	*LockID=ID;
@@ -250,8 +265,10 @@ int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID){
 	return TRUE;
 #else
 	int result;
-	
-	if (!Globals.UseThreads) return TRUE;
+
+	if (!Globals.UseThreads)
+		return TRUE;
+
 	result = pthread_mutex_trylock(mutex);
 #ifdef DEBUGLOCKS	
 	*LockID=ID;
@@ -268,7 +285,9 @@ int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
 #ifndef HAS_THREADS
 	return TRUE;
 #else
-	if (!Globals.UseThreads) return TRUE;
+	if (!Globals.UseThreads)
+		return TRUE;
+
 	return pthread_mutex_unlock(mutex);
 #endif
 }
@@ -278,20 +297,21 @@ int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
 *************************************/
 void HandleSignal(int signal){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	switch (signal) {
-	case SIGINT:
-	case SIGQUIT:
-	case SIGTERM:
-		printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());
-		
-		// Removing the pid file
-		if (remove(Globals.PidFilename))
-			fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
+		case SIGINT:
+		case SIGQUIT:
+		case SIGTERM:
+			printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());
+			
+			// Removing the pid file
+			if (remove(Globals.PidFilename))
+				fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
 
-		Globals.Done = TRUE;
-		break;
+			Globals.Done = TRUE;
+
+			break;
 	}
 }
 
@@ -301,6 +321,7 @@ void HandleSignal(int signal){
 int main(int argc, char**argv){
 
 	bzero(&Globals, sizeof(GlobalVars));
+
 	Globals.IdleCount=MAX_PACKETS;
 	Globals.PacketLimit=-1;
 
@@ -349,6 +370,7 @@ int main(int argc, char**argv){
 		printf("Error loading rules file\n");
 		return FALSE;
 	}
+
 	printf("Loaded %i rules\n",Globals.NumRules);
 
 	if (!TestsFinishSetup()){
@@ -356,8 +378,8 @@ int main(int argc, char**argv){
 		return FALSE;
 	}
 
-			
-	if (Globals.ParseOnly) return TRUE;
+	if (Globals.ParseOnly)
+		return TRUE;
 
 	if (!OpenInterfaces()){
 		printf("Error initializing interfaces\n");
@@ -374,7 +396,7 @@ int main(int argc, char**argv){
 	Globals.UseThreads=FALSE;
 #ifdef DEBUG
 	printf("No Thread Suppport. Forcing Non-Threaded Mode.\n");
-#endif	
+#endif
 #endif
 
 	MainLoop();
@@ -393,10 +415,11 @@ int GetListByName(char* Name){
 
 	DEBUGPATH;
 
-	for (i=0;i<Globals.NumLists;i++){
-		if (strcasecmp(Globals.Lists[i].Name, Name)==0) return i;
+	for (i = 0 ; i < Globals.NumLists ; i++){
+		if (strcasecmp(Globals.Lists[i].Name, Name)==0)
+			return i;
 	}
-	
+
 	return LIST_NONE;
 
 }
@@ -408,20 +431,24 @@ int GetListByName(char* Name){
 int AddShutdownHandler(int (*func)(void* data), void* data){
 	FuncList*	f;
 	FuncList*	this;
-	
+
 	DEBUGPATH;
 
-	f=calloc(sizeof(FuncList),1);
-	f->Func=func;
-	f->Data=data;
+	f = calloc(sizeof(FuncList), 1);
+	f->Func = func;
+	f->Data = data;
 
 	if (!Globals.ShutdownFuncs){
-		Globals.ShutdownFuncs=f;
+		Globals.ShutdownFuncs = f;
 		return TRUE;
 	}else{
 		this=Globals.ShutdownFuncs;
-		while (this->Next) this=this->Next;
+
+		while (this->Next)
+			this=this->Next;
+
 		this->Next=f;
+
 		return TRUE;
 	}
 }
@@ -435,12 +462,14 @@ int CallShutdownHandlers(){
 	DEBUGPATH;
 
 	this=Globals.ShutdownFuncs;
+
 	while (this){
 		if (!this->Func(this->Data)){
 			printf("Shutdown handler failed\n");
 		}
+
 		this=this->Next;
 	}
-	
+
 	return TRUE;
 }

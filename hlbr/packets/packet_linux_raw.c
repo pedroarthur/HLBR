@@ -105,7 +105,7 @@ int OpenInterfaceLinuxRaw(int InterfaceID){
 	if (Interface->MTU==-1) Interface->MTU=1500;
 
 	Interface->IsPollable=TRUE;
-	
+
 	return TRUE;
 }
 
@@ -114,19 +114,20 @@ int OpenInterfaceLinuxRaw(int InterfaceID){
 **********************************************/
 int ReadPacketLinuxRaw(int InterfaceID){
 	int 			count;
-	InterfaceRec*	Interface;
-	int				PacketSlot;
+	InterfaceRec*		Interface;
+	int			PacketSlot;
 	PacketRec*		p;
-#ifdef DEBUG	
-	int				i;
-#endif	
+#ifdef DEBUG
+	int			i;
+#endif
 	
 	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
-	if ( (PacketSlot=GetEmptyPacket())==-1){
+
+	if ((PacketSlot=GetEmptyPacket()) == -1){
 		printf("Unable to allocate packet for reading\n");
-#ifdef DEBUG		
+#ifdef DEBUG
 		printf("Packets are in the following states:\n");
 		for (i=0;i<MAX_PACKETS;i++){
 			switch (Globals.Packets[i].Status){
@@ -135,40 +136,41 @@ int ReadPacketLinuxRaw(int InterfaceID){
 				break;
 			case PACKET_STATUS_PENDING:
 				printf("%i: pending\n",i);
-				break;				
+				break;
 			case PACKET_STATUS_SAVED:
 				printf("%i: saved\n",i);
-				break;				
+				break;
 			case PACKET_STATUS_ALLOCATED:
 				printf("%i: allocated\n",i);
-				break;				
+				break;
 			case PACKET_STATUS_PROCESSING:
 				printf("%i: processing\n",i);
-				break;				
+				break;
 			default:
 				printf("%i: unknown(%i)\n",i, Globals.Packets[i].Status);
 			}
 		}
-#endif			
-		return FALSE;		
-	}	
+#endif
+		return FALSE;
+	}
 
-	
 	p=&Globals.Packets[PacketSlot];
-	
-	p->InterfaceNum=InterfaceID;
+
+	p->InterfaceNum = InterfaceID;
 
 	count = read(Interface->FD, (char*)p->RawPacket, TYPICAL_PACKET_SIZE-1);
-	if (count==-1){
+
+	if (count == -1){
 #ifdef DEBUG	
 		printf("Failed to read packet. FD %i\n", Interface->FD);
-#endif		
+#endif
 		ReturnEmptyPacket(PacketSlot);
 		return FALSE;
 	}
-	p->PacketLen=count;
-	
-	if (ioctl(Interface->FD, SIOCGSTAMP, &p->tv)==-1){
+
+	p->PacketLen = count;
+
+	if (ioctl(Interface->FD, SIOCGSTAMP, &p->tv) == -1){
 #ifdef DEBUG	
 		printf("Failed to get timestamp\n");
 #endif
@@ -214,10 +216,11 @@ void* LinuxRawLoopFunc(void* v){
 	DEBUGPATH;
 
 	InterfaceID=(int)v;
+
 	while (!Globals.Done){
 		ReadPacketLinuxRaw(InterfaceID);
 	}
-	
+
 	return NULL;
 }
 
