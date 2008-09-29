@@ -388,7 +388,7 @@ int GetEmptyPacket(){
 			printf("Found IDLE packet in slot %i\n",i);
 #endif
 			Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
-			Packet = Packet = &Globals.Packets[i];
+			Packet = &Globals.Packets[i];
 
 			Globals.AllocatedCount++;
 			Globals.IdleCount--;
@@ -404,7 +404,7 @@ int GetEmptyPacket(){
 				printf("Found IDLE packet in slot %i\n",i);
 #endif
 				Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
-				Packet = Packet = &Globals.Packets[i];
+				Packet = &Globals.Packets[i];
 
 				Globals.AllocatedCount++;
 				Globals.IdleCount--;
