@@ -323,7 +323,6 @@ int MainLoopPoll(){
 *******************************/
 int MainLoopThreaded(){
 	int i;
-	pthread_t *t;
 
 	DEBUGPATH;
 
@@ -347,10 +346,10 @@ int MainLoopThreaded(){
 
 #ifdef MTHREADS
 	if (Globals.UseThreads - 1 > 0) {
-		t = (pthread_t *) malloc ((Globals.UseThreads - 1) * sizeof(pthread_t));
+		Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads - 1) * sizeof(pthread_t));
 
 		for (i = 0 ; i < Globals.UseThreads - 1 ; i++)
-			pthread_create (&t[i], NULL, ProcessPacketThread, NULL);
+			pthread_create (&Globals.Threads[i], NULL, ProcessPacketThread, NULL);
 	}
 #endif
 

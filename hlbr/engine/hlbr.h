@@ -351,6 +351,9 @@ typedef struct global_vars{
 
 	char			Done;
 	char			UseThreads;
+#ifdef MTHREADS
+	pthread_t*		Threads;
+#endif
 	char			ParseOnly;
 	char*			ConfigFilename;
 	char*			RulesFilename;
