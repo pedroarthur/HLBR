@@ -2,6 +2,7 @@
 
  * BUGFIX: Packet allocation status in GetEmptyPacket at packet.c (PAJ)
  * BUGFIX: Memory leak in the new decoder data indexing schema (PAJ)
+ * BUGFIX: Log file being open two times and not been kept open (PAJ)
  * PacketMutex optmization (PAJ)
  * New decoder data indexing schema (ABA)
  * Multi-threaded decoding (PAJ)

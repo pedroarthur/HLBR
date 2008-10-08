@@ -244,20 +244,20 @@ void* DecodeIPDefrag(int PacketSlot){
 		unsigned char	proto;
 	};
 
-	CacheItems*			CI;	
+	CacheItems*		CI;
 	IPDefragData*		data=NULL;
-	IPData*				idata;
-	int					flags;
-	int					offset;
+	IPData*			idata;
+	int			flags;
+	int			offset;
 	struct defrag_key	Key;
-	
-	PacketRec*			ThisPacket;
+
+	PacketRec*		ThisPacket;
 	struct defrag_item	Frags[128];
-	int					NumFrags;
-	int					i;
-	
-	PacketRec*			p;
-	
+	int			NumFrags;
+	int			i;
+
+	PacketRec*		p;
+
 	DEBUGPATH;
 
 #ifdef DEBUG
@@ -271,16 +271,16 @@ void* DecodeIPDefrag(int PacketSlot){
 		printf("Failed to get ip header data\n");
 		return NULL;
 	}
-	
+
 	flags=ntohs(idata->Header->frag_off) / 8192;
 	offset=ntohs(idata->Header->frag_off) & 0x1FFF;
-	
+
 	if ( (offset>0) || (flags & FRAG_FLAG_MORE) ){
-#ifdef DEBUG	
+#ifdef DEBUG
 		printf("This is a fragment\n");
-#endif	 
+#endif
 		p->PassRawPacket=FALSE;
-#ifdef DEBUG		
+#ifdef DEBUG
 		if (offset==0){
 			printf("This is the first Fragment\n");
 		}else{
@@ -292,15 +292,14 @@ void* DecodeIPDefrag(int PacketSlot){
 			}
 		}
 #endif
-
 		Key.IPID=ntohs(idata->Header->id);
 		Key.saddr=idata->Header->saddr;
 		Key.daddr=idata->Header->daddr;
 		Key.proto=idata->Header->protocol;
-		
+
 		printf("ID is %u\n",ntohs(idata->Header->id));
 		printf("Proto is %u\n",idata->Header->protocol);
-		
+
 		/*check to see if we have all the pieces*/
 		hlbr_mutex_lock(&FragMutex, FRAG_LOCK_1, &FragLockID);
 		CI=CacheGet(FragCache, (unsigned char*)&Key, sizeof(Key), p->tv.tv_sec);
@@ -318,10 +317,10 @@ void* DecodeIPDefrag(int PacketSlot){
 				Frags[0].more=FALSE;
 			}				
 			NumFrags=1;
-#ifdef DEBUG			
+#ifdef DEBUG
 			printf("This frag %i-%i\n",Frags[0].begin, Frags[0].end);
-#endif			
-		
+#endif
+
 			for (i=0;i<CI->NumItems;i++){
 				ThisPacket=&Globals.Packets[*(int*)CI->Items[i].Data];
 				if (!GetDataByID(ThisPacket->PacketSlot, IPDecoderID, (void**)&Frags[NumFrags].idata)){
@@ -341,7 +340,7 @@ void* DecodeIPDefrag(int PacketSlot){
 				}				
 				NumFrags++;
 			}
-		
+
 			if (!SortFragArray(Frags, NumFrags)){
 				/*send this packet off to the cache*/
 				/*to wait for the rest of the pieces*/
@@ -350,7 +349,7 @@ void* DecodeIPDefrag(int PacketSlot){
 				Globals.Packets[PacketSlot].SaveCount++;
 #ifdef DEBUG
 				printf("Still more packets\n");
-#endif								
+#endif
 			}else{
 				/*tell the engine we're done with these packets*/
 				RebuildPacket(Frags, NumFrags);
@@ -363,7 +362,7 @@ void* DecodeIPDefrag(int PacketSlot){
 				CacheDelKey(FragCache, (unsigned char*)&Key, sizeof(struct defrag_key), Globals.Packets[PacketSlot].tv.tv_sec);
 #ifdef DEBUG
 				printf("Packet was rebuilt\n");
-#endif				
+#endif
 			}
 		}else{	
 			printf("Adding slot %i\n",PacketSlot);		
@@ -371,7 +370,7 @@ void* DecodeIPDefrag(int PacketSlot){
 			Globals.Packets[PacketSlot].SaveCount++;
 #ifdef DEBUG
 			printf("First piece\n");
-#endif											
+#endif
 		}
 		hlbr_mutex_unlock(&FragMutex);
 	}else{

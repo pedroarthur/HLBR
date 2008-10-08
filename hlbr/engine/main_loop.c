@@ -23,6 +23,14 @@ extern GlobalVars	Globals;
 extern int		TCPDecoderID;
 extern int		UDPDecoderID;
 
+#ifdef MTHREADS
+pthread_mutex_t		StatsMutex;
+int			StatsLockID;
+
+pthread_mutex_t		PLimitMutex;
+int			PLimitLockID;
+#endif
+
 /************************************
 * Called whenever hlbr is idle
 ************************************/
@@ -171,6 +179,9 @@ int ProcessPacket(int PacketSlot){
 
 	DEBUGPATH;
 
+#ifdef MTHREADS
+	hlbr_mutex_lock (&PLimitMutex, 1, &PLimitLockID);
+#endif
 	if (Globals.PacketLimit == 0){
 		printf("Packet Limit Reached\n");
 		Globals.Done=TRUE;
@@ -178,6 +189,9 @@ int ProcessPacket(int PacketSlot){
 
 	if (Globals.PacketLimit > 0)
 		Globals.PacketLimit--;
+#ifdef MTHREADS
+	hlbr_mutex_unlock (&PLimitMutex);
+#endif
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -192,9 +206,22 @@ int ProcessPacket(int PacketSlot){
 		printf("Error Processing Packet\n");
 	}
 
+	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
+#ifdef DEBUG
+		printf("There are rule matches\n");
+#endif	
+		if (!PerformActions(PacketSlot)){
+			printf("Failed to execute the actions\n");
+		}
+	}
+
+	RouteAndSend(PacketSlot);
+
 	/*update the packet statistics*/
 	PacketSec++;
-
+#ifdef MTHREADS
+	hlbr_mutex_lock (&StatsMutex, 0, &StatsLockID);
+#endif
 	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
 		TCPSec++;
 	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
@@ -211,17 +238,9 @@ int ProcessPacket(int PacketSlot){
 
 		LastTime = Globals.Packets[PacketSlot].tv.tv_sec;
 	}
-
-	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
-#ifdef DEBUG
-		printf("There are rule matches\n");
-#endif	
-		if (!PerformActions(PacketSlot)){
-			printf("Failed to execute the actions\n");
-		}
-	}
-
-	RouteAndSend(PacketSlot);
+#ifdef MTHREADS
+	hlbr_mutex_unlock (&StatsMutex);
+#endif
 	ReturnEmptyPacket(PacketSlot);
 
 	return TRUE;
@@ -346,10 +365,23 @@ int MainLoopThreaded(){
 
 #ifdef MTHREADS
 	if (Globals.UseThreads - 1 > 0) {
+		pthread_attr_t attr;
+
+		pthread_attr_init (&attr);
+		pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+
 		Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads - 1) * sizeof(pthread_t));
 
-		for (i = 0 ; i < Globals.UseThreads - 1 ; i++)
-			pthread_create (&Globals.Threads[i], NULL, ProcessPacketThread, NULL);
+		for (i = 0 ; i < Globals.UseThreads - 1 ; i++) {
+			if (!Globals.Threads[i]) {
+				fprintf (stderr, "Couldn't allocate thread %d\n", i);
+				return FALSE;
+			}
+
+			pthread_create (&Globals.Threads[i], &attr, ProcessPacketThread, NULL);
+		}
+
+		pthread_attr_destroy (&attr);
 	}
 #endif
 

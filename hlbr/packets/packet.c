@@ -20,9 +20,9 @@ extern GlobalVars Globals;
 int					LastFreeSlot;
 int					LastPendingSlot;
 
-pthread_mutex_t		PacketMutex;
+pthread_mutex_t				PacketMutex;
 int					PacketLockID=0;
-unsigned int 		CurPacketNum=0;
+unsigned int 				CurPacketNum=0;
 
 //#define DEBUG
 //#define DEBUGPACKETS
@@ -34,7 +34,7 @@ unsigned int 		CurPacketNum=0;
 **************************************/
 int GetPacketTypeByName(char* Name){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	if (strcasecmp(Name, "linux_raw")==0){
 		return PACKET_TYPE_LINUX_RAW;
@@ -60,7 +60,7 @@ int GetPacketTypeByName(char* Name){
 **************************************/
 int GetPacketProtoByName(char* Name){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	if (strcasecmp(Name, "ethernet")==0){
 		return PACKET_PROTO_ETHERNET;
@@ -75,7 +75,7 @@ int GetPacketProtoByName(char* Name){
 **************************************/
 int GetPacketRoleByName(char* Name){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	if (strcasecmp(Name, "normal")==0){
 		return PACKET_ROLE_NORMAL;
@@ -327,13 +327,14 @@ int WritePacket(int PacketSlot){
 int AddPacketToPending(int PacketSlot){
 	DEBUGPATH;
 
-	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
-
+	hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 0, &Globals.Packets[PacketSlot].LockID);
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
+	hlbr_mutex_unlock(&PacketMutex);
+
+	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
 	LastPendingSlot = PacketSlot;
 	Globals.PendingCount++;
 	Globals.AllocatedCount--;
-
 	hlbr_mutex_unlock(&PacketMutex);
 
 	return TRUE;
@@ -350,21 +351,20 @@ int PopFromPending(){
 	DEBUGPATH;
 
 	PacketSlot=PACKET_NONE;
-	hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
 
 	for (i = 0 ; i < MAX_PACKETS ; i++){
-		if (Globals.Packets[i].Status == PACKET_STATUS_PENDING){
+		if (Globals.Packets[i].Status == PACKET_STATUS_PENDING && !hlbr_mutex_trylock(&Globals.Packets[i].Mutex, 0, &Globals.Packets[i].LockID)){
 			Globals.Packets[i].Status = PACKET_STATUS_PROCESSING;
+			hlbr_mutex_unlock (&Globals.Packets[i].Mutex);
 
+			hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
 			Globals.PendingCount--;
 			Globals.ProcessingCount++;
-
 			hlbr_mutex_unlock(&PacketMutex);
+
 			return i;
 		}
 	}
-
-	hlbr_mutex_unlock(&PacketMutex);
 
 	return PACKET_NONE;
 }
@@ -375,45 +375,44 @@ int PopFromPending(){
 int GetEmptyPacket(){
 	PacketRec*	Packet;
 	int		i;
+	int		lf;
 
 	DEBUGPATH;
 
 	Packet=NULL;
 
 	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
+	lf = LastFreeSlot;
+	hlbr_mutex_unlock(&PacketMutex);
 
-	for (i = LastFreeSlot; i < MAX_PACKETS ; i++){
-		if (Globals.Packets[i].Status == PACKET_STATUS_IDLE){
+	for (i = lf; i < MAX_PACKETS ; i++){
+		if (Globals.Packets[i].Status == PACKET_STATUS_IDLE && !hlbr_mutex_trylock(&Globals.Packets[i].Mutex, 0, &Globals.Packets[i].LockID)){
 #ifdef DEBUG
 			printf("Found IDLE packet in slot %i\n",i);
 #endif
 			Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
-			Packet = &Globals.Packets[i];
+			hlbr_mutex_unlock (&Globals.Packets[i].Mutex);
 
-			Globals.AllocatedCount++;
-			Globals.IdleCount--;
+			Packet = &Globals.Packets[i];
 
 			break;
 		}
 	}
 
 	if (!Packet)
-		for (i = 0 ; i < LastFreeSlot ; i++){
-			if (Globals.Packets[i].Status==PACKET_STATUS_IDLE){
+		for (i = 0 ; i < lf ; i++){
+			if (Globals.Packets[i].Status==PACKET_STATUS_IDLE && !hlbr_mutex_trylock(&Globals.Packets[i].Mutex, 0, &Globals.Packets[i].LockID)){
 #ifdef DEBUG
 				printf("Found IDLE packet in slot %i\n",i);
 #endif
 				Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
-				Packet = &Globals.Packets[i];
+				hlbr_mutex_unlock (&Globals.Packets[i].Mutex);
 
-				Globals.AllocatedCount++;
-				Globals.IdleCount--;
+				Packet = &Globals.Packets[i];
 
 				break;
 			}
 		}
-
-	hlbr_mutex_unlock(&PacketMutex);
 
 	if (!Packet){
 #ifdef DEBUG
@@ -435,6 +434,11 @@ int GetEmptyPacket(){
 	Packet->RawPacket = Packet->TypicalPacket;
 	Packet->LargePacket = FALSE;
 
+	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
+	Globals.AllocatedCount++;
+	Globals.IdleCount--;
+	hlbr_mutex_unlock(&PacketMutex);
+
 	return i;
 }
 
@@ -447,8 +451,6 @@ void ReturnEmptyPacket(int PacketSlot){
 	PacketRec*	p;
 
 	DEBUGPATH;
-
-	hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 
 	if (Globals.Packets[PacketSlot].SaveCount < 1){
 		p=&Globals.Packets[PacketSlot];
@@ -466,6 +468,10 @@ void ReturnEmptyPacket(int PacketSlot){
 			p->DecoderInfo[p->DecodersUsed[i]].Data=NULL;
 		}
 
+		hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 1, &Globals.Packets[PacketSlot].LockID);
+		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
+
+		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 		switch(Globals.Packets[PacketSlot].Status){
 			case PACKET_STATUS_ALLOCATED:
 				Globals.AllocatedCount--;
@@ -475,15 +481,19 @@ void ReturnEmptyPacket(int PacketSlot){
 				break;
 		}
 
+		LastFreeSlot = PacketSlot;
 		Globals.IdleCount++;
-		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
 	}else{
+		hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 1, &Globals.Packets[PacketSlot].LockID);
 		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
+
+		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 		Globals.ProcessingCount--;
 		Globals.SavedCount++;
 	}
 
 	hlbr_mutex_unlock(&PacketMutex);
+	hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
 
 #ifdef DEBUG_PACKETS
 	printf("There are:\n");

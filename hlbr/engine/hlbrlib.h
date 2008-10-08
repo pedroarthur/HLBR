@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 
+#ifdef HAS_THREADS
+#include <pthread.h>
+#endif
 
 /**
  * Generic linked list struct for strings.
@@ -22,6 +25,10 @@ typedef struct queue_t QueueList;
 typedef struct log_file_rec {
 	char	fname[1024];
 	FILE*	fp;
+#ifdef MTHREADS
+	pthread_mutex_t		FileMutex;
+	int			FileLockID;
+#endif
 } LogFileRec;
 
 

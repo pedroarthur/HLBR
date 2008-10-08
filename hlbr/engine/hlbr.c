@@ -272,7 +272,7 @@ int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID){
 	result = pthread_mutex_trylock(mutex);
 #ifdef DEBUGLOCKS	
 	*LockID=ID;
-#endif	
+#endif
 	return result;
 #endif
 }
@@ -328,7 +328,7 @@ int main(int argc, char**argv){
 	if (argc==1){
 		PrintUsage();
 		return FALSE;
-	}	
+	}
 	
 	if (!ParseArgs(argc, argv)){
 		printf("Couldn't understand command line, quitting\n\n");
