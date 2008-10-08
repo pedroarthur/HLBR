@@ -323,7 +323,7 @@ int MainLoopPoll(){
 *******************************/
 int MainLoopThreaded(){
 	int i;
-//	pthread_t	test_thread;
+	pthread_t *t;
 
 	DEBUGPATH;
 
@@ -344,8 +344,16 @@ int MainLoopThreaded(){
 	/* start up the log files keeper thread */
 	pthread_create(&Globals.logThread, NULL, ProcessLogFilesThread, NULL);
 #endif
-	/* start up the first process packet thread */
-	//pthread_create(&test_thread, NULL, ProcessPacketThread, NULL);
+
+#ifdef MTHREADS
+	if (Globals.UseThreads - 1 > 0) {
+		t = (pthread_t *) malloc ((Globals.UseThreads - 1) * sizeof(pthread_t));
+
+		for (i = 0 ; i < Globals.UseThreads - 1 ; i++)
+			pthread_create (&t[i], NULL, ProcessPacketThread, NULL);
+	}
+#endif
+
 	ProcessPacketThread(NULL);
 
 	return FALSE;

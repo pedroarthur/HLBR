@@ -26,7 +26,7 @@ extern GlobalVars Globals;
 **********************************/
 int InitActions(){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	if (!InitActionDrop()) return FALSE;
 	if (!InitActionAlertConsole()) return FALSE;
@@ -46,7 +46,7 @@ int InitActions(){
 * Given an action's name, return
 * its ID
 ***********************************/
-int	GetActionByName(char* Name){
+int GetActionByName(char* Name){
 	int	i;
 
 	DEBUGPATH;
@@ -65,7 +65,7 @@ int	GetActionByName(char* Name){
 *********************************/
 int CreateAction(char* Name){
 	int ActionID;
-	
+
 	DEBUGPATH;
 
 	/*check to see if this name is already used*/
@@ -74,18 +74,18 @@ int CreateAction(char* Name){
 		printf("Action %s already exists\n",Name);
 		return ACTION_NONE;
 	}
-	
+
 	ActionID=Globals.NumActionItems;
 	Globals.NumActionItems++;
-	
+
 	bzero(&Globals.ActionItems[ActionID], sizeof(ActionItem));
 	Globals.ActionItems[ActionID].ID=ActionID;
 	snprintf(Globals.ActionItems[ActionID].Name, MAX_NAME_LEN, Name);
-	
+
 #ifdef DEBUG
 	printf("Allocated Action \"%s\" at number %i\n",Name, ActionID);
-#endif	
-	
+#endif
+
 	return ActionID;
 }
 
@@ -94,7 +94,7 @@ int CreateAction(char* Name){
 ****************************************************/
 int BuildMessageString(char* Message, int PacketSlot, char* TargetBuff, int TargetBuffLen){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	return FALSE;
 }

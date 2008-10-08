@@ -290,23 +290,32 @@ int ParseSystem(FILE* fp){
 		}else if (strncasecmp(LineBuff, "Threads=",8)==0){
 			Current=LineBuff+strlen("Threads=");
 			switch (*Current){
-			case 'Y':
-			case 'y':
-			case '1':
-			case 't':
-			case 'T':
-				Globals.UseThreads=TRUE;
-				break;
-			case 'n':
-			case 'N':
-			case '0':
-			case 'f':
-			case 'F':
-				Globals.UseThreads=FALSE;
-				break;
-			default:
-				printf("I don't understand thread option %c\n",*Current);
-				Globals.UseThreads=TRUE;
+				case 'Y':
+				case 'y':
+				case '1':
+				case 't':
+				case 'T':
+					Globals.UseThreads=TRUE;
+					break;
+				case 'n':
+				case 'N':
+				case '0':
+				case 'f':
+				case 'F':
+					Globals.UseThreads=FALSE;
+					break;
+				default:
+#ifdef MTHREADS
+					if (*Current - '0' > 0 && *Current - '0' < 9){
+						Globals.UseThreads=strtol(Current, &Current, 10);
+					} else {
+						printf("I don't understand thread option %c\n",*Current);
+						Globals.UseThreads=TRUE;
+					}
+#else
+					printf("I don't understand thread option %c\n",*Current);
+					Globals.UseThreads=TRUE;
+#endif
 			}
 #ifdef DEBUG
 			printf("UseThreads is %i\n",Globals.UseThreads);

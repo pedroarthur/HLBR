@@ -180,14 +180,16 @@ int DecoderAddDecoder(int ParentDecoderID, int ChildDecoderID)
 			printf("This decoder already bound to this decoder\n");
 			return FALSE;
 		}
-		if (!This->NextChild) break;
+
+		if (!This->NextChild)
+			break;
+
 		This=This->NextChild;
 	}
 	
 	This->NextChild=Child;
 
 	return TRUE;
-
 }
 
 /**
@@ -289,7 +291,7 @@ int Decode(int DecoderID, int PacketSlot)
 
 		while (test) {
 			if (test->Active)
-				if (test->TestFunc) 
+				if (test->TestFunc)
 					test->TestFunc(PacketSlot, test->TestNodes);
 			test = test->Next;
 		}
@@ -310,13 +312,13 @@ int Decode(int DecoderID, int PacketSlot)
 
 	// check to see if there are any rules left
 	if (!BitFieldIsEmpty(p->RuleBits, Globals.NumRules)) {
-#ifdef DEBUG	
+#ifdef DEBUG
 		printf("There are rules left\n");
 #endif		
 	} else {
 #ifdef DEBUG
 		printf("All rules have been eliminated\n");
-#endif				
+#endif
 		return TRUE;
 	}
 

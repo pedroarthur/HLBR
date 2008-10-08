@@ -4,6 +4,7 @@
  * BUGFIX: Memory leak in the new decoder data indexing schema (PAJ)
  * PacketMutex optmization (PAJ)
  * New decoder data indexing schema (ABA)
+ * Multi-threaded decoding (PAJ)
 
 2008-07-24  Version: 1.6
 

@@ -31,8 +31,8 @@ void* DecodeInterface(int PacketSlot){
 int InitDecoderInterface(){
 	int DecoderID;
 
-    DEBUGPATH;
-	
+	DEBUGPATH;
+
 	if ((DecoderID=CreateDecoder("Interface"))==DECODER_NONE){
 		DBG( PRINTERROR("Couldn't Allocate Decoder Interface\n") );
 		return FALSE;
