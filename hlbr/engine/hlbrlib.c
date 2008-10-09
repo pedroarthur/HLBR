@@ -40,9 +40,9 @@ void CloseLogFile(LogFileRec* log)
 {
 	if (log->fp != NULL)
 #ifndef KEEP_LOGFILE_OPEN
-		if (!fclose(log->fp))
+		if (fclose(log->fp) == EOF)
 #else
-		if (!fflush(log->fp))
+		if (fflush(log->fp) == EOF)
 #endif
 			fprintf(stderr, "Error closing/flushing log file %s\n",
 					log->fname);

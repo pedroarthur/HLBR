@@ -329,7 +329,7 @@ int AddPacketToPending(int PacketSlot){
 
 	hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 0, &Globals.Packets[PacketSlot].LockID);
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
-	hlbr_mutex_unlock(&PacketMutex);
+	hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
 
 	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
 	LastPendingSlot = PacketSlot;

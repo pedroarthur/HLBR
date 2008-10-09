@@ -10,16 +10,13 @@
 
 extern GlobalVars	Globals;
 
-FILE*	fp;
-
 /**
  * Parse the args for this action (alert file).
  */
 void* AlertFileParseArgs(char* Args)
 {
-#ifndef KEEP_LOGFILE_OPEN
 	FILE*		fp;
-#endif
+
 	LogFileRec*	data;
 	char		FileName[1024];
 
@@ -48,6 +45,7 @@ void* AlertFileParseArgs(char* Args)
 int AlertFileMessage(char* Message, void* Data)
 {
 	LogFileRec*	data;
+	FILE*		fp;
 #ifdef MTHREADS
 	int		ocs;
 #endif
@@ -77,7 +75,7 @@ int AlertFileMessage(char* Message, void* Data)
 	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
 #endif
 
-	fwrite(Message, strlen(Message), 1, data->fp);
+	fwrite(Message, strlen(Message), 1, fp);
 	fwrite("\n", 1, 1, data->fp);
 
 #ifdef MTHREADS
