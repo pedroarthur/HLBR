@@ -112,9 +112,11 @@ clean:
 	cd tests; make clean
 	cd actions; make clean
 	cd routes; make clean
+	rm -f hlbr
+
+reconfigure: clean
 	rm -f config.h
 	rm -f Makefile *.old
-	rm -f hlbr
 
 hlbr: config.h $(HLBR_OBJECTS)
 	cd engine;make

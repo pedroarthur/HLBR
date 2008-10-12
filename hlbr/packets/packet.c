@@ -470,6 +470,7 @@ void ReturnEmptyPacket(int PacketSlot){
 
 		hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 1, &Globals.Packets[PacketSlot].LockID);
 		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
+		hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
 
 		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 		switch(Globals.Packets[PacketSlot].Status){
@@ -486,6 +487,7 @@ void ReturnEmptyPacket(int PacketSlot){
 	}else{
 		hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 1, &Globals.Packets[PacketSlot].LockID);
 		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
+		hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
 
 		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
 		Globals.ProcessingCount--;
@@ -493,7 +495,6 @@ void ReturnEmptyPacket(int PacketSlot){
 	}
 
 	hlbr_mutex_unlock(&PacketMutex);
-	hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
 
 #ifdef DEBUG_PACKETS
 	printf("There are:\n");

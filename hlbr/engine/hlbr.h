@@ -353,6 +353,8 @@ typedef struct global_vars{
 	char			UseThreads;
 #ifdef MTHREADS
 	pthread_t*		Threads;
+	int*			ThreadsID;
+	pthread_key_t		ThreadsKey;
 #endif
 	char			ParseOnly;
 	char*			ConfigFilename;

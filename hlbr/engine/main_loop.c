@@ -46,11 +46,8 @@ void IdleFunc(){
 	printf("  %i Allocated\n",Globals.AllocatedCount);
 	printf("  %i Processing\n",Globals.ProcessingCount);
 #endif
-#ifdef _OBSD_	
- 	usleep(100);
-#else
+
 	usleep(100);
-#endif
 }
 
 
@@ -257,7 +254,9 @@ void* ProcessPacketThread(void* v)
 	int	PacketSlot;
 
 	DEBUGPATH;
-
+#ifdef MTHREADS
+	pthread_setspecific (Globals.ThreadsKey, v);
+#endif
 	while (!Globals.Done) {
 		PacketSlot = PopFromPending();
 
@@ -343,6 +342,10 @@ int MainLoopPoll(){
 int MainLoopThreaded(){
 	int i;
 
+#ifdef MTHREADS
+	pthread_attr_t attr;
+#endif
+
 	DEBUGPATH;
 
 #ifdef DEBUG
@@ -364,29 +367,29 @@ int MainLoopThreaded(){
 #endif
 
 #ifdef MTHREADS
-	if (Globals.UseThreads - 1 > 0) {
-		pthread_attr_t attr;
+	pthread_attr_init (&attr);
+	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
-		pthread_attr_init (&attr);
-		pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
+	Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads) * sizeof(pthread_t));
+	Globals.ThreadsID = (int *) malloc ((Globals.UseThreads) * sizeof(int));
 
-		Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads - 1) * sizeof(pthread_t));
-
-		for (i = 0 ; i < Globals.UseThreads - 1 ; i++) {
-			if (!Globals.Threads[i]) {
-				fprintf (stderr, "Couldn't allocate thread %d\n", i);
-				return FALSE;
-			}
-
-			pthread_create (&Globals.Threads[i], &attr, ProcessPacketThread, NULL);
+	for (i = 0 ; i < Globals.UseThreads ; i++) {
+		if (!Globals.Threads[i] || !Globals.ThreadsID[i]) {
+			fprintf (stderr, "Couldn't allocate thread %d\n", i);
+			return FALSE;
 		}
 
-		pthread_attr_destroy (&attr);
+		Globals.ThreadsID[i] = i;
+		pthread_create (&Globals.Threads[i], &attr, ProcessPacketThread, (void *)&Globals.ThreadsID[i]);
 	}
-#endif
 
+	pthread_attr_destroy (&attr);
+
+	for (i = 0 ; i < Globals.UseThreads ; i++)
+		pthread_join (Globals.Threads[i], NULL);
+#else
 	ProcessPacketThread(NULL);
-
+#endif
 	return FALSE;
 }
 
