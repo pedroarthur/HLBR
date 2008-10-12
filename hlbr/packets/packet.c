@@ -318,13 +318,15 @@ int WritePacket(int PacketSlot){
 	return FALSE;
 }
 
-/******************************************
-* Gets called every time a packet gets
-* put on the pending list.
-* This may be called more than once per
-* ReadPacket request.
-******************************************/
-int AddPacketToPending(int PacketSlot){
+/**
+ * Marks a packet as 'pending' (thread safe, called from ReadPacket)
+ * Gets called every time a packet gets put on the pending list. Uses a 
+ * mutex lock (to avoid problems with threads).
+ * This may be called more than once per ReadPacket request.
+ * @see ReadPacket
+ */
+int AddPacketToPending(int PacketSlot)
+{
 	DEBUGPATH;
 
 	hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 0, &Globals.Packets[PacketSlot].LockID);
@@ -340,11 +342,13 @@ int AddPacketToPending(int PacketSlot){
 	return TRUE;
 }
 
-/*****************************************
-* Give the caller a packet off the pending
-* Queue
-******************************************/
-int PopFromPending(){
+/**
+ * Pops a packet off the pending queue
+ * Give the caller a packet off the pending queue (marked as 
+ * PACKET_STATUS_PENDING)
+ */
+int PopFromPending()
+{
 	int		PacketSlot;
 	int		i;
 
@@ -369,10 +373,11 @@ int PopFromPending(){
 	return PACKET_NONE;
 }
 
-/*******************************************
-* Get a packet from the pool
-********************************************/
-int GetEmptyPacket(){
+/**
+ * Get an emoty, unused packet struct from the pool.
+ */
+int GetEmptyPacket()
+{
 	PacketRec*	Packet;
 	int		i;
 	int		lf;
@@ -442,10 +447,9 @@ int GetEmptyPacket(){
 	return i;
 }
 
-/************************************
-* Return a packet to the pool
-* for reuse
-************************************/
+/**
+ * Return a packet struct to the pool for reuse.
+ */
 void ReturnEmptyPacket(int PacketSlot){
 	int 		i;
 	PacketRec*	p;

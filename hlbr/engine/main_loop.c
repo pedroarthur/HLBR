@@ -31,11 +31,12 @@ pthread_mutex_t		PLimitMutex;
 int			PLimitLockID;
 #endif
 
-/************************************
-* Called whenever hlbr is idle
-************************************/
-void IdleFunc(){
-
+/**
+ * Called whenever hlbr is idle. 
+ * Usually called by one of the threads, when it doesn't have anything to process.
+ */
+void IdleFunc()
+{
 	DEBUGPATH;
 
 #ifdef DEBUGPACKETS
@@ -51,10 +52,11 @@ void IdleFunc(){
 }
 
 
-/**********************************************
-* Apply the routing and send out the packet
-***********************************************/
-int RouteAndSend(int PacketSlot){
+/**
+ * Apply the routing and send out the packet.
+*/
+int RouteAndSend(int PacketSlot)
+{
 	PacketRec*	p;
 	
 	DEBUGPATH;
@@ -163,9 +165,22 @@ int HandleTimers(int Now){
 	return TRUE;
 }
 
-/************************************
-* Check the packet for rules matches
-************************************/
+/**
+ * Check the packet for rules matches.
+ * This is one of the main functions responsible for everything HLBR does;
+ * the other is Decode(), called here. Decode() is called with the 'root'
+ * packet decoder, so all registered decoders (TCP, UDP, etc.) will 
+ * be called, with all their respective registered tests (according to the
+ * rules defined by the user). After this, the RuleBits field of the packet 
+ * structure is tested to see if any rule matched, and the necessary actions
+ * performed. Then finally the packet is 'routed' and sent.
+ * @return Always TRUE?
+ * @remarks Basically this is what ProcessPacket does:
+ * @li Calls HandleTimers()
+ * @li Calls the 'root' decoder (defined in Globals.DecoderRoot) with Decode()
+ * @li Tests the RuleBits packet field (results of the tests/rules); if any rule matched, calls PerformActions()
+ * @li Then, the packet is routed with RouteAndSend()
+ */
 int ProcessPacket(int PacketSlot){
 	PacketRec*	p;
 	static int	PacketSec=0;
@@ -243,12 +258,10 @@ int ProcessPacket(int PacketSlot){
 	return TRUE;
 }
 
-/*******************************
-* Start up a thread to process 
-* packets from the queue.
-* There may be more than one of
-* these.
-*******************************/
+/**
+ * Start up a thread to process packets from the queue.
+ * There may be more than one of these.
+ */
 void* ProcessPacketThread(void* v)
 {
 	int	PacketSlot;
@@ -270,10 +283,11 @@ void* ProcessPacketThread(void* v)
 	return NULL;
 }
 
-/*******************************
-* Poll the FD's to get packets
-*******************************/
-int MainLoopPoll(){
+/** Main loop, polling version.
+ * Poll the FD's to get packets
+ */
+int MainLoopPoll()
+{
 	struct timeval		timeout;
 	int			result;
 	fd_set			set;
@@ -336,10 +350,11 @@ int MainLoopPoll(){
 	return TRUE;
 }
 
-/*******************************
-* Spawn a thread for each interface
-*******************************/
-int MainLoopThreaded(){
+/** Main loop, threaded version.
+ * Spawn a thread for each interface
+ */
+int MainLoopThreaded()
+{
 	int i;
 
 #ifdef MTHREADS
@@ -393,10 +408,14 @@ int MainLoopThreaded(){
 	return FALSE;
 }
 
-/**************************
-* Start handling packets
-**************************/
-int MainLoop(){
+/**
+ * Main loop, start handling packets. Calls one of the two other functions:
+ * MainLoopThreaded() if HLBR is running in multi-thread mode, or 
+ * MainLoopPolling() if in single-thread mode.
+ * @return Always FALSE?
+ */
+int MainLoop()
+{
 	int i;
 	
 	DEBUGPATH;
@@ -415,3 +434,22 @@ int MainLoop(){
 
 	return FALSE;
 }
+
+
+#ifdef KEEP_LOGFILE_OPEN
+/**
+ * Start up a thread to deal with log files.
+ */
+void* ProcessLogFilesThread(void* v)
+{
+    DEBUGPATH;
+    
+    while (!Globals.Done) {
+	// pop next line to write
+	// write it, else IdleFunc()
+	IdleFunc();
+    }
+
+    return NULL;
+}
+#endif //KEEP_LOGFILE_OPEN

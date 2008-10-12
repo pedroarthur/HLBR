@@ -31,6 +31,24 @@ FILE* LogFile(LogFileRec* log)
 	return log->fp;
 } 
 
+LogFileRec* OpenLogFile(char* name)
+{
+	int 		i;
+	LogFileRec*	f = NULL;
+	
+	for (i=0; i<MAX_LOG_FILES && Globals.LogFiles[i] != NULL; i++)
+		if (strcmp(name, Globals.LogFiles[i]->fname) == 0) {
+			f = Globals.LogFiles[i];
+			break;
+		}
+
+	if (f == NULL && i < MAX_LOG_FILES) {
+		// allocate new file, update f
+	}
+
+	return f;
+}
+
 /**
  * If the log file is still opened - and we're opening/closing it at every
  * access - then close it, otherwise just flush the data.
@@ -60,10 +78,10 @@ int LogMessage(char* Message, void* Data)
 	
 	DEBUGPATH;
 
+	assert(Message != NULL);
+
 	if (!Data) {
-		//PRINTERROR("I must have a filename to write to!\n");
-		//return FALSE;
-		fp = stdin;
+		fp = stdout;
 	} else {
 		fp = fopen(((LogFileRec*)Data)->fname, "a");
 		if (!LogFile((LogFileRec*)Data))

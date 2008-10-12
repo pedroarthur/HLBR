@@ -3,10 +3,10 @@ You can use tcpdump to read hlbr.dump and virus.dump files (stored in
 
    # tcpdump -n -s 1500 -A -r /var/log/hlbr/hlbr.log
 
-If you need to see an especific host activities, use "host IP". Example:
+If you need to see a specific host activity, use "host IP". Example:
 
    # tcpdump -n -s 1500 -A -r /var/log/hlbr/hlbr.log host 64.65.66.67
 
-To see others tcpdump examples and options:
+To see other tcpdump examples and options:
 
    $ man tcpdump

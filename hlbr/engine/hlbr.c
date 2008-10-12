@@ -315,11 +315,11 @@ void HandleSignal(int signal){
 	}
 }
 
-/*************************************
-* The one and only main
-**************************************/
-int main(int argc, char**argv){
-
+/**
+ * The One and Only main
+*/
+int main(int argc, char**argv)
+{
 	bzero(&Globals, sizeof(GlobalVars));
 
 	Globals.IdleCount=MAX_PACKETS;

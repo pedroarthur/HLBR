@@ -32,6 +32,13 @@
 #include "num_list.h"
 #include "session.h"
 
+/* Defines behaviour of logging files.
+ * Default behaviour is to open and close the file every time a message is written.
+ * Uncomment this if you want to open the file only once and keep it open
+ */
+//#define KEEP_LOGFILE_OPEN
+
+
 #define MAX_PACKET_SIZE		65536+14+1
 #define TYPICAL_PACKET_SIZE	16000
 #define MAX_NAME_LEN		20
@@ -55,6 +62,10 @@
 #define MAX_LISTS		16
 #define MAX_TIMERS		16
 #define MAX_PACKETS		1024
+#ifdef KEEP_LOGFILE_OPEN
+#define MAX_LOG_FILES		16
+#define MAX_MESSAGE		4096
+#endif
 
 #define DEFAULT_SENSOR_NAME	"Default Sensor"
 #define DEFAULT_SENSOR_ID	0
@@ -69,11 +80,6 @@
 #define USER_RULE_START		50000
 
 
-/* Defines behaviour of logging files.
- * Default behaviour is to open and close the file every time a message is written.
- * Uncomment this if you want to open the file only once and keep it open
- */
-//#define KEEP_LOGFILE_OPEN
 
 
 /**********************************************
@@ -344,6 +350,19 @@ typedef struct timer_rec{
 	int (*TimerFunc) (int TimerID, int Time, void* User);
 } TimerRec;
 
+/**
+ * Struct used to keep names/handlers/etc of log files.
+ * This is mainly used (now) by action alert file.
+ */
+typedef struct log_file_rec {
+	char	fname[1024];
+	FILE*	fp;
+#ifdef MTHREADS
+	pthread_mutex_t		FileMutex;
+	int			FileLockID;
+#endif
+} LogFileRec;
+
 
 typedef struct global_vars{
 	char*			SensorName;
@@ -404,6 +423,11 @@ typedef struct global_vars{
 	int			NumLists;
 
 	TimerRec		Timers[MAX_TIMERS];
+
+#ifdef KEEP_LOGFILE_OPEN
+	LogFileRec*		LogFiles[MAX_LOG_FILES];
+	char[MAX_MESSAGE]	LogMessages[MAX_LOG_FILES];
+#endif
 
 	FuncList*		ShutdownFuncs;
 
