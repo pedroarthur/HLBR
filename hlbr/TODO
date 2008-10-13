@@ -1,6 +1,9 @@
 To next versions:
 
-- finish implementation of the logThread (keeps/updates all logfiles)
+- finish implementation of the logThread (keeps/updates all logfiles);
+   implement function to manage string buffers for messages;
+   define KEEP_LOGFILE_OPEN and fix stuff so that works; change
+   action_alert_file.c to use LogMessage
 - finish documentation at site
 - create faq
 - insert logic operations (not, and, or)

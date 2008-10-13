@@ -23,10 +23,6 @@ typedef struct queue_t QueueList;
 /**************/
 /* Prototypes */
 /**************/
-FILE* LogFile(LogFileRec*);
-void CloseLogFile(LogFileRec*);
-int LogMessage(char*, void*);
-
 char *ParseCmp(char *,char *);
 char *RmSpace(char *);
 

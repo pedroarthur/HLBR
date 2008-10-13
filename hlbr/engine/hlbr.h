@@ -64,7 +64,7 @@
 #define MAX_PACKETS		1024
 #ifdef KEEP_LOGFILE_OPEN
 #define MAX_LOG_FILES		16
-#define MAX_MESSAGE		4096
+#define MAX_MESSAGE_SIZE	4096
 #endif
 
 #define DEFAULT_SENSOR_NAME	"Default Sensor"
@@ -363,6 +363,8 @@ typedef struct log_file_rec {
 #endif
 } LogFileRec;
 
+pthread_mutex_t			LogThreadMutex;
+
 
 typedef struct global_vars{
 	char*			SensorName;
@@ -426,7 +428,9 @@ typedef struct global_vars{
 
 #ifdef KEEP_LOGFILE_OPEN
 	LogFileRec*		LogFiles[MAX_LOG_FILES];
-	char[MAX_MESSAGE]	LogMessages[MAX_LOG_FILES];
+	int			NumLogFiles;
+	char[MAX_MESSAGE_SIZE]	LogMessages[MAX_LOG_FILES];
+	int			NumLogMessages;
 #endif
 
 	FuncList*		ShutdownFuncs;
@@ -447,7 +451,7 @@ typedef struct global_vars{
 
 
 
-
+/* IDs for hlbr_mutex_lock() */
 #define GET_SESSION_1		1001
 #define GET_SESSION_2		1002 
 #define GET_SESSION_3		1003
@@ -478,6 +482,9 @@ int AddShutdownHandler(int (*func)(void* data), void* data);
 #define TIMER_NONE	-1
 int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID, int Time, void* user), void* User);
 
+//FILE* LogFile(LogFileRec*);
+//void CloseLogFile(LogFileRec*);
+int LogMessage(char*, LogFileRec*);
+LogFileRec* OpenLogFile(char*);
 
-
-#endif
+#endif // _HLBR_H_

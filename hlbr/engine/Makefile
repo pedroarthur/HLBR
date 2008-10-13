@@ -29,7 +29,7 @@ regex.o: regex.c regex.h ../config.h hlbr.h
 	$(CC) -c -o regex.o regex.c $(DEBUG)
 
 url.o: url.c url.h ../config.h hlbr.h
-	$(cc) -c -o url.o url.c $(DEBUG)
+	$(CC) -c -o url.o url.c $(DEBUG)
 
 cache.o: cache.c cache.h ../config.h hlbr.h
 	$(CC) -c -o cache.o cache.c $(DEBUG)

@@ -62,7 +62,8 @@ int AlertFileMessage(char* Message, void* Data)
 #ifdef MTHREADS
 	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
 #endif
-	fp = LogFile(data);
+	//fp = LogFile(data);
+	fp = fopen(data->fname, "a");
 
 	if (!fp) {
 #ifdef MTHREADS
@@ -82,7 +83,8 @@ int AlertFileMessage(char* Message, void* Data)
 	pthread_setcancelstate (ocs, NULL);
 #endif
 
-	CloseLogFile(data);
+	//CloseLogFile(data);
+	fclose(fp);
 #ifdef MTHREADS
 	hlbr_mutex_unlock (&data->FileMutex);
 #endif
@@ -127,7 +129,8 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 #ifdef MTHREADS
 	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
 #endif
-	fp = LogFile(data);
+	//fp = LogFile(data);
+	fp = fopen(data->fname, "a");
 
 	if (!fp) {
 		PRINTERROR1("AlertFileAction: Couldn't open \"%s\" for writing\n",data->fname);
@@ -149,7 +152,8 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	pthread_setcancelstate (ocs, NULL);
 #endif
 
-	CloseLogFile(data);
+	//CloseLogFile(data);
+	fclose(fp);
 #ifdef MTHREADS
 	hlbr_mutex_unlock (&data->FileMutex);
 #endif

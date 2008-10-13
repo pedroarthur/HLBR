@@ -1,102 +1,10 @@
+//#define DEBUG
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include "hlbr.h"
 #include "hlbrlib.h"
-
-/*********************
- * Log file functions
- *********************/
-
-/**
- * If the log file has not been opened yet, open it, otherwise return the 
- * file pointer previously opened.
- * The KEEP_LOGFILE_OPEN define controls how this function works.
- */
-FILE* LogFile(LogFileRec* log)
-{
-#ifdef KEEP_LOGFILE_OPEN
-	if (log->fp == NULL)
-		log->fp = fopen(log->fname, "a");
-#else
-	log->fp = fopen(log->fname, "a");
-#endif
-	if (!(log->fp)) {
-		PRINTERROR1("LogFile: Couldn't open file \"%s\" for appending\n",
-			    log->fname);
-		return NULL;
-	}
-
-	return log->fp;
-} 
-
-LogFileRec* OpenLogFile(char* name)
-{
-	int 		i;
-	LogFileRec*	f = NULL;
-	
-	for (i=0; i<MAX_LOG_FILES && Globals.LogFiles[i] != NULL; i++)
-		if (strcmp(name, Globals.LogFiles[i]->fname) == 0) {
-			f = Globals.LogFiles[i];
-			break;
-		}
-
-	if (f == NULL && i < MAX_LOG_FILES) {
-		// allocate new file, update f
-	}
-
-	return f;
-}
-
-/**
- * If the log file is still opened - and we're opening/closing it at every
- * access - then close it, otherwise just flush the data.
- * The KEEP_LOGFILE_OPEN define controls how this function works.
- */
-void CloseLogFile(LogFileRec* log)
-{
-	if (log->fp != NULL)
-#ifndef KEEP_LOGFILE_OPEN
-		if (fclose(log->fp) == EOF)
-#else
-		if (fflush(log->fp) == EOF)
-#endif
-			fprintf(stderr, "Error closing/flushing log file %s\n",
-					log->fname);
-} 
-
-/**
- * Handle the message (write to a log file).
- * Basically it gets a file name (inside the LogFileRec type) and writes 
- * the message to it. If the LogFileRec passed is NULL, then writes to standard
- * output.
- */
-int LogMessage(char* Message, void* Data)
-{
-	FILE*		fp;
-	
-	DEBUGPATH;
-
-	assert(Message != NULL);
-
-	if (!Data) {
-		fp = stdout;
-	} else {
-		fp = fopen(((LogFileRec*)Data)->fname, "a");
-		if (!LogFile((LogFileRec*)Data))
-			return FALSE;
-	}
-	
-	fwrite(Message, strlen(Message), 1, fp);
-	fwrite("\n", 1, 1, fp);
-	
-	if (Data)
-		CloseLogFile((LogFileRec*)Data);
-	
-	return TRUE;
-}
-
 
 
 /*********************/ 
@@ -270,3 +178,8 @@ void DumpBuffer(unsigned char *data, int size, FILE *stream)
 	for (i=0; i < size; i++)
 		putc((data[i] >= 32 && data[i] <=127 ? data[i] : '.'), stream);
 }
+
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
