@@ -357,10 +357,6 @@ int MainLoopThreaded()
 {
 	int i;
 
-#ifdef MTHREADS
-	pthread_attr_t attr;
-#endif
-
 	DEBUGPATH;
 
 #ifdef DEBUG
@@ -382,23 +378,13 @@ int MainLoopThreaded()
 #endif
 
 #ifdef MTHREADS
-	pthread_attr_init (&attr);
-	pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
-
 	Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads) * sizeof(pthread_t));
 	Globals.ThreadsID = (int *) malloc ((Globals.UseThreads) * sizeof(int));
 
 	for (i = 0 ; i < Globals.UseThreads ; i++) {
-		if (!Globals.Threads[i] || !Globals.ThreadsID[i]) {
-			fprintf (stderr, "Couldn't allocate thread %d\n", i);
-			return FALSE;
-		}
-
 		Globals.ThreadsID[i] = i;
-		pthread_create (&Globals.Threads[i], &attr, ProcessPacketThread, (void *)&Globals.ThreadsID[i]);
+		pthread_create (&Globals.Threads[i], NULL, ProcessPacketThread, (void *)&Globals.ThreadsID[i]);
 	}
-
-	pthread_attr_destroy (&attr);
 
 	for (i = 0 ; i < Globals.UseThreads ; i++)
 		pthread_join (Globals.Threads[i], NULL);
