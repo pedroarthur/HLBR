@@ -24,6 +24,8 @@
 
 #define DEBUGLOCKS
 
+/* Still development feature! */
+#define MTHREADS
 
 #define MAJOR_VERSION	1
 #define MINOR_VERSION	6

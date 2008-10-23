@@ -58,15 +58,15 @@ void IdleFunc()
 int RouteAndSend(int PacketSlot)
 {
 	PacketRec*	p;
-	
+
 	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Routing the packet\n");
 #endif
-	
+
 	p=&Globals.Packets[PacketSlot];
-	
+
 	/*No routing Protocols*/
 	if (Globals.NumRoutes==0)
 		return TRUE;
@@ -93,7 +93,7 @@ int RouteAndSend(int PacketSlot)
 		p->RawPacket[4],
 		p->RawPacket[5]);
 #endif
-	
+
 	if (!Route(PacketSlot)){
 #ifdef DEBUG
 		printf("Routing rules dropped the packet\n");
@@ -221,7 +221,7 @@ int ProcessPacket(int PacketSlot){
 	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
 #ifdef DEBUG
 		printf("There are rule matches\n");
-#endif	
+#endif
 		if (!PerformActions(PacketSlot)){
 			printf("Failed to execute the actions\n");
 		}
@@ -230,10 +230,11 @@ int ProcessPacket(int PacketSlot){
 	RouteAndSend(PacketSlot);
 
 	/*update the packet statistics*/
-	PacketSec++;
 #ifdef MTHREADS
 	hlbr_mutex_lock (&StatsMutex, 0, &StatsLockID);
 #endif
+	PacketSec++;
+
 	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
 		TCPSec++;
 	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
@@ -365,6 +366,8 @@ int MainLoopThreaded()
 
 	Globals.Done=FALSE;
 
+	InitPacketQueue (MAX_PACKETS);
+
 	/* start up the interface threads */
 	for (i = 0 ; i < Globals.NumInterfaces ; i++)
 		if (!StartInterfaceThread(i)){
@@ -379,7 +382,18 @@ int MainLoopThreaded()
 
 #ifdef MTHREADS
 	Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads) * sizeof(pthread_t));
+
+	if (!Globals.Threads) {
+		fprintf (stderr, "Couldn't allocate Threads\n");
+		return FALSE;
+	}
+
 	Globals.ThreadsID = (int *) malloc ((Globals.UseThreads) * sizeof(int));
+
+	if (!Globals.ThreadsID) {
+		fprintf (stderr, "Couldn't allocate ThreadsID\n");
+		return FALSE;
+	}
 
 	for (i = 0 ; i < Globals.UseThreads ; i++) {
 		Globals.ThreadsID[i] = i;
@@ -429,7 +443,7 @@ int MainLoop()
 void* ProcessLogFilesThread(void* v)
 {
     DEBUGPATH;
-    
+
     while (!Globals.Done) {
 	// pop next line to write
 	// write it, else IdleFunc()

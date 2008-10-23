@@ -1,8 +1,11 @@
-#include "packet.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <semaphore.h>
+
+#include "packet.h"
 #include "../engine/bits.h"
+#include "../engine/hlbr.h"
 //#include "../mangle/mangle.h"
 
 /*****************************************
@@ -15,12 +18,27 @@
 #include "packet_tcpdump.h"
 #include "packet_solaris_dlpi.h"
 
+typedef struct qn {
+	int p;
+	struct qn *next;
+} QNode;
+
+struct {
+	/* Stacks */
+	QNode* Idle;
+	QNode* Processing;
+	QNode* Allocated;
+	QNode* Saved;
+
+	/* Queue */
+	QNode* PendingFisrt;
+	QNode* PendingLast;
+} PacketQueue;
+
 extern GlobalVars Globals;
 
-int					LastFreeSlot;
-int					LastPendingSlot;
-
 pthread_mutex_t				PacketMutex;
+sem_t					PendingSemaphore;
 int					PacketLockID=0;
 unsigned int 				CurPacketNum=0;
 
@@ -41,15 +59,14 @@ int GetPacketTypeByName(char* Name){
 	}else if (strcasecmp(Name, "pcap")==0){
 		return PACKET_TYPE_PCAP;
 	}else if (strcasecmp(Name, "obsd_bpf")==0){
-		return PACKET_TYPE_OBSD_BPF;		
+		return PACKET_TYPE_OBSD_BPF;
 	}else if (strcasecmp(Name, "osx_bpf")==0){
 		return PACKET_TYPE_OSX_BPF;
 	}else if (strcasecmp(Name, "tcpdump")==0){
-		return PACKET_TYPE_TCPDUMP;		
+		return PACKET_TYPE_TCPDUMP;
 	}else if (strcasecmp(Name, "solaris_dlpi")==0){
-		return PACKET_TYPE_SOLARIS_DLPI;		
+		return PACKET_TYPE_SOLARIS_DLPI;
 	}
-
 
 	return PACKET_TYPE_NONE;
 }
@@ -104,27 +121,27 @@ int OpenInterface(int InterfaceID){
 
 	Interface=&Globals.Interfaces[InterfaceID];
 	switch (Interface->Type){
-#ifdef _LINUX_	
-	case PACKET_TYPE_LINUX_RAW:	
-		return OpenInterfaceLinuxRaw(InterfaceID);
+#ifdef _LINUX_
+		case PACKET_TYPE_LINUX_RAW:
+			return OpenInterfaceLinuxRaw(InterfaceID);
+#endif
+#ifdef _OBSD_
+		case PACKET_TYPE_OBSD_BPF:
+			return OpenInterfaceOBSDBPF(InterfaceID);
 #endif		
-#ifdef _OBSD_	
-	case PACKET_TYPE_OBSD_BPF:	
-		return OpenInterfaceOBSDBPF(InterfaceID);
-#endif		
-#ifdef _OSX_	
-	case PACKET_TYPE_OSX_BPF:	
-		return OpenInterfaceOSXBPF(InterfaceID);
-#endif		
-	case PACKET_TYPE_TCPDUMP:	
-		return OpenInterfaceTCPDump(InterfaceID);
-#ifdef _SOLARIS_	
-	case PACKET_TYPE_SOLARIS_DLPI:	
-		return OpenInterfaceSolarisDLPI(InterfaceID);
-#endif				
-	default:
-		printf("Invalid interface type for \"%s\" try specifying type=<type>\n", Interface->Name);
-		return FALSE;
+#ifdef _OSX_
+		case PACKET_TYPE_OSX_BPF:
+			return OpenInterfaceOSXBPF(InterfaceID);
+#endif
+		case PACKET_TYPE_TCPDUMP:
+			return OpenInterfaceTCPDump(InterfaceID);
+#ifdef _SOLARIS_
+		case PACKET_TYPE_SOLARIS_DLPI:
+			return OpenInterfaceSolarisDLPI(InterfaceID);
+#endif
+		default:
+			printf("Invalid interface type for \"%s\" try specifying type=<type>\n", Interface->Name);
+			return FALSE;
 	}
 
 	return FALSE;
@@ -141,7 +158,7 @@ int OpenInterfaces(){
 
 	for (i=0;i<Globals.NumInterfaces;i++)
 		if (!OpenInterface(i)) return FALSE;
-		
+
 	return TRUE;
 }
 
@@ -155,29 +172,29 @@ int ReadPacket(int InterfaceID){
 	DEBUGPATH;
 
 	Interface=&Globals.Interfaces[InterfaceID];
-	
+
 	switch (Interface->Type){
-#ifdef _LINUX_	
-	case PACKET_TYPE_LINUX_RAW:
-		return ReadPacketLinuxRaw(InterfaceID);
+#ifdef _LINUX_
+		case PACKET_TYPE_LINUX_RAW:
+			return ReadPacketLinuxRaw(InterfaceID);
 #endif
-#ifdef _OBSD_		
-	case PACKET_TYPE_OBSD_BPF:
-		return ReadPacketOBSDBPF(InterfaceID);		
-#endif		
-#ifdef _OSX_		
-	case PACKET_TYPE_OSX_BPF:
-		return ReadPacketOSXBPF(InterfaceID);		
-#endif		
-	case PACKET_TYPE_TCPDUMP:
-		return ReadPacketTCPDump(InterfaceID);		
-#ifdef _SOLARIS_		
-	case PACKET_TYPE_SOLARIS_DLPI:
-		return ReadPacketSolarisDLPI(InterfaceID);		
-#endif		
-	default:
-		printf("ReadPacket: I don't know what type of interface that is (%i)\n", Interface->Type);
-		return FALSE;
+#ifdef _OBSD_
+		case PACKET_TYPE_OBSD_BPF:
+			return ReadPacketOBSDBPF(InterfaceID);
+#endif
+#ifdef _OSX_
+		case PACKET_TYPE_OSX_BPF:
+			return ReadPacketOSXBPF(InterfaceID);
+#endif
+		case PACKET_TYPE_TCPDUMP:
+			return ReadPacketTCPDump(InterfaceID);
+#ifdef _SOLARIS_
+		case PACKET_TYPE_SOLARIS_DLPI:
+			return ReadPacketSolarisDLPI(InterfaceID);
+#endif
+		default:
+			printf("ReadPacket: I don't know what type of interface that is (%i)\n", Interface->Type);
+			return FALSE;
 	}
 
 	return FALSE;
@@ -187,11 +204,12 @@ int ReadPacket(int InterfaceID){
 * Send off the packet
 *****************************************************/
 int WritePacket(int PacketSlot){
-	InterfaceRec*	Interface;
-	int				i;
-	int				InterfaceID;
-	unsigned char*	Packet;
-	int				PacketLen;
+	InterfaceRec*		Interface;
+	int			InterfaceID;
+	unsigned char*		Packet;
+	int			PacketLen;
+
+	int			i;
 
 	DEBUGPATH;
 
@@ -214,49 +232,49 @@ int WritePacket(int PacketSlot){
 		}
 */	
 		switch (Interface->Type){
-		case PACKET_TYPE_LINUX_RAW:
-#ifdef _LINUX_		
-#ifdef DEBUG		
-			printf("1Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
-#endif			
-			return WritePacketLinuxRaw(InterfaceID, Packet, PacketLen);
+			case PACKET_TYPE_LINUX_RAW:
+#ifdef _LINUX_
+#ifdef DEBUG
+				printf("1Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
 #endif
-#ifdef _OBSD_			
-		case PACKET_TYPE_OBSD_BPF:
-#ifdef DEBUG		
-			printf("2Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
-#endif			
-			return WritePacketOBSDBPF(InterfaceID, Packet, PacketLen);			
-#endif			
-#ifdef _OSX_			
-		case PACKET_TYPE_OSX_BPF:
-#ifdef DEBUG		
-			printf("3Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
-#endif			
-			return WritePacketOSXBPF(InterfaceID, Packet, PacketLen);			
-#endif			
-		case PACKET_TYPE_TCPDUMP:
-#ifdef DEBUG		
-			printf("4Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
-#endif			
-			return WritePacketTCPDump(InterfaceID, Packet, PacketLen);			
+				return WritePacketLinuxRaw(InterfaceID, Packet, PacketLen);
+#endif
+#ifdef _OBSD_
+			case PACKET_TYPE_OBSD_BPF:
+#ifdef DEBUG
+				printf("2Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
+#endif
+				return WritePacketOBSDBPF(InterfaceID, Packet, PacketLen);
+#endif
+#ifdef _OSX_
+			case PACKET_TYPE_OSX_BPF:
+#ifdef DEBUG
+				printf("3Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
+#endif
+				return WritePacketOSXBPF(InterfaceID, Packet, PacketLen);			
+#endif
+			case PACKET_TYPE_TCPDUMP:
+#ifdef DEBUG
+				printf("4Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
+#endif
+				return WritePacketTCPDump(InterfaceID, Packet, PacketLen);
 #ifdef _SOLARIS_
-		case PACKET_TYPE_SOLARIS_DLPI:
-#ifdef DEBUG		
-			printf("3Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
-#endif			
-			return WritePacketSolarisDLPI(InterfaceID, Packet, PacketLen);			
-#endif						
-		default:
-			printf("WritePacket: I don't know what type of interface that is (%i)\n", Interface->Type);
-			return FALSE;
+			case PACKET_TYPE_SOLARIS_DLPI:
+#ifdef DEBUG
+				printf("3Normal: Sending out interface %i(%s)\n",InterfaceID, Globals.Interfaces[InterfaceID].Name);
+#endif
+				return WritePacketSolarisDLPI(InterfaceID, Packet, PacketLen);
+#endif
+			default:
+				printf("WritePacket: I don't know what type of interface that is (%i)\n", Interface->Type);
+				return FALSE;
 		}
 	}else{
 		/*this is a broadcast packet*/
 		for (i=0;i<Globals.NumInterfaces;i++){
 			if (i!=InterfaceID){
 				Interface=&Globals.Interfaces[i];
-/*	
+/*
 #ifdef DEBUG
 				printf("Applying mangling to broadcast packet\n");
 #endif	
@@ -267,55 +285,85 @@ int WritePacket(int PacketSlot){
 #endif		
 					break;
 				}
-*/		
+*/
 				switch (Interface->Type){
-#ifdef _LINUX_				
-				case PACKET_TYPE_LINUX_RAW:
-#ifdef DEBUG				
-					printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
-#endif					
-					WritePacketLinuxRaw(i, Packet, PacketLen);
-					break;	
-#endif					
-#ifdef _OBSD_									
-				case PACKET_TYPE_OBSD_BPF:
-#ifdef DEBUG				
-					printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
-#endif					
-					WritePacketOBSDBPF(i, Packet, PacketLen);					
-					break;
+#ifdef _LINUX_
+					case PACKET_TYPE_LINUX_RAW:
+#ifdef DEBUG
+						printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
 #endif
-#ifdef _OSX_									
-				case PACKET_TYPE_OSX_BPF:
-#ifdef DEBUG				
-					printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
+						WritePacketLinuxRaw(i, Packet, PacketLen);
+						break;
 #endif
-					WritePacketOSXBPF(i, Packet, PacketLen);						
-					break;
-#endif										
-				case PACKET_TYPE_TCPDUMP:
-#ifdef DEBUG				
-					printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
-#endif					
-					WritePacketTCPDump(i, Packet, PacketLen);					
-					break;
+#ifdef _OBSD_
+					case PACKET_TYPE_OBSD_BPF:
+#ifdef DEBUG
+						printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
+#endif
+						WritePacketOBSDBPF(i, Packet, PacketLen);
+						break;
+#endif
+#ifdef _OSX_
+					case PACKET_TYPE_OSX_BPF:
+#ifdef DEBUG
+						printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
+#endif
+						WritePacketOSXBPF(i, Packet, PacketLen);
+						break;
+#endif
+					case PACKET_TYPE_TCPDUMP:
+#ifdef DEBUG
+						printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
+#endif
+						WritePacketTCPDump(i, Packet, PacketLen);
+						break;
 #ifdef _SOLARIS_
-				case PACKET_TYPE_SOLARIS_DLPI:
-#ifdef DEBUG				
-					printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
+					case PACKET_TYPE_SOLARIS_DLPI:
+#ifdef DEBUG
+						printf("Broadcast: Sending out interface %i(%s)\n",i, Globals.Interfaces[i].Name);
 #endif
-					WritePacketSolarisDLPI(i, Packet, PacketLen);
-					break;
+						WritePacketSolarisDLPI(i, Packet, PacketLen);
+						break;
 #endif
-				default:
-					printf("WritePacket2: I don't know what type of interface that is (%i) Interface %i\n", Interface->Type, i);
-					return FALSE;
+					default:
+						printf("WritePacket2: I don't know what type of interface that is (%i) Interface %i\n", Interface->Type, i);
+						return FALSE;
 				}
 			}
 		}
 	}
 
 	return FALSE;
+}
+
+void InitPacketQueue (int max_packets) {
+	int i;
+	QNode *aux = NULL;
+
+	DEBUGPATH;
+
+	PacketQueue.Idle = aux = (QNode *) calloc (1, sizeof(QNode));
+
+	if (!aux) {
+		fprintf (stderr, "Couldn't allocate memory for Packet 0\n");
+		return;
+	}
+
+	aux->p = 0;
+
+	for (i = 1 ; i < max_packets ; i++) {
+		aux->next = (QNode *) calloc (1, sizeof(QNode));
+
+		if (!aux->next) {
+			fprintf (stderr, "Couldn't allocate memory for Packet %d\n", i);
+			return;
+		}
+
+		aux = aux->next;
+		aux->p = i;
+	}
+
+	sem_init (&PendingSemaphore, 0, 0);
 }
 
 /**
@@ -325,19 +373,36 @@ int WritePacket(int PacketSlot){
  * This may be called more than once per ReadPacket request.
  * @see ReadPacket
  */
-int AddPacketToPending(int PacketSlot)
-{
+int AddPacketToPending(int PacketSlot) {
 	DEBUGPATH;
 
-	hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 0, &Globals.Packets[PacketSlot].LockID);
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
-	hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
 
 	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
-	LastPendingSlot = PacketSlot;
+
+	if (!PacketQueue.PendingFisrt) {
+		PacketQueue.PendingFisrt = PacketQueue.PendingLast = PacketQueue.Allocated;
+
+		PacketQueue.Allocated = PacketQueue.Allocated->next;
+		PacketQueue.PendingFisrt->next = NULL;
+
+		PacketQueue.PendingFisrt->p = PacketSlot;
+	} else {
+		PacketQueue.PendingLast->next = PacketQueue.Allocated;
+		PacketQueue.PendingLast = PacketQueue.Allocated;
+
+		PacketQueue.Allocated = PacketQueue.Allocated->next;
+
+		PacketQueue.PendingLast->next = NULL;
+		PacketQueue.PendingLast->p = PacketSlot;
+	}
+
 	Globals.PendingCount++;
 	Globals.AllocatedCount--;
+
 	hlbr_mutex_unlock(&PacketMutex);
+
+	sem_post (&PendingSemaphore);
 
 	return TRUE;
 }
@@ -347,86 +412,71 @@ int AddPacketToPending(int PacketSlot)
  * Give the caller a packet off the pending queue (marked as 
  * PACKET_STATUS_PENDING)
  */
-int PopFromPending()
-{
-	int		PacketSlot;
-	int		i;
+int PopFromPending() {
+	int 	PacketSlot = PACKET_NONE;
+	QNode*	aux;
 
 	DEBUGPATH;
 
-	PacketSlot=PACKET_NONE;
-
-	for (i = 0 ; i < MAX_PACKETS ; i++){
-		if (Globals.Packets[i].Status == PACKET_STATUS_PENDING && !hlbr_mutex_trylock(&Globals.Packets[i].Mutex, 0, &Globals.Packets[i].LockID)){
-			Globals.Packets[i].Status = PACKET_STATUS_PROCESSING;
-			hlbr_mutex_unlock (&Globals.Packets[i].Mutex);
-
-			hlbr_mutex_lock(&PacketMutex, POP_PACKET_1, &PacketLockID);
-			Globals.PendingCount--;
-			Globals.ProcessingCount++;
-			hlbr_mutex_unlock(&PacketMutex);
-
-			return i;
-		}
+	if (sem_wait (&PendingSemaphore)) {
+		return PACKET_NONE;
 	}
 
-	return PACKET_NONE;
+	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
+
+	aux = PacketQueue.PendingFisrt;
+	PacketQueue.PendingFisrt = PacketQueue.PendingFisrt->next;
+
+	aux->next = PacketQueue.Processing;
+	PacketQueue.Processing = aux;
+
+	PacketSlot = aux->p;
+
+	if (!PacketQueue.PendingFisrt && PacketQueue.PendingLast)
+		PacketQueue.PendingLast = NULL;
+
+	Globals.PendingCount--;
+	Globals.ProcessingCount++;
+
+	hlbr_mutex_unlock(&PacketMutex);
+
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PROCESSING;
+
+	return PacketSlot;
 }
 
 /**
  * Get an emoty, unused packet struct from the pool.
  */
-int GetEmptyPacket()
-{
+int GetEmptyPacket() {
 	PacketRec*	Packet;
-	int		i;
-	int		lf;
-
-	DEBUGPATH;
-
-	Packet=NULL;
+	int		PacketSlot;
 
 	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
-	lf = LastFreeSlot;
-	hlbr_mutex_unlock(&PacketMutex);
 
-	for (i = lf; i < MAX_PACKETS ; i++){
-		if (Globals.Packets[i].Status == PACKET_STATUS_IDLE && !hlbr_mutex_trylock(&Globals.Packets[i].Mutex, 0, &Globals.Packets[i].LockID)){
-#ifdef DEBUG
-			printf("Found IDLE packet in slot %i\n",i);
-#endif
-			Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
-			hlbr_mutex_unlock (&Globals.Packets[i].Mutex);
-
-			Packet = &Globals.Packets[i];
-
-			break;
-		}
-	}
-
-	if (!Packet)
-		for (i = 0 ; i < lf ; i++){
-			if (Globals.Packets[i].Status==PACKET_STATUS_IDLE && !hlbr_mutex_trylock(&Globals.Packets[i].Mutex, 0, &Globals.Packets[i].LockID)){
-#ifdef DEBUG
-				printf("Found IDLE packet in slot %i\n",i);
-#endif
-				Globals.Packets[i].Status = PACKET_STATUS_ALLOCATED;
-				hlbr_mutex_unlock (&Globals.Packets[i].Mutex);
-
-				Packet = &Globals.Packets[i];
-
-				break;
-			}
-		}
-
-	if (!Packet){
-#ifdef DEBUG
-		printf("There were no free packets\n");
-#endif
+	if (!PacketQueue.Idle) {
+		hlbr_mutex_unlock (&PacketMutex);
 		return PACKET_NONE;
+	} else {
+		QNode* aux = PacketQueue.Idle;
+		PacketQueue.Idle = PacketQueue.Idle->next;
+
+		aux->next = PacketQueue.Allocated;
+		PacketQueue.Allocated = aux;
+
+		PacketSlot = aux->p;
+
+		Globals.AllocatedCount++;
+		Globals.IdleCount--;
+
+		hlbr_mutex_unlock (&PacketMutex);
 	}
+
+	Packet = &Globals.Packets[PacketSlot];
 
 	/*initialize the packet*/
+	Packet->PacketSlot = PacketSlot;
+	Packet->Status = PACKET_STATUS_ALLOCATED;
 	memset(Packet->RuleBits, 0xFF, MAX_RULES/8);
 	Packet->PacketLen = 0;
 	Packet->SaveCount = 0;
@@ -435,28 +485,23 @@ int GetEmptyPacket()
 	Packet->NumDecoderData = 0;
 	Packet->PassRawPacket = TRUE;
 	Packet->PacketNum = CurPacketNum++;
-	Packet->PacketSlot = i;
 	Packet->RawPacket = Packet->TypicalPacket;
 	Packet->LargePacket = FALSE;
 
-	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
-	Globals.AllocatedCount++;
-	Globals.IdleCount--;
-	hlbr_mutex_unlock(&PacketMutex);
-
-	return i;
+	return Packet->PacketSlot;
 }
 
 /**
  * Return a packet struct to the pool for reuse.
  */
-void ReturnEmptyPacket(int PacketSlot){
+void ReturnEmptyPacket(int PacketSlot) {
 	int 		i;
 	PacketRec*	p;
+	QNode*		aux;
 
 	DEBUGPATH;
 
-	if (Globals.Packets[PacketSlot].SaveCount < 1){
+	if (Globals.Packets[PacketSlot].SaveCount < 1) {
 		p=&Globals.Packets[PacketSlot];
 
 		if  (p->LargePacket){
@@ -472,33 +517,54 @@ void ReturnEmptyPacket(int PacketSlot){
 			p->DecoderInfo[p->DecodersUsed[i]].Data=NULL;
 		}
 
-		hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 1, &Globals.Packets[PacketSlot].LockID);
-		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
-		hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
-
 		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
+
 		switch(Globals.Packets[PacketSlot].Status){
 			case PACKET_STATUS_ALLOCATED:
+				aux = PacketQueue.Allocated;
+				PacketQueue.Allocated = PacketQueue.Allocated->next;
+
 				Globals.AllocatedCount--;
 				break;
 			case PACKET_STATUS_PROCESSING:
+				aux = PacketQueue.Processing;
+				PacketQueue.Processing = PacketQueue.Processing->next;
+
 				Globals.ProcessingCount--;
+				break;
+			case PACKET_STATUS_SAVED:
+				aux = PacketQueue.Saved;
+				PacketQueue.Saved = PacketQueue.Saved->next;
+
+				Globals.SavedCount--;
 				break;
 		}
 
-		LastFreeSlot = PacketSlot;
-		Globals.IdleCount++;
-	}else{
-		hlbr_mutex_lock(&Globals.Packets[PacketSlot].Mutex, 1, &Globals.Packets[PacketSlot].LockID);
-		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
-		hlbr_mutex_unlock(&Globals.Packets[PacketSlot].Mutex);
+		aux->next = PacketQueue.Idle;
+		PacketQueue.Idle = aux;
+		aux->p = PacketSlot;
 
+		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
+
+		Globals.IdleCount++;
+
+		hlbr_mutex_unlock(&PacketMutex);
+	} else if (Globals.Packets[PacketSlot].Status == PACKET_STATUS_PROCESSING) {
 		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
+
+		aux = PacketQueue.Processing;
+		PacketQueue.Processing = PacketQueue.Processing->next;
+
+		aux->next = PacketQueue.Saved;
+		PacketQueue.Saved = aux;
+
+		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
+
 		Globals.ProcessingCount--;
 		Globals.SavedCount++;
-	}
 
-	hlbr_mutex_unlock(&PacketMutex);
+		hlbr_mutex_unlock(&PacketMutex);
+	}
 
 #ifdef DEBUG_PACKETS
 	printf("There are:\n");
@@ -507,6 +573,7 @@ void ReturnEmptyPacket(int PacketSlot){
 	printf("  %i Saved\n",Globals.SavedCount);
 	printf("  %i Allocated\n",Globals.AllocatedCount);
 	printf("  %i Processing\n",Globals.ProcessingCount);
+	printf("  %i The Total sum\n", Globals.IdleCount+Globals.PendingCount+Globals.SavedCount+Globals.AllocatedCount+Globals.ProcessingCount);
 #endif
 }
 

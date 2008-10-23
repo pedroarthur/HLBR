@@ -48,7 +48,7 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 	for ( TimerID = 0 ; TimerID < MAX_TIMERS ; TimerID++)
 		if (Globals.Timers[TimerID].InUse==FALSE)
 			break;
-	
+
 	if (TimerID == MAX_TIMERS)
 		return TIMER_NONE;
 
@@ -123,7 +123,7 @@ int hlbr_daemon(int nochdir, int noclose){
 		printf("Failed to enter daemon mode\n");
 		exit(1);
 	}
-#else	/* !HAS_DAEMON */
+#else
 	switch (fork()){
 		case -1:
 			printf("fork() failed\n");
@@ -133,7 +133,7 @@ int hlbr_daemon(int nochdir, int noclose){
 		default:
 			exit(0);
 	}
-	
+
 	if (setsid() == -1)
 		exit(0);
 
@@ -145,7 +145,7 @@ int hlbr_daemon(int nochdir, int noclose){
 		if (fd>2)
 			close(fd);
 	}
-#endif	/* HAS_DAEMON */
+#endif
 	return TRUE;
 }
 
@@ -154,7 +154,7 @@ int hlbr_daemon(int nochdir, int noclose){
 ************************************/
 int ParseArgs(int argc, char **argv){
 	int c;
-	
+
 	DEBUGPATH;
 
 #define HOG_PARSEARGS_FLAGS "c:r:tn:l:dhv"
@@ -169,7 +169,7 @@ int ParseArgs(int argc, char **argv){
 			{"rules", 1, 0, 'r'},
 			{"test", 0, 0, 't'},
 			{"number", 1, 0, 'n'},
-			{"log", 1, 0, 'l'},				   
+			{"log", 1, 0, 'l'},
 			{"daemon", 0, 0, 'd'},
 			{"help", 0, 0, 'h'},
 			{"version", 0, 0, 'v'},
@@ -178,7 +178,7 @@ int ParseArgs(int argc, char **argv){
 
 		c = getopt_long (argc, argv, HOG_PARSEARGS_FLAGS,
                         long_options, &option_index);
-#endif						
+#endif
 		if (c == -1)
 			break;
 
@@ -225,7 +225,7 @@ int ParseArgs(int argc, char **argv){
 				exit(0);
 			default:
 				printf("Unknown option\n");
-		}	
+		}
 	}
 
 	if (!Globals.LogDir){
@@ -244,20 +244,20 @@ int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID){
 	return TRUE;
 #else
 	int	result;
-	
+
 	if (!Globals.UseThreads)
 		return TRUE;
 
 	result = pthread_mutex_lock(mutex);
-#ifdef DEBUGLOCKS	
+#ifdef DEBUGLOCKS
 	*LockID=ID;
-#endif	
+#endif
 	return result;
 #endif
 }
 
 /**************************************************
-* Abstract away the thread locking for 
+* Abstract away the thread locking for
 * ease of programming
 **************************************************/
 int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID){
@@ -270,7 +270,7 @@ int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID){
 		return TRUE;
 
 	result = pthread_mutex_trylock(mutex);
-#ifdef DEBUGLOCKS	
+#ifdef DEBUGLOCKS
 	*LockID=ID;
 #endif
 	return result;
@@ -296,6 +296,7 @@ int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
 * Handle the signals
 *************************************/
 void HandleSignal(int signal){
+	int i;
 
 	DEBUGPATH;
 
@@ -304,8 +305,11 @@ void HandleSignal(int signal){
 		case SIGQUIT:
 		case SIGTERM:
 			printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());
-			
-			// Removing the pid file
+#ifdef MTHREADS
+			for (i = 0 ; i < Globals.UseThreads ; i++) {
+				pthread_cancel (Globals.Threads[i]);
+			}
+#endif
 			if (remove(Globals.PidFilename))
 				fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
 
@@ -329,7 +333,7 @@ int main(int argc, char**argv)
 		PrintUsage();
 		return FALSE;
 	}
-	
+
 	if (!ParseArgs(argc, argv)){
 		printf("Couldn't understand command line, quitting\n\n");
 		PrintUsage();
@@ -421,7 +425,6 @@ int GetListByName(char* Name){
 	}
 
 	return LIST_NONE;
-
 }
 
 /*****************************************
@@ -590,7 +593,7 @@ int LogMessage(char* Message, LogFileRec* Data)
 	FILE*		fp;
 
 	DEBUGPATH;
-	
+
 	if (!Data)
 		fp = stdout;
 	else {
@@ -621,10 +624,10 @@ int LogMessage(char* Message, LogFileRec* Data)
 		//if (!LogFile(Data))
 		//return FALSE;
 	}
-	
+
 	fwrite(Message, strlen(Message), 1, fp);
 	fwrite("\n", 1, 1, fp);
-	
+
 	if (Data) {
 		//CloseLogFile((LogFileRec*)Data);
 #ifndef KEEP_LOGFILE_OPEN
@@ -634,7 +637,7 @@ int LogMessage(char* Message, LogFileRec* Data)
 #endif
 			fprintf(stderr, "Error closing/flushing log file %s\n", Data->fname);
 	}
-	
+
 	return TRUE;
 }
-#endif KEEP_LOGFILE_OPEN
+#endif
