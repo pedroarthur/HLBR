@@ -36,7 +36,7 @@
 
 /* Defines behaviour of logging files.
  * Default behaviour is to open and close the file every time a message is written.
- * Uncomment this if you want to open the file only once and keep it open
+ * Uncomment this if you want to open the file only once and keep it open (enables a thread only for log keeping)
  */
 //#define KEEP_LOGFILE_OPEN
 
@@ -359,16 +359,15 @@ typedef struct timer_rec{
 typedef struct log_file_rec {
 	char	fname[1024];
 	FILE*	fp;
-#ifdef MTHREADS
-	pthread_mutex_t		FileMutex;
-	int			FileLockID;
-#endif
+  //#ifdef HAS_THREADS
+  //	pthread_mutex_t		FileMutex;
+  //	int			FileLockID;
+  //#endif
 } LogFileRec;
 
-pthread_mutex_t			LogThreadMutex;
 
 
-typedef struct global_vars{
+typedef struct global_vars {
 	char*			SensorName;
 	int			SensorID;
 
@@ -431,8 +430,10 @@ typedef struct global_vars{
 #ifdef KEEP_LOGFILE_OPEN
 	LogFileRec*		LogFiles[MAX_LOG_FILES];
 	int			NumLogFiles;
-	char[MAX_MESSAGE_SIZE]	LogMessages[MAX_LOG_FILES];
+	char[MAX_MESSAGE_SIZE+1]	LogMessages[MAX_LOG_FILES];
+	LogFileRec*		LogMessagesDest[MAX_LOG_FILES];
 	int			NumLogMessages;
+	pthread_mutex_t		LogThreadMutex;	/**< for controlling access to LogMessages[] */
 #endif
 
 	FuncList*		ShutdownFuncs;

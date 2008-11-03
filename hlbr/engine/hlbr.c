@@ -235,11 +235,12 @@ int ParseArgs(int argc, char **argv){
 	return TRUE;
 }
 
-/**************************************************
-* Abstract away the thread locking for 
-* ease of programming
-**************************************************/
-int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID){
+/**
+ * Abstract away the thread locking for ease of programming.
+ * If HAS_THREADS is not defined (program runs in only one thread), this function does nothing.
+ */
+int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID)
+{
 #ifndef HAS_THREADS
 	return TRUE;
 #else
@@ -250,17 +251,18 @@ int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID){
 
 	result = pthread_mutex_lock(mutex);
 #ifdef DEBUGLOCKS
-	*LockID=ID;
+	*LockID = ID;
 #endif
 	return result;
 #endif
 }
 
-/**************************************************
-* Abstract away the thread locking for
-* ease of programming
-**************************************************/
-int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID){
+/**
+ * Abstract away the thread locking for ease of programming
+ * @see hlbr_mutex_lock()
+ */
+int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID)
+{
 #ifndef HAS_THREADS
 	return TRUE;
 #else
@@ -277,11 +279,12 @@ int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID){
 #endif
 }
 
-/**************************************************
-* Abstract away the thread locking for 
-* ease of programming
-**************************************************/
-int hlbr_mutex_unlock(pthread_mutex_t*	mutex){
+/**
+ * Abstract away the thread locking for ease of programming.
+ * @see hlbr_mutex_lock()
+ */
+int hlbr_mutex_unlock(pthread_mutex_t*	mutex)
+{
 #ifndef HAS_THREADS
 	return TRUE;
 #else
@@ -584,11 +587,38 @@ void CloseLogFile(LogFileRec* log)
 } */
 
 /**
- * Write the message directly to a log file.
- * If the LogFileRec passed is NULL, then writes to standard output.
+ * Write the message to a log file. If the LogFileRec passed is NULL, then writes to standard output.
+ * If KEEP_LOGFILE_OPEN is defined, this function actually just stores the message
+ * for processing by the log thread later.
  */
 #ifdef KEEP_LOGFILE_OPEN
 int LogMessage(char* Message, LogFileRec* Data)
+{
+  int i, r, LockID;
+
+  if (Globals.NumLogMessages >= MAX_LOG_FILES)
+    return false;
+
+  hlbr_mutex_lock(&Globals.LogThreadMutex, 0, &LockID);
+
+  if (Globals.NumLogMessages >= MAX_LOG_FILES)
+    return false;
+  
+  r = false;
+  for (i=0; i < MAX_LOG_FILES; i++)
+    if (Globals.LogMessagesDest[i] == NULL) {
+      strncpy(Globals.LogMessages[i], Message, MAX_MESSAGE_SIZE);
+      LogMessagesDest[i] = Data;
+      Globals.NumLogMessages++;
+      r = true;
+      break;
+    }
+
+  hlbr_mutex_unlock(&Globals.LogThreadMutex);
+
+  return r;
+}
+int LogMessage__(char* Message, LogFileRec* Data)
 {
 	FILE*		fp;
 
@@ -603,7 +633,8 @@ int LogMessage(char* Message, LogFileRec* Data)
 
 	fwrite(Message, strlen(Message), 1, fp);
 	fwrite("\n", 1, 1, fp);
-	fflush(fp);
+	if (fflush(fp) == EOF)
+	  fprintf(stderr, "Error flushing log file %s\n", Data->fname);
 
 	if (Data)
 		hlbr_mutex_unlock(&Data->FileMutex);
@@ -630,14 +661,10 @@ int LogMessage(char* Message, LogFileRec* Data)
 
 	if (Data) {
 		//CloseLogFile((LogFileRec*)Data);
-#ifndef KEEP_LOGFILE_OPEN
 		if (fclose(fp) == EOF)
-#else
-		if (fflush(fp) == EOF)
-#endif
-			fprintf(stderr, "Error closing/flushing log file %s\n", Data->fname);
+			fprintf(stderr, "Error closing log file %s\n", Data->fname);
 	}
 
 	return TRUE;
 }
-#endif
+#endif	//KEEP_LOGFILE_OPEN

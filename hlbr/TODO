@@ -1,16 +1,19 @@
-To next versions:
+Current version:
 
 - finish implementation of the logThread (keeps/updates all logfiles);
    implement function to manage string buffers for messages;
    define KEEP_LOGFILE_OPEN and fix stuff so that works; change
    action_alert_file.c to use LogMessage
+
+Next versions:
+
 - finish documentation at site
 - create faq
-- insert logic operations (not, and, or)
+- Implement other protocol parsing (like, say, checking HTTP options or decoding SMTP)
+- Integrate the VoIP code that's currently under "testing" status; maybe re-code stuff
+- create some form of rules correlation (like in the Shoki project)
 - add possibility of daemon reload
-- implement AI
-- integration with clamav
-- create documentation about AI
+- add rules reload
 - create a remote GUI?
 - rules, rules and more rules...
 

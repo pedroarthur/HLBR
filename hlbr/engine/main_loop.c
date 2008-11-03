@@ -442,14 +442,39 @@ int MainLoop()
  */
 void* ProcessLogFilesThread(void* v)
 {
-    DEBUGPATH;
+	int 	i, LockID;
+	FILE*	fp;
 
-    while (!Globals.Done) {
-	// pop next line to write
-	// write it, else IdleFunc()
-	IdleFunc();
-    }
+	DEBUGPATH;
 
-    return NULL;
+	while (!Globals.Done) {
+		if (Globals.NumLogMessages > 0) {
+			hlbr_mutex_lock(&Globals.LogThreadMutex, 0, &LockID);
+			for (i=0; i<=MAX_LOG_FILES; i++) {
+				if (!Globals.LogMessagesDest[i])
+					fp = stdout;
+				else {
+					fp = Globals.LogMessagesDest[i]->fp;
+					//hlbr_mutex_lock(&Data->FileMutex, 0, &Data->FileLockID);
+				}
+
+				fwrite(Globals.LogMessages[i], strlen(Globals.LogMessages[i]), 1, fp);
+				fwrite("\n", 1, 1, fp);
+				if (fflush(fp) == EOF)
+					fprintf(stderr, "Error flushing log file %s\n", (fp == stdout ? "<stdout>" : Data->fname));
+
+				//if (Data)
+				//	hlbr_mutex_unlock(&Data->FileMutex);
+			}
+		} else
+			sleep(1);
+	}
+
+	// Ending program, close all file handlers
+	for (i=0; i<MAX_LOG_FILES; i++)
+		if (LogFiles[i] != NULL)
+			fclose(LogFiles[i].fp);
+
+	return NULL;
 }
 #endif //KEEP_LOGFILE_OPEN
