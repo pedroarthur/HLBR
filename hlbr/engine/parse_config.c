@@ -1,3 +1,6 @@
+//#define DEBUG
+//#define DEBUGPATH
+
 #include "../config.h"
 #include "parse_config.h"
 #include "../packets/packet.h"
@@ -16,14 +19,12 @@
 
 extern GlobalVars	Globals;
 
-//#define DEBUGPATH
-//#define DEBUG
-
-/****************************************
-* Get a line out of the rules file
-* TODO: Make this recursive
-****************************************/
-int GetLine(FILE* fp, char* buff, int buff_len){
+/**
+ * Get a line out of the rules file.
+ * TODO: Make this recursive
+ */
+int GetLine(FILE* fp, char* buff, int buff_len)
+{
 	int 	Done;
 	char	LineBuff[65536];
 	char*	Begin;
@@ -154,14 +155,15 @@ int ParseList(FILE* fp, char* Name, int ListType){
 }
 
 
-/***********************************
-* Make sense out of this action
-***********************************/
-int ParseAction(FILE* fp, char* Name){
+/**
+ * Make sense out of this action. 
+ */
+int ParseAction(FILE* fp, char* Name)
+{
 	char		LineBuff[10240];
-	int			ActionNum;
+	int		ActionNum;
 	ActionRec*	Action;
-	int			ActionItemID;
+	int		ActionItemID;
 	char*		Args;
 	char*		Args2;
 	
@@ -171,53 +173,56 @@ int ParseAction(FILE* fp, char* Name){
 	printf("Parsing Action\n");
 #endif	
 
-	if (!Name) return FALSE;
+	if (!Name) 
+		return FALSE;
 	
-	while(*Name==' ') Name++;
+	while(*Name==' ') 
+		Name++;
 	
-	ActionNum=Globals.NumActions;
-	Action=&Globals.Actions[ActionNum];
+	ActionNum = Globals.NumActions;
+	Action = &Globals.Actions[ActionNum];
 	
-	/*set the defaults*/
+	/* set the defaults */
 	bzero(Action, sizeof(ActionRec));
 	snprintf(Action->Name, MAX_NAME_LEN, "%s",Name);
-	Action->ID=ActionNum;
+	Action->ID = ActionNum;
 
-	while(GetLine(fp, LineBuff, 10240)){
-		if (strcasecmp(LineBuff, "</action>")==0){
+	while(GetLine(fp, LineBuff, 10240)) {
+		if (strcasecmp(LineBuff, "</action>")==0) {
 #ifdef DEBUG
 			printf("All done with action \"%s\"\n",Action->Name);
 #endif			
 			Globals.NumActions++;
 			return TRUE;
-		}else if (strncasecmp(LineBuff, "response=",9)==0){
+		} else if (strncasecmp(LineBuff, "response=",9)==0) {
 #ifdef DEBUG
 			printf("Adding Response %s\n",LineBuff+9);
 #endif
-			Args=strchr(LineBuff+9,'(');
-			if (Args){
-				Args2=strchr(Args, ')');
-				if (!Args2){
+			Args = strchr(LineBuff+9,'(');
+			if (Args) {
+				Args2 = strchr(Args, ')');
+				if (!Args2) {
 					printf("Expected \"(\"\n");
 					return FALSE;
 				}
-				*Args=0x00;
+				*Args = 0x00;
 				Args++;
-				*Args2=0x00;
+				*Args2 = 0x00;
 			}
 			
-			ActionItemID=GetActionByName(LineBuff+9);
-			if (ActionItemID==ACTION_NONE){
-				printf("There is no response named \"%s\"\n",LineBuff+9);
+			ActionItemID = GetActionByName(LineBuff+9);
+			if (ActionItemID == ACTION_NONE) {
+				printf("There is no response named \"%s\"\n", LineBuff+9);
 				return FALSE;
 			}
 			
-			Action->ActionItems[Action->NumItems]=ActionItemID;
+			Action->ActionItems[Action->NumItems] = ActionItemID;
 			if (Globals.ActionItems[ActionItemID].ParseArgs)
-			if (Args) Action->ActionItemData[Action->NumItems]=Globals.ActionItems[ActionItemID].ParseArgs(Args);
+				if (Args)
+					Action->ActionItemData[Action->NumItems] = Globals.ActionItems[ActionItemID].ParseArgs(Args);
 			Action->NumItems++;			
-		}else{	
-			printf("I don't understand %s\n",LineBuff);
+		} else {	
+			printf("I don't understand %s\n", LineBuff);
 		}
 	}
 	
@@ -575,3 +580,11 @@ int ParseConfig(){
 
 	return TRUE;
 }
+
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
+#ifdef DEBUGPATH
+#undef DEBUGPATH
+#endif

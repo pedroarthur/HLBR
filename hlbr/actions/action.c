@@ -1,3 +1,5 @@
+//#define DEBUG
+
 #include "action.h"
 #include <stdio.h>
 #include <string.h>
@@ -17,7 +19,6 @@
 #include "action_alert_socket.h"
 #include "action_alert_listensocket.h"
 
-//#define DEBUG
 
 extern GlobalVars Globals;
 
@@ -99,35 +100,35 @@ int BuildMessageString(char* Message, int PacketSlot, char* TargetBuff, int Targ
 	return FALSE;
 }
 
-/************************************
-* We've got rules matches, perform
-* the actions
-************************************/
-int PerformActions(int PacketSlot){
-	int	i;
-	int j;
+/**
+ * We've got rules matches, perform the actions.
+ */
+int PerformActions(int PacketSlot)
+{
+	int		i;
+	int 		j;
 	ActionRec*	Action;
 	PacketRec*	p;
 
 	DEBUGPATH;
 
-	p=&Globals.Packets[PacketSlot];
+	p = &Globals.Packets[PacketSlot];
 	Globals.AlertCount++;
 
 #ifdef DEBUG
 	printf("----------------------------\n");
 	printf("Results:\n");
 #endif	
-	for (i=0;i<Globals.NumRules;i++){
-		if (RuleIsActive(PacketSlot, i)){
-#ifdef DEBUG		
+	for (i=0;i<Globals.NumRules;i++) {
+		if (RuleIsActive(PacketSlot, i)) {
+#ifdef DEBUG
 			printf("Rule %i Matches\n", i);
 			printf("ActionID is %i\n",Globals.Rules[i].Action);
 			printf("There are %i items\n",Globals.Actions[Globals.Rules[i].Action].NumItems);
 #endif			
-			/*call all of the actions*/
-			Action=&Globals.Actions[Globals.Rules[i].Action];
-			for (j=0;j<Action->NumItems;j++){
+			/* call all of the actions */
+			Action = &Globals.Actions[Globals.Rules[i].Action];
+			for (j=0; j<Action->NumItems; j++){
 				if (Globals.ActionItems[Action->ActionItems[j]].ActionFunc)
 					Globals.ActionItems[Action->ActionItems[j]].ActionFunc(i,PacketSlot,Globals.Actions[Globals.Rules[i].Action].ActionItemData[j]);
 			}
@@ -163,3 +164,8 @@ int	LogMessageAllActions(char* Message)
 	
 	return FALSE;
 }
+
+
+#ifdef DEBUG
+#undef DEBUG
+#endif

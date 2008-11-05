@@ -35,8 +35,10 @@
 #include "session.h"
 
 /* Defines behaviour of logging files.
- * Default behaviour is to open and close the file every time a message is written.
- * Uncomment this if you want to open the file only once and keep it open (enables a thread only for log keeping)
+ * If KEEP_LOGFILE_OPEN is defined, the log files will be opened only once and 
+ * kept open; also it will enable a thread only for log file keeping.
+ * If KEEP_LOGFILE_OPEN is NOT defined, the original behaviour will be used:
+ * the log files will be opened and closedevery time a message is written.
  */
 //#define KEEP_LOGFILE_OPEN
 
@@ -66,6 +68,7 @@
 #define MAX_PACKETS		1024
 #ifdef KEEP_LOGFILE_OPEN
 #define MAX_LOG_FILES		16
+#define MAX_LOG_BUFFERS		(MAX_LOG_FILES*2)
 #define MAX_MESSAGE_SIZE	4096
 #endif
 
@@ -83,32 +86,12 @@
 
 
 
-
-/**********************************************
- * Some useful defines, mostly for convenience
- **********************************************/
-
-/* printfs
- * Use these instead of directly using printf/fprintf to stdout or stderr
- */
-#define PRINT(msg)			printf(msg)
-#define PRINT1(msg, p1)			printf(msg, p1)
-#define PRINT2(msg, p1, p2)		printf(msg, p1, p2)
-#define PRINT3(msg, p1, p2, p3)		printf(msg, p1, p2, p3)
-#define PRINTERROR(msg)			fprintf(stderr, msg)
-#define PRINTERROR1(msg, p1)		fprintf(stderr, msg, p1)
-#define PRINTERROR2(msg, p1, p2)	fprintf(stderr, msg, p1, p2)
-#define PRINTERROR3(msg, p1, p2, p3)	fprintf(stderr, msg, p1, p2, p3)
-#define PRINTERROR4(msg, p1, p2, p3, p4)		fprintf(stderr, msg, p1, p2, p3, p4)
-#define PRINTERROR5(msg, p1, p2, p3, p4, p5)		fprintf(stderr, msg, p1, p2, p3, p4, p5)
-#define PRINTERROR6(msg, p1, p2, p3, p4, p5, p6)	fprintf(stderr, msg, p1, p2, p3, p4, p5, p6)
-
 /* This define is for printing packet details in stderr.
  * Depends on the PrintPacketSummary() and PrintSessionSummary() functions,
  * defined at session.c
  */
-#define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
-#define PRINTSESERROR(pp, cr)		PrintSessionSummary(stderr, pp, cr)
+//#define PRINTPKTERROR(p, ip, tcp, cr)	PrintPacketSummary(stderr, p, ip, tcp, cr)
+//#define PRINTSESERROR(pp, cr)		PrintSessionSummary(stderr, pp, cr)
 
 
 
@@ -123,7 +106,7 @@
 #define MALLOC malloc
 #define MALLOC_CHECK(x) { \
 	if (x == NULL) { \
-		PRINTERROR2("Couldn't allocate memory! (%s():%d)\n", __FUNCTION__, __LINE__); \
+		fprintf(stderr, "Couldn't allocate memory! (%s():%d)\n", __FUNCTION__, __LINE__); \
 		return NULL; \
 	} \
 }
@@ -132,7 +115,7 @@
 	if (x != NULL) { \
 		free(x); \
 	} else { \
-		PRINTERROR3("Attempting to free a NULL pointer at 0x%x (%s():%d)\n", x, __FUNCTION__, __LINE__); \
+		fprintf(stderr, "Attempting to free a NULL pointer at 0x%x (%s():%d)\n", x, __FUNCTION__, __LINE__); \
 	} \
 }
 
@@ -352,20 +335,6 @@ typedef struct timer_rec{
 	int (*TimerFunc) (int TimerID, int Time, void* User);
 } TimerRec;
 
-/**
- * Struct used to keep names/handlers/etc of log files.
- * This is mainly used (now) by action alert file.
- */
-typedef struct log_file_rec {
-	char	fname[1024];
-	FILE*	fp;
-  //#ifdef HAS_THREADS
-  //	pthread_mutex_t		FileMutex;
-  //	int			FileLockID;
-  //#endif
-} LogFileRec;
-
-
 
 typedef struct global_vars {
 	char*			SensorName;
@@ -427,15 +396,6 @@ typedef struct global_vars {
 
 	TimerRec		Timers[MAX_TIMERS];
 
-#ifdef KEEP_LOGFILE_OPEN
-	LogFileRec*		LogFiles[MAX_LOG_FILES];
-	int			NumLogFiles;
-	char[MAX_MESSAGE_SIZE+1]	LogMessages[MAX_LOG_FILES];
-	LogFileRec*		LogMessagesDest[MAX_LOG_FILES];
-	int			NumLogMessages;
-	pthread_mutex_t		LogThreadMutex;	/**< for controlling access to LogMessages[] */
-#endif
-
 	FuncList*		ShutdownFuncs;
 
 	/*statistical counts*/
@@ -446,7 +406,7 @@ typedef struct global_vars {
 	/* logging flags */
 	unsigned char		logSession_StartEnd;
 	unsigned char		logSession_All;
-	LogFileRec		logSessionFile;
+	//LogFileRec		logSessionFile;
 #ifdef KEEP_LOGFILE_OPEN
 	pthread_t		logThread;
 #endif
@@ -487,7 +447,7 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 
 //FILE* LogFile(LogFileRec*);
 //void CloseLogFile(LogFileRec*);
-int LogMessage(char*, LogFileRec*);
-LogFileRec* OpenLogFile(char*);
+//int LogMessage(char*, LogFileRec*);
+//LogFileRec* OpenLogFile(char*);
 
 #endif // _HLBR_H_

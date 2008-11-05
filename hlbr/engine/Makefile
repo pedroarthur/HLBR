@@ -13,6 +13,7 @@ cache.o         \
 jtree.o 	\
 regex.o		\
 url.o		\
+logfile.o	\
 hlbrlib.o
 
 clean:
@@ -31,6 +32,9 @@ regex.o: regex.c regex.h ../config.h hlbr.h
 url.o: url.c url.h ../config.h hlbr.h
 	$(CC) -c -o url.o url.c $(DEBUG)
 
+logfile.o: logfile.c logfile.h ../config.h hlbr.h
+	$(CC) -c -o logfile.o logfile.c $(DEBUG)
+
 cache.o: cache.c cache.h ../config.h hlbr.h
 	$(CC) -c -o cache.o cache.c $(DEBUG)
 
@@ -39,7 +43,7 @@ message.o: message.c message.h ../config.h hlbr.h
 
 num_list.o: num_list.c num_list.h ../config.h hlbr.h
 	$(CC) -c -o num_list.o num_list.c $(DEBUG)
-	
+
 jtree.o: jtree.c jtree.h ../config.h hlbr.h
 	$(CC) -c -o jtree.o jtree.c $(DEBUG)
 

@@ -1,12 +1,12 @@
+//#define DEBUG
+
 #include "action_alert_file.h"
 #include <stdio.h>
 #include "../engine/message.h"
+#include "../engine/logfile.h"
 #include "../engine/hlbr.h"
 #include <stdlib.h>
 #include <string.h>
-
-
-//#define DEBUG
 
 extern GlobalVars	Globals;
 
@@ -15,14 +15,14 @@ extern GlobalVars	Globals;
  */
 void* AlertFileParseArgs(char* Args)
 {
+/*
 	FILE*		fp;
-
 	LogFileRec*	data;
 	char		FileName[1024];
-
+*/
 	DEBUGPATH;
-
-	snprintf(FileName,1024,"%s%s",Globals.LogDir, Args);
+/*
+	snprintf(FileName, 1024, "%s%s", Globals.LogDir, Args);
 	fp = fopen(FileName, "a");
 	if (!fp) {
 		PRINTERROR1("Couldn't open file \"%s\" for appending\n", FileName);
@@ -34,6 +34,12 @@ void* AlertFileParseArgs(char* Args)
 	snprintf(data->fname, 1024, "%s", FileName);
 
 	return data;
+*/
+#ifdef DEBUG
+	printf("AlertFileParseArgs: received %s\n", Args);
+#endif
+
+	return OpenLogFile(Args);
 }
 
 
@@ -44,6 +50,15 @@ void* AlertFileParseArgs(char* Args)
  */
 int AlertFileMessage(char* Message, void* Data)
 {
+	int r;
+	
+	r = LogMessage(Message, Data);
+
+	if (!r)
+		fprintf(stderr, "In AlertFileMessage: Could not log a message to a logfile! Message: %s\n", Message);
+
+	return r;
+/*
 	LogFileRec*	data;
 	FILE*		fp;
 #ifdef MTHREADS
@@ -90,6 +105,7 @@ int AlertFileMessage(char* Message, void* Data)
 #endif
 
 	return TRUE;
+*/
 }
 
 /**
@@ -97,8 +113,10 @@ int AlertFileMessage(char* Message, void* Data)
  */
 int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 {
-	char		Buffa[1024];
-	char		Buffb[1024];
+	//char		Buffa[1024];
+	//char		Buffb[1024];
+	char		Buff[2048];
+	int		b;
 	FILE*		fp;
 	LogFileRec*	data;
 	PacketRec*	p;
@@ -109,55 +127,65 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	DEBUGPATH;
 
 	if (!Data) {
-		PRINTERROR("AlertFileAction: Must have a filename to write to!\n");
+		fprintf(stderr, "AlertFileAction: Must have a filename to write to!\n");
 		return FALSE;
 	}
 
 	p = &Globals.Packets[PacketSlot];
 	data = (LogFileRec*)Data;
-
-	if (!ApplyMessage(Globals.AlertHeader, PacketSlot, Buffa, 1024)) {
-		PRINTERROR("AlertFileAction: Couldn't alert header to packet\n");
-		return FALSE;
-	}
-
-	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, Buffb, 1024)) {
-		PRINTERROR("AlertFileAction: Couldn't apply message to packet\n");
-		return FALSE;
-	}
-
-#ifdef MTHREADS
-	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
+#ifdef DEBUG
+	printf("AlertFileAction: message to logfile %x (%s)\n", data, data->fname);
 #endif
+
+	if (!ApplyMessage(Globals.AlertHeader, PacketSlot, Buff, 1024)) {
+		fprintf(stderr, "AlertFileAction: Couldn't alert header to packet\n");
+		return FALSE;
+	}
+	b = strlen(Buff);
+	Buff[b] = ' ';
+	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, &Buff[b+1], 1024)) {
+		fprintf(stderr, "AlertFileAction: Couldn't apply message to packet\n");
+		return FALSE;
+	}
+
+//#ifdef MTHREADS
+//	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
+//#endif
 	//fp = LogFile(data);
+	/*
 	fp = fopen(data->fname, "a");
 
 	if (!fp) {
-		PRINTERROR1("AlertFileAction: Couldn't open \"%s\" for writing\n",data->fname);
+		fprintf(stderr, "AlertFileAction: Couldn't open \"%s\" for writing\n", data->fname);
 #ifdef MTHREADS
 		hlbr_mutex_unlock (&data->FileMutex);
 #endif
 		return FALSE;
 	}
+	*/
 
-#ifdef MTHREADS
-	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
-#endif
+//#ifdef MTHREADS
+//	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
+//#endif
+/*
 	fwrite(Buffa, strlen(Buffa), 1, fp);
 	fwrite(" ", 1, 1, fp);
 
 	fwrite(Buffb, strlen(Buffb), 1, fp);
 	fwrite("\n", 1, 1, fp);
-#ifdef MTHREADS
-	pthread_setcancelstate (ocs, NULL);
-#endif
+*/
+//#ifdef MTHREADS
+//	pthread_setcancelstate (ocs, NULL);
+//#endif
 
 	//CloseLogFile(data);
+	/*
 	fclose(fp);
-#ifdef MTHREADS
-	hlbr_mutex_unlock (&data->FileMutex);
-#endif
-	return TRUE;
+	*/
+//#ifdef MTHREADS
+//	hlbr_mutex_unlock (&data->FileMutex);
+//#endif
+	return LogMessage(Buff, data);
 }
 
 /**
@@ -171,7 +199,7 @@ int InitActionAlertFile()
 
 	ActionID = CreateAction("alert file");
 	if (ActionID == ACTION_NONE) {
-		PRINTERROR("InitActionAlertFile: Couldn't allocate action alert file\n");
+		fprintf(stderr, "InitActionAlertFile: Couldn't allocate action alert file\n");
 		return FALSE;
 	}
 
@@ -181,3 +209,8 @@ int InitActionAlertFile()
 
 	return TRUE;
 }
+
+
+#ifdef DEBUG
+#undef DEBUG
+#endif

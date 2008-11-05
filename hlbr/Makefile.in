@@ -34,6 +34,7 @@ HLBR_OBJECTS= \
   engine/regex.o \
   engine/hlbrlib.o \
   engine/url.o \
+  engine/logfile.o \
   packets/packet.o \
   packets/packet_linux_raw.o \
   packets/packet_obsd_bpf.o \
