@@ -68,38 +68,39 @@ int AlertFileMessage(char* Message, void* Data)
 	DEBUGPATH;
 
 	if (!Data) {
-		PRINTERROR("I must have a filename to write to!\n");
+		fprintf(stderr, "I must have a filename to write to!\n");
 		return FALSE;
 	}
 
-	data = (LogFileRec*)Data;
+	data = OpenLogFile((LogFileRec*)Data);
 
 #ifdef MTHREADS
 	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
 #endif
 	//fp = LogFile(data);
-	fp = fopen(data->fname, "a");
+	//fp = fopen(data->fname, "a");
 
-	if (!fp) {
+	//if (!fp) {
 #ifdef MTHREADS
-		hlbr_mutex_unlock (&data->FileMutex);
+	//	hlbr_mutex_unlock (&data->FileMutex);
 #endif
-		return FALSE;
-	}
+	//	return FALSE;
+	//}
 
 #ifdef MTHREADS
 	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
 #endif
 
-	fwrite(Message, strlen(Message), 1, fp);
-	fwrite("\n", 1, 1, data->fp);
+	//fwrite(Message, strlen(Message), 1, fp);
+	//fwrite("\n", 1, 1, data->fp);
+	LogMessage(Message, data);
 
 #ifdef MTHREADS
 	pthread_setcancelstate (ocs, NULL);
 #endif
 
-	//CloseLogFile(data);
-	fclose(fp);
+	CloseLogFile(data);
+	//fclose(fp);
 #ifdef MTHREADS
 	hlbr_mutex_unlock (&data->FileMutex);
 #endif
@@ -118,7 +119,7 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	char		Buff[2048];
 	int		b;
 	FILE*		fp;
-	LogFileRec*	data;
+	//LogFileRec*	data;
 	PacketRec*	p;
 #ifdef MTHREADS
 	int		ocs;
@@ -132,7 +133,8 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	}
 
 	p = &Globals.Packets[PacketSlot];
-	data = (LogFileRec*)Data;
+	//data = (LogFileRec*)Data;
+	//data = OpenLogFile((LogFileRec*)Data);
 #ifdef DEBUG
 	printf("AlertFileAction: message to logfile %x (%s)\n", data, data->fname);
 #endif
@@ -147,45 +149,45 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 		fprintf(stderr, "AlertFileAction: Couldn't apply message to packet\n");
 		return FALSE;
 	}
-
-//#ifdef MTHREADS
-//	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
-//#endif
-	//fp = LogFile(data);
-	/*
-	fp = fopen(data->fname, "a");
-
-	if (!fp) {
-		fprintf(stderr, "AlertFileAction: Couldn't open \"%s\" for writing\n", data->fname);
-#ifdef MTHREADS
-		hlbr_mutex_unlock (&data->FileMutex);
-#endif
-		return FALSE;
-	}
-	*/
-
-//#ifdef MTHREADS
-//	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
-//#endif
 /*
-	fwrite(Buffa, strlen(Buffa), 1, fp);
+#ifdef MTHREADS
+	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
+#endif
+	//fp = LogFile(data);
+	//fp = fopen(data->fname, "a");
+
+	//if (!fp) {
+	//	fprintf(stderr, "AlertFileAction: Couldn't open \"%s\" for writing\n", data->fname);
+#ifdef MTHREADS
+	//	hlbr_mutex_unlock (&data->FileMutex);
+#endif
+	//	return FALSE;
+	//}
+
+#ifdef MTHREADS
+	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
+#endif
+
+	//fwrite(Buff, strlen(Buff), 1, fp);
 	fwrite(" ", 1, 1, fp);
 
-	fwrite(Buffb, strlen(Buffb), 1, fp);
-	fwrite("\n", 1, 1, fp);
-*/
-//#ifdef MTHREADS
-//	pthread_setcancelstate (ocs, NULL);
-//#endif
+	fwrite(Buffb, strlen(Buffb), 1, fp); 
+	//fwrite("\n", 1, 1, fp);
+	//fflush(fp);
+	//LogMessage(Buff, (LogFileRec*)Data);
+
+#ifdef MTHREADS
+	pthread_setcancelstate (ocs, NULL);
+#endif
 
 	//CloseLogFile(data);
-	/*
-	fclose(fp);
-	*/
-//#ifdef MTHREADS
-//	hlbr_mutex_unlock (&data->FileMutex);
-//#endif
-	return LogMessage(Buff, data);
+	//fclose(fp);
+
+#ifdef MTHREADS
+	hlbr_mutex_unlock (&data->FileMutex);
+#endif
+*/
+	return LogMessage(Buff, (LogFileRec*)Data);
 }
 
 /**

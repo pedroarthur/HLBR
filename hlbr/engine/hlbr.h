@@ -40,7 +40,7 @@
  * If KEEP_LOGFILE_OPEN is NOT defined, the original behaviour will be used:
  * the log files will be opened and closedevery time a message is written.
  */
-//#define KEEP_LOGFILE_OPEN
+#define KEEP_LOGFILE_OPEN
 
 
 #define MAX_PACKET_SIZE		65536+14+1
