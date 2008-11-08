@@ -1,3 +1,6 @@
+//#define DEBUG
+//#define DEBUGLOCKS
+
 #include "hlbr.h"
 #include "parse_config.h"
 #include "parse_rules.h"
@@ -24,9 +27,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-//#define DEBUGPATH
-//#define DEBUG
-//#define DEBUGLOCKS
+/** @mainpage HLBR Code Documentation
+ * This is the documentation for HLBR's code, generated with Doxygen.\n
+ * HLBR code can be quite a bit hard to grasp at first glance; 
+ * if you want a place to start, I'd suggest you take a look at the 
+ * ProcessPacket() and Decode() functions.
+ */
 
 GlobalVars Globals;
 
@@ -337,7 +343,7 @@ int main(int argc, char**argv)
 		return FALSE;
 	}
 
-#ifdef KEEP_LOGFILE_OPEN
+#ifdef LOGFILE_THREAD
 	InitLogFiles();	/* before parsing config file */
 #endif
 
@@ -484,3 +490,10 @@ int CallShutdownHandlers(){
 	return TRUE;
 }
 
+
+#ifdef DEBUG
+#undef DEBUG
+#endif
+#ifdef DEBUGLOCKS
+#undef DEBUGLOCKS
+#endif

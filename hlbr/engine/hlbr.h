@@ -34,14 +34,10 @@
 #include "num_list.h"
 #include "session.h"
 
-/* Defines behaviour of logging files.
- * If KEEP_LOGFILE_OPEN is defined, the log files will be opened only once and 
- * kept open; also it will enable a thread only for log file keeping.
- * If KEEP_LOGFILE_OPEN is NOT defined, the original behaviour will be used:
- * the log files will be opened and closedevery time a message is written.
+/**
+ * If LOGFILE_THREAD is defined, there will be a thread only for log file keeping.
  */
-#define KEEP_LOGFILE_OPEN
-
+#define LOGFILE_THREAD
 
 #define MAX_PACKET_SIZE		65536+14+1
 #define TYPICAL_PACKET_SIZE	16000
@@ -66,11 +62,6 @@
 #define MAX_LISTS		16
 #define MAX_TIMERS		16
 #define MAX_PACKETS		1024
-#ifdef KEEP_LOGFILE_OPEN
-#define MAX_LOG_FILES		16
-#define MAX_LOG_BUFFERS		(MAX_LOG_FILES*2)
-#define MAX_MESSAGE_SIZE	4096
-#endif
 
 #define DEFAULT_SENSOR_NAME	"Default Sensor"
 #define DEFAULT_SENSOR_ID	0
@@ -407,7 +398,7 @@ typedef struct global_vars {
 	unsigned char		logSession_StartEnd;
 	unsigned char		logSession_All;
 	//LogFileRec		logSessionFile;
-#ifdef KEEP_LOGFILE_OPEN
+#ifdef LOGFILE_THREAD
 	pthread_t		logThread;
 #endif
 } GlobalVars;

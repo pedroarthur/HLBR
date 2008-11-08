@@ -50,14 +50,15 @@ void* AlertFileParseArgs(char* Args)
  */
 int AlertFileMessage(char* Message, void* Data)
 {
-	int r;
+	int buf;
 	
-	r = LogMessage(Message, Data);
-
-	if (!r)
+	//r = LogMessage(Message, Data);
+	buf = GetLogBuffer();
+	if (buf == LOGBUFFER_NOBUFFER)
 		fprintf(stderr, "In AlertFileMessage: Could not log a message to a logfile! Message: %s\n", Message);
+	strncpy(LogBuffer(buf), Message, MAX_LOGBUFFER_SIZE);
+	return FlushLogBuffer(buf, Data);
 
-	return r;
 /*
 	LogFileRec*	data;
 	FILE*		fp;
@@ -116,8 +117,9 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 {
 	//char		Buffa[1024];
 	//char		Buffb[1024];
-	char		Buff[2048];
-	int		b;
+	//char		Buff[2048];
+	char*		Buff;
+	int		b, len;
 	FILE*		fp;
 	//LogFileRec*	data;
 	PacketRec*	p;
@@ -127,8 +129,8 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 
 	DEBUGPATH;
 
-	if (!Data) {
-		fprintf(stderr, "AlertFileAction: Must have a filename to write to!\n");
+	if ((int)Data == LOGFILE_NOFILE) {
+		fprintf(stderr, "AlertFileAction: Must have a log file to write to!\n");
 		return FALSE;
 	}
 
@@ -136,16 +138,23 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	//data = (LogFileRec*)Data;
 	//data = OpenLogFile((LogFileRec*)Data);
 #ifdef DEBUG
-	printf("AlertFileAction: message to logfile %x (%s)\n", data, data->fname);
+	printf("AlertFileAction: message to logfile %d\n", Data);
 #endif
 
-	if (!ApplyMessage(Globals.AlertHeader, PacketSlot, Buff, 1024)) {
+	b = GetLogBuffer();
+	if (b == LOGBUFFER_NOBUFFER) {
+		fprintf(stderr, "AlertFileAction: Couldn't get log buffer to write to\n");
+		return FALSE;
+	}
+	Buff = LogBuffer(b);
+
+	if (!ApplyMessage(Globals.AlertHeader, PacketSlot, Buff, MAX_LOGBUFFER_SIZE/2)) {
 		fprintf(stderr, "AlertFileAction: Couldn't alert header to packet\n");
 		return FALSE;
 	}
-	b = strlen(Buff);
-	Buff[b] = ' ';
-	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, &Buff[b+1], 1024)) {
+	len = strlen(Buff);
+	Buff[len] = ' ';
+	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, &Buff[len+1], MAX_LOGBUFFER_SIZE/2)) {
 		fprintf(stderr, "AlertFileAction: Couldn't apply message to packet\n");
 		return FALSE;
 	}
@@ -187,7 +196,7 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	hlbr_mutex_unlock (&data->FileMutex);
 #endif
 */
-	return LogMessage(Buff, (LogFileRec*)Data);
+	return FlushLogBuffer(b, (int)Data);
 }
 
 /**

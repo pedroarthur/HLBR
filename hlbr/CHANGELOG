@@ -1,3 +1,7 @@
+2008-11-08
+
+ * Thread for keeping of logfiles (ABA)
+
 2008-09-28
 
  * BUGFIX: Packet allocation status in GetEmptyPacket at packet.c (PAJ)

@@ -211,15 +211,15 @@ int ProcessPacket(int PacketSlot){
 	if (p->tv.tv_sec)
 		HandleTimers(p->tv.tv_sec);
 
-	if (!Decode(Globals.DecoderRoot, PacketSlot)){
+	if (!Decode(Globals.DecoderRoot, PacketSlot)) {
 		printf("Error Processing Packet\n");
 	}
 
-	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)){
+	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)) {
 #ifdef DEBUG
 		printf("There are rule matches\n");
 #endif
-		if (!PerformActions(PacketSlot)){
+		if (!PerformActions(PacketSlot)) {
 			printf("Failed to execute the actions\n");
 		}
 	}
@@ -372,9 +372,12 @@ int MainLoopThreaded()
 			return FALSE;
 		}
 
-#ifdef KEEP_LOGFILE_OPEN
+#ifdef LOGFILE_THREAD
 	/* start up the log files keeper thread */
 	pthread_create(&Globals.logThread, NULL, ProcessLogFilesThread, NULL);
+#endif
+#ifdef LOGFILE_THREAD_NO
+	fprintf(stderr, "Thread for log file keeping won't be created because we're running in non-threaded mode.\n");
 #endif
 
 #ifdef MTHREADS

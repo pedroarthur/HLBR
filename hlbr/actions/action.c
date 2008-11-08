@@ -143,11 +143,9 @@ int PerformActions(int PacketSlot)
 
 /**
  * Log a message, using all applicable responses in all defined actions.
- * Differentrly from LogMessage, this function searches for all responses in
- * all defined actions and calls every one of them.
- * @see LogMessage
+ * Searches for all responses in all defined actions and calls every one of them.
  */
-int	LogMessageAllActions(char* Message)
+int LogMessageAllActions(char* Message)
 {
 	int 		i,j;
 	ActionRec*	Action;
