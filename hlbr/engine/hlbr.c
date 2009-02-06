@@ -69,26 +69,27 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 }
 
 
-/**************************************
-* print out the version number
-***************************************/
-void PrintVersion() {
+/**
+ * Print out the version number.
+ */
+void PrintVersion()
+{
 	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
 	printf("http://hlbr.sourceforge.net\n\n");
-	printf("(Jason Larsen's Hogwash based)\n\n\n");
+	printf("(Based in Jason Larsen's Hogwash)\n\n\n");
 }
 
-/*************************************
-* Tell the user about the command line
-**************************************/
-void PrintUsage(){
-
+/**
+ * Tell the user about the command line.
+ */
+void PrintUsage()
+{
 	DEBUGPATH;
 
 	PrintVersion();
 
 	printf("HLBR eh um IPS brasileiro e alguns arquivos possuem frases em portugues e ingles.\n");
-	printf("HLBR is a Brazilian IPS and some files has phrases in portuguese and english.\n\n\n");
+	printf("HLBR is a brazilian IPS and some files have text in portuguese and english.\n\n\n");
 	printf("Utilizacao / Usage:\n");
 	printf("------------------\n");
 	printf("hlbr <args>\n");
