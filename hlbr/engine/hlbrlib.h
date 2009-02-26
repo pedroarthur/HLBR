@@ -3,26 +3,15 @@
 
 #include <stdio.h>
 
-#ifdef HAS_THREADS
-#include <pthread.h>
-#endif
-
 /**
  * Generic linked list struct for strings.
  * Used to queue a lot of things along the code
  */
-struct queue_t {
+typedef struct queue_t {
    char *item;
    struct queue_t *next;
-};
-typedef struct queue_t QueueList;
+} QueueList;
 
-
-
-
-/**************/
-/* Prototypes */
-/**************/
 char *ParseCmp(char *,char *);
 char *RmSpace(char *);
 
