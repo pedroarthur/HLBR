@@ -10,11 +10,14 @@
 #ifndef _HLBR_H_
 #define _HLBR_H_
 
+#include "../config.h"
+
 #include <sys/time.h>
+
 #ifdef HAS_THREADS
 #include <pthread.h>
 #endif
-#include "../config.h"
+
 #include "hlbrlib.h"
 
 // More debugging defines
