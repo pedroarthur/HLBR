@@ -22,12 +22,12 @@ extern GlobalVars Globals;
 * Set up all the routing code
 ***********************************/
 int InitRoutes(){
-  DEBUGPATH;
-	
+	DEBUGPATH;
+
+  	if (!InitSBridge()) return FALSE;
 	if (!InitRouteDIP()) return FALSE;
 	if (!InitRouteSIP()) return FALSE;
 	if (!InitMacFilter()) return FALSE;
-	if (!InitSBridge()) return FALSE;
 	if (!InitRouteBroadcast()) return FALSE;
 	if (!InitRouteARP()) return FALSE;
 	if (!InitRouteInterface()) return FALSE;
@@ -40,10 +40,13 @@ int InitRoutes(){
 * Put a new entry into the routing system
 ******************************************/
 int RouteAdd(int RouteID, char* Args){
-  DEBUGPATH;
+	DEBUGPATH;
 
-	if (RouteID>=Globals.NumRoutes) return FALSE;
-	if (!Globals.Routes[RouteID].AddNode) return FALSE;
+	if (RouteID>=Globals.NumRoutes)
+		return FALSE;
+
+	if (!Globals.Routes[RouteID].AddNode)
+		return FALSE;
 	
 	return Globals.Routes[RouteID].AddNode(RouteID, Args);
 }
@@ -52,7 +55,7 @@ int RouteAdd(int RouteID, char* Args){
 * Given an route's name, return
 * its ID
 ***********************************/
-int	GetRouteByName(char* Name){
+int GetRouteByName(char* Name){
 	int	i;
 
 	DEBUGPATH;
@@ -71,7 +74,7 @@ int	GetRouteByName(char* Name){
 *********************************/
 int CreateRoute(char* Name){
 	int RouteID;
-	
+
 	DEBUGPATH;
 
 	/*check to see if this name is already used*/
@@ -80,10 +83,10 @@ int CreateRoute(char* Name){
 		printf("Route %s already exists\n",Name);
 		return ROUTE_NONE;
 	}
-	
+
 	RouteID=Globals.NumRoutes;
 	Globals.NumRoutes++;
-	
+
 	bzero(&Globals.Routes[RouteID], sizeof(RouteRec));
 	Globals.Routes[RouteID].ID=RouteID;
 	snprintf(Globals.Routes[RouteID].Name, MAX_NAME_LEN, Name);
@@ -102,16 +105,20 @@ int CreateRoute(char* Name){
 int Route(int PacketSlot){
 	int 		i;
 	int 		result;
-	
+
 	DEBUGPATH;
 
 	for (i=0;i<Globals.NumRoutes;i++){
 		if (Globals.Routes[i].Active)
-		if (Globals.Routes[i].RouteFunc){
-			result=Globals.Routes[i].RouteFunc(PacketSlot);
-			if (result==ROUTE_RESULT_DROP) return FALSE;
-			if (result==ROUTE_RESULT_DONE) return TRUE;
-		}
+			if (Globals.Routes[i].RouteFunc) {
+				result=Globals.Routes[i].RouteFunc(PacketSlot);
+
+				if (result==ROUTE_RESULT_DROP)
+					return FALSE;
+
+				if (result==ROUTE_RESULT_DONE)
+					return TRUE;
+			}
 	}
 
 	return TRUE;

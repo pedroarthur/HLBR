@@ -1,3 +1,10 @@
+2009-03-08
+
+ * Improved paralelism (PAJ)
+ * Implementation of thread-safe data structures (PAJ)
+ * Actualy implementation of SBridge routing method (PAJ)
+ * Got rid of hlbr_mutex_* function (PAJ)
+
 2008-11-08
 
  * Thread for keeping of logfiles (ABA)

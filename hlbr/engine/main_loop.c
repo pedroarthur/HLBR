@@ -22,10 +22,7 @@ extern int		UDPDecoderID;
 
 #ifdef MTHREADS
 pthread_mutex_t		StatsMutex;
-int			StatsLockID;
-
 pthread_mutex_t		PLimitMutex;
-int			PLimitLockID;
 #endif
 
 /**
@@ -37,12 +34,7 @@ void IdleFunc()
 	DEBUGPATH;
 
 #ifdef DEBUGPACKETS
-	printf("There are:\n");
-	printf("  %i Idle\n",Globals.IdleCount);
-	printf("  %i Pending\n",Globals.PendingCount);
-	printf("  %i Saved\n",Globals.SavedCount);
-	printf("  %i Allocated\n",Globals.AllocatedCount);
-	printf("  %i Processing\n",Globals.ProcessingCount);
+	PrintPacketCount();
 #endif
 
 	usleep(100);
@@ -189,7 +181,7 @@ int ProcessPacket(int PacketSlot){
 	DEBUGPATH;
 
 #ifdef MTHREADS
-	hlbr_mutex_lock (&PLimitMutex, 1, &PLimitLockID);
+	pthread_mutex_lock (&PLimitMutex);
 #endif
 	if (Globals.PacketLimit == 0){
 		printf("Packet Limit Reached\n");
@@ -199,7 +191,7 @@ int ProcessPacket(int PacketSlot){
 	if (Globals.PacketLimit > 0)
 		Globals.PacketLimit--;
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&PLimitMutex);
+	pthread_mutex_unlock (&PLimitMutex);
 #endif
 
 	p=&Globals.Packets[PacketSlot];
@@ -228,7 +220,7 @@ int ProcessPacket(int PacketSlot){
 
 	/*update the packet statistics*/
 #ifdef MTHREADS
-	hlbr_mutex_lock (&StatsMutex, 0, &StatsLockID);
+	pthread_mutex_lock (&StatsMutex);
 #endif
 	PacketSec++;
 
@@ -249,7 +241,7 @@ int ProcessPacket(int PacketSlot){
 		LastTime = Globals.Packets[PacketSlot].tv.tv_sec;
 	}
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&StatsMutex);
+	pthread_mutex_unlock (&StatsMutex);
 #endif
 	ReturnEmptyPacket(PacketSlot);
 

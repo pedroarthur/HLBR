@@ -136,7 +136,7 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 	Header.caplen=p->PacketLen;
 	Header.len=p->PacketLen;
 #ifdef MTHREADS
-	hlbr_mutex_lock (&data->DumpMutex, 0, &data->DumpLockID);
+	pthread_mutex_lock (&data->DumpMutex);
 #endif
 	fp=fopen(data->fname, "a");
 	if (!fp){
@@ -145,7 +145,7 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 #endif
 
 #ifdef MTHREADS
-		hlbr_mutex_unlock (&data->DumpMutex);
+		pthread_mutex_unlock (&data->DumpMutex);
 #endif
 		return FALSE;
 	}
@@ -163,7 +163,7 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 
 	fclose(fp);
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&data->DumpMutex);
+	pthread_mutex_unlock (&data->DumpMutex);
 #endif
 
 	return TRUE;

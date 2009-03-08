@@ -39,7 +39,7 @@ void* AlertFileParseArgs(char* Args)
 	printf("AlertFileParseArgs: received %s\n", Args);
 #endif
 
-	return OpenLogFile(Args);
+	return (void*)OpenLogFile(Args);
 }
 
 
@@ -57,7 +57,7 @@ int AlertFileMessage(char* Message, void* Data)
 	if (buf == LOGBUFFER_NOBUFFER)
 		fprintf(stderr, "In AlertFileMessage: Could not log a message to a logfile! Message: %s\n", Message);
 	strncpy(LogBuffer(buf), Message, MAX_LOGBUFFER_SIZE);
-	return FlushLogBuffer(buf, Data);
+	return FlushLogBuffer(buf, (int)Data);
 
 /*
 	LogFileRec*	data;
@@ -76,14 +76,14 @@ int AlertFileMessage(char* Message, void* Data)
 	data = OpenLogFile((LogFileRec*)Data);
 
 #ifdef MTHREADS
-	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
+	pthread_mutex_lock (&data->FileMutex);
 #endif
 	//fp = LogFile(data);
 	//fp = fopen(data->fname, "a");
 
 	//if (!fp) {
 #ifdef MTHREADS
-	//	hlbr_mutex_unlock (&data->FileMutex);
+	//	pthread_mutex_unlock (&data->FileMutex);
 #endif
 	//	return FALSE;
 	//}
@@ -103,7 +103,7 @@ int AlertFileMessage(char* Message, void* Data)
 	CloseLogFile(data);
 	//fclose(fp);
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&data->FileMutex);
+	pthread_mutex_unlock (&data->FileMutex);
 #endif
 
 	return TRUE;
@@ -160,7 +160,7 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	}
 /*
 #ifdef MTHREADS
-	hlbr_mutex_lock (&data->FileMutex, 0, &data->FileLockID);
+	pthread_mutex_lock (&data->FileMutex);
 #endif
 	//fp = LogFile(data);
 	//fp = fopen(data->fname, "a");
@@ -168,7 +168,7 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	//if (!fp) {
 	//	fprintf(stderr, "AlertFileAction: Couldn't open \"%s\" for writing\n", data->fname);
 #ifdef MTHREADS
-	//	hlbr_mutex_unlock (&data->FileMutex);
+	//	pthread_mutex_unlock (&data->FileMutex);
 #endif
 	//	return FALSE;
 	//}
@@ -193,7 +193,7 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	//fclose(fp);
 
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&data->FileMutex);
+	pthread_mutex_unlock (&data->FileMutex);
 #endif
 */
 	return FlushLogBuffer(b, (int)Data);

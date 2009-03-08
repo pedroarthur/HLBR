@@ -5,9 +5,9 @@
 #include "../packets/packet.h"
 #include "../engine/num_list.h"
 
-int			EthernetDecoderID;
+/* #define DEBUG */
 
-//#define DEBUG
+#define SBMask	0xFF000000
 
 extern GlobalVars	Globals;
 
@@ -21,16 +21,56 @@ int RouteSBridge(int PacketSlot){
 
 	p=&Globals.Packets[PacketSlot];
 
-	p->TargetInterface=!p->InterfaceNum;
+	if (Globals.Interfaces[p->InterfaceNum].SBData) {
+		p->TargetInterface = Globals.Interfaces[p->InterfaceNum].SBData & (~SBMask);
+		return ROUTE_RESULT_DONE;
+	}
+
 	return ROUTE_RESULT_CONTINUE;
 }
 
 /*********************************
 * Specify the interfaces to bridge
-* TODO: make this actually work
 **********************************/
 int RouteSBridgeAddNode(int RouteID, char* Args){
-  DEBUGPATH;
+	int InterfaceA;
+	int InterfaceB;
+
+	DEBUGPATH;
+
+#ifdef DEBUG
+	printf ("Adding a SBridge node with \"%s\" as Args\n", Args);
+#endif
+
+	InterfaceA = GetInterfaceByName(strtok(Args, ", "));
+	InterfaceB = GetInterfaceByName(strtok(NULL, ", "));
+
+	if (InterfaceA == INTERFACE_NONE) {
+		fprintf (stderr, "%s: Couldn't parse arguments %s\n", __FUNCTION__, Args);
+		return FALSE;
+	}
+
+	if (InterfaceB == INTERFACE_NONE) {
+		fprintf (stderr, "%s: Couldn't parse arguments %s\n", __FUNCTION__, Args);
+		return FALSE;
+	}
+
+	if (Globals.Interfaces[InterfaceA].SBData) {
+		fprintf (stderr, "%s: Interface %s already in a Simple Bridge",
+			 __FUNCTION__, Globals.Interfaces[InterfaceA].Name);
+
+		return FALSE;
+	}
+
+	if (Globals.Interfaces[InterfaceB].SBData) {
+		fprintf (stderr, "%s: Interface %s already in a Simple Bridge",
+			 __FUNCTION__, Globals.Interfaces[InterfaceB].Name);
+
+		return FALSE;
+	}
+
+	Globals.Interfaces[InterfaceA].SBData = SBMask | InterfaceB;
+	Globals.Interfaces[InterfaceB].SBData = SBMask | InterfaceA;
 
 	return TRUE;
 }
@@ -43,7 +83,7 @@ int InitSBridge(){
 
 	DEBUGPATH;
 	
-	if ( (RouteID=CreateRoute("SBridge"))==ROUTE_NONE){
+	if ((RouteID=CreateRoute("SBridge"))==ROUTE_NONE){
 		printf("Couldn't create route SBridge\n");
 		return FALSE;
 	}
@@ -54,3 +94,6 @@ int InitSBridge(){
 	return TRUE;
 }
 
+#ifdef DEBUG
+#undef DEBUG
+#endif

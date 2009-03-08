@@ -242,66 +242,6 @@ int ParseArgs(int argc, char **argv){
 	return TRUE;
 }
 
-/**
- * Abstract away the thread locking for ease of programming.
- * If HAS_THREADS is not defined (program runs in only one thread), this function does nothing.
- */
-int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID)
-{
-#ifndef HAS_THREADS
-	return TRUE;
-#else
-	int	result;
-
-	if (!Globals.UseThreads)
-		return TRUE;
-
-	result = pthread_mutex_lock(mutex);
-#ifdef DEBUGLOCKS
-	*LockID = ID;
-#endif
-	return result;
-#endif
-}
-
-/**
- * Abstract away the thread locking for ease of programming
- * @see hlbr_mutex_lock()
- */
-int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID)
-{
-#ifndef HAS_THREADS
-	return TRUE;
-#else
-	int result;
-
-	if (!Globals.UseThreads)
-		return TRUE;
-
-	result = pthread_mutex_trylock(mutex);
-#ifdef DEBUGLOCKS
-	*LockID=ID;
-#endif
-	return result;
-#endif
-}
-
-/**
- * Abstract away the thread locking for ease of programming.
- * @see hlbr_mutex_lock()
- */
-int hlbr_mutex_unlock(pthread_mutex_t*	mutex)
-{
-#ifndef HAS_THREADS
-	return TRUE;
-#else
-	if (!Globals.UseThreads)
-		return TRUE;
-
-	return pthread_mutex_unlock(mutex);
-#endif
-}
-
 /*************************************
 * Handle the signals
 *************************************/
@@ -336,7 +276,6 @@ int main(int argc, char**argv)
 {
 	bzero(&Globals, sizeof(GlobalVars));
 
-	Globals.IdleCount=MAX_PACKETS;
 	Globals.PacketLimit=-1;
 
 	if (argc==1){

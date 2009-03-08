@@ -9,7 +9,6 @@ extern GlobalVars	Globals;
 
 #ifdef MTHREADS
 pthread_mutex_t		ConsoleMutex;
-int			ConsoleLockID;
 #endif
 
 /******************************************
@@ -19,11 +18,11 @@ int AlertConsoleMessage(char* Message, void* Data){
 
 	DEBUGPATH;
 #ifdef MTHREADS
-	hlbr_mutex_lock (&ConsoleMutex, 0, &ConsoleLockID);
+	pthread_mutex_lock (&ConsoleMutex);
 #endif
 	printf("%s\n",Message);
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&ConsoleMutex);
+	pthread_mutex_unlock (&ConsoleMutex);
 #endif
 	return TRUE;
 }
@@ -44,7 +43,7 @@ int AlertConsoleAction(int RuleNum, int PacketSlot, void* Data){
 		return FALSE;
 	}
 #ifdef MTHREADS
-	hlbr_mutex_lock (&ConsoleMutex, 0, &ConsoleLockID);
+	pthread_mutex_lock (&ConsoleMutex);
 #endif
 	printf("%s ", Buff);
 
@@ -55,7 +54,7 @@ int AlertConsoleAction(int RuleNum, int PacketSlot, void* Data){
 
 	printf("%s\n",Buff);
 #ifdef MTHREADS
-	hlbr_mutex_unlock (&ConsoleMutex);
+	pthread_mutex_unlock (&ConsoleMutex);
 #endif
 
 	return TRUE;

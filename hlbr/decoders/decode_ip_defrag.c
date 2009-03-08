@@ -17,18 +17,18 @@
 
 extern GlobalVars	Globals;
 
-int				IPDecoderID;
+int			IPDecoderID;
 Cache*			FragCache;
-pthread_mutex_t	FragMutex;
-int				FragLockID;
+pthread_mutex_t		FragMutex;
+int			FragLockID;
 
 struct defrag_item{
-	int				begin;
-	int				end;
-	int				PacketSlot;
-	IPData*			idata;
-	int				more;
-	char			done;
+	int		begin;
+	int		end;
+	int		PacketSlot;
+	IPData*		idata;
+	int		more;
+	char		done;
 };
 
 /************************************************************************
@@ -95,12 +95,12 @@ unsigned short checksum(unsigned short *b1, unsigned int len1, unsigned short *b
 int RebuildPacket(struct defrag_item* Frags, int NumFrags){
 	PacketRec*	newp;
 	IPData*		idata;
-	int			i;
-	int			flags;
-	int			offset;
-	int			first_header_len;
-	int			offset_to_ip;
-	int			PacketSlot;
+	int		i;
+	int		flags;
+	int		offset;
+	int		first_header_len;
+	int		offset_to_ip;
+	int		PacketSlot;
 	
 	/*stick together the packet and put it on the pending queue*/
 	PacketSlot=GetEmptyPacket();
@@ -301,7 +301,7 @@ void* DecodeIPDefrag(int PacketSlot){
 		printf("Proto is %u\n",idata->Header->protocol);
 
 		/*check to see if we have all the pieces*/
-		hlbr_mutex_lock(&FragMutex, FRAG_LOCK_1, &FragLockID);
+		pthread_mutex_lock(&FragMutex);
 		CI=CacheGet(FragCache, (unsigned char*)&Key, sizeof(Key), p->tv.tv_sec);
 		NumFrags=0;
 		if (CI){
@@ -372,7 +372,7 @@ void* DecodeIPDefrag(int PacketSlot){
 			printf("First piece\n");
 #endif
 		}
-		hlbr_mutex_unlock(&FragMutex);
+		pthread_mutex_unlock(&FragMutex);
 	}else{
 		data=calloc(sizeof(IPDefragData),1);
 		data->IsRebuilt=FALSE;

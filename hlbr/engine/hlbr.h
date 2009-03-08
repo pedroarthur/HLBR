@@ -189,6 +189,7 @@ typedef struct interface_rec{
 	pthread_t	Thread;
 	int		ThreadID;
 	void*		User;
+	int		SBData; /* Data for Simple Bridge routing */
 } InterfaceRec;
 
 typedef struct test_node{
@@ -351,11 +352,6 @@ typedef struct global_vars {
 	unsigned int		AlertCount;
 
 	PacketRec		Packets[MAX_PACKETS];
-	int			IdleCount;
-	int			PendingCount;
-	int			SavedCount;
-	int			AllocatedCount;
-	int			ProcessingCount;
 
 	RuleRec			Rules[MAX_RULES];
 	int			NumRules;
@@ -426,10 +422,6 @@ typedef struct global_vars {
 #define GET_SAVED_3		9003
 #define UNLOCK_SAVED_1		10001
 #define FRAG_LOCK_1		11001
-
-int hlbr_mutex_lock(pthread_mutex_t*	mutex, int ID, int* LockID);
-int hlbr_mutex_trylock(pthread_mutex_t* mutex, int ID, int* LockID);
-int hlbr_mutex_unlock(pthread_mutex_t* mutex);
 
 /*put this somewhere else later*/
 #define LIST_NONE	-1

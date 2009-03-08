@@ -128,28 +128,7 @@ int ReadPacketLinuxRaw(int InterfaceID){
 	if ((PacketSlot=GetEmptyPacket()) == -1){
 		printf("Unable to allocate packet for reading\n");
 #ifdef DEBUG
-		printf("Packets are in the following states:\n");
-		for (i=0;i<MAX_PACKETS;i++){
-			switch (Globals.Packets[i].Status){
-			case PACKET_STATUS_IDLE:
-				printf("%i: idle\n",i);
-				break;
-			case PACKET_STATUS_PENDING:
-				printf("%i: pending\n",i);
-				break;
-			case PACKET_STATUS_SAVED:
-				printf("%i: saved\n",i);
-				break;
-			case PACKET_STATUS_ALLOCATED:
-				printf("%i: allocated\n",i);
-				break;
-			case PACKET_STATUS_PROCESSING:
-				printf("%i: processing\n",i);
-				break;
-			default:
-				printf("%i: unknown(%i)\n",i, Globals.Packets[i].Status);
-			}
-		}
+		PrintPacketCount();
 #endif
 		return FALSE;
 	}

@@ -6,6 +6,7 @@
 #include "packet.h"
 #include "../engine/bits.h"
 #include "../engine/hlbr.h"
+#include "../engine/hlbrlib.h"
 //#include "../mangle/mangle.h"
 
 /*****************************************
@@ -18,26 +19,19 @@
 #include "packet_tcpdump.h"
 #include "packet_solaris_dlpi.h"
 
-typedef struct qn {
-	int p;
-	struct qn *next;
-} QNode;
-
 struct {
 	/* Stacks */
-	QNode* Idle;
-	QNode* Processing;
-	QNode* Allocated;
-	QNode* Saved;
+	Stack* Idle;
+	Stack* Processing;
+	Stack* Allocated;
+	Stack* Saved;
 
 	/* Queue */
-	QNode* PendingFisrt;
-	QNode* PendingLast;
+	Queue* Pending;
 } PacketQueue;
 
 extern GlobalVars Globals;
 
-pthread_mutex_t				PacketMutex;
 sem_t					PendingSemaphore;
 int					PacketLockID=0;
 unsigned int 				CurPacketNum=0;
@@ -336,31 +330,43 @@ int WritePacket(int PacketSlot){
 	return FALSE;
 }
 
-void InitPacketQueue (int max_packets) {
+void PrintPacketCount () {
+	printf("There are:\n");
+	printf("  %i Idle\n", StackGetSize(PacketQueue.Idle));
+	printf("  %i Pending\n", QueueGetSize(PacketQueue.Pending));
+	printf("  %i Saved\n", StackGetSize(PacketQueue.Saved));
+	printf("  %i Allocated\n", StackGetSize(PacketQueue.Allocated));
+	printf("  %i Processing\n", StackGetSize(PacketQueue.Processing));
+}
+
+int InitPacketQueue (int max_packets) {
 	int i;
-	QNode *aux = NULL;
 
 	DEBUGPATH;
 
-	PacketQueue.Idle = aux = (QNode *) calloc (1, sizeof(QNode));
+	PacketQueue.Idle = StackNew ();
+	PacketQueue.Allocated = StackNew ();
+	PacketQueue.Processing = StackNew ();
+	PacketQueue.Saved = StackNew ();
+	PacketQueue.Pending = QueueNew();
 
-	if (!aux) {
-		fprintf (stderr, "Couldn't allocate memory for Packet 0\n");
-		return;
+	if (!PacketQueue.Idle ||
+	    !PacketQueue.Allocated ||
+	    !PacketQueue.Processing ||
+	    !PacketQueue.Saved ||
+	    !PacketQueue.Pending)
+	{
+		fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
+		return FALSE;
 	}
 
-	aux->p = 0;
-
-	for (i = 1 ; i < max_packets ; i++) {
-		aux->next = (QNode *) calloc (1, sizeof(QNode));
-
-		if (!aux->next) {
-			fprintf (stderr, "Couldn't allocate memory for Packet %d\n", i);
-			return;
+	for (i = 0 ; i < max_packets ; i++){
+		if (!StackPushData(PacketQueue.Idle, (void*)i)) {
+			fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
+			return FALSE;
 		}
 
-		aux = aux->next;
-		aux->p = i;
+		Globals.Packets[i].PacketSlot = i;
 	}
 
 	sem_init (&PendingSemaphore, 0, 0);
@@ -374,33 +380,16 @@ void InitPacketQueue (int max_packets) {
  * @see ReadPacket
  */
 int AddPacketToPending(int PacketSlot) {
+	Node* aux;
+
 	DEBUGPATH;
 
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
 
-	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
+	aux = StackPopNode(PacketQueue.Allocated);
+	NodeSetData(aux,(void*)PacketSlot);
 
-	if (!PacketQueue.PendingFisrt) {
-		PacketQueue.PendingFisrt = PacketQueue.PendingLast = PacketQueue.Allocated;
-
-		PacketQueue.Allocated = PacketQueue.Allocated->next;
-		PacketQueue.PendingFisrt->next = NULL;
-
-		PacketQueue.PendingFisrt->p = PacketSlot;
-	} else {
-		PacketQueue.PendingLast->next = PacketQueue.Allocated;
-		PacketQueue.PendingLast = PacketQueue.Allocated;
-
-		PacketQueue.Allocated = PacketQueue.Allocated->next;
-
-		PacketQueue.PendingLast->next = NULL;
-		PacketQueue.PendingLast->p = PacketSlot;
-	}
-
-	Globals.PendingCount++;
-	Globals.AllocatedCount--;
-
-	hlbr_mutex_unlock(&PacketMutex);
+	QueueAddNode(PacketQueue.Pending, aux);
 
 	sem_post (&PendingSemaphore);
 
@@ -414,7 +403,7 @@ int AddPacketToPending(int PacketSlot) {
  */
 int PopFromPending() {
 	int 	PacketSlot = PACKET_NONE;
-	QNode*	aux;
+	Node*	aux;
 
 	DEBUGPATH;
 
@@ -422,23 +411,10 @@ int PopFromPending() {
 		return PACKET_NONE;
 	}
 
-	hlbr_mutex_lock(&PacketMutex, ADD_PACKET_1, &PacketLockID);
+	aux = QueueGetNode (PacketQueue.Pending);
+	PacketSlot = (int)NodeGetData (aux);
 
-	aux = PacketQueue.PendingFisrt;
-	PacketQueue.PendingFisrt = PacketQueue.PendingFisrt->next;
-
-	aux->next = PacketQueue.Processing;
-	PacketQueue.Processing = aux;
-
-	PacketSlot = aux->p;
-
-	if (!PacketQueue.PendingFisrt && PacketQueue.PendingLast)
-		PacketQueue.PendingLast = NULL;
-
-	Globals.PendingCount--;
-	Globals.ProcessingCount++;
-
-	hlbr_mutex_unlock(&PacketMutex);
+	StackPushNode (PacketQueue.Processing, aux);
 
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PROCESSING;
 
@@ -452,39 +428,28 @@ int GetEmptyPacket() {
 	PacketRec*	Packet;
 	int		PacketSlot;
 
-	hlbr_mutex_lock(&PacketMutex, GET_PACKET_1, &PacketLockID);
-
-	if (!PacketQueue.Idle) {
-		hlbr_mutex_unlock (&PacketMutex);
+	if (!StackGetSize(PacketQueue.Idle)) {
 		return PACKET_NONE;
 	} else {
-		QNode* aux = PacketQueue.Idle;
-		PacketQueue.Idle = PacketQueue.Idle->next;
+		Node* aux = StackPopNode(PacketQueue.Idle);
 
-		aux->next = PacketQueue.Allocated;
-		PacketQueue.Allocated = aux;
+		PacketSlot = (int) NodeGetData(aux);
 
-		PacketSlot = aux->p;
-
-		Globals.AllocatedCount++;
-		Globals.IdleCount--;
-
-		hlbr_mutex_unlock (&PacketMutex);
+		StackPushNode (PacketQueue.Allocated, aux);
 	}
 
 	Packet = &Globals.Packets[PacketSlot];
 
-	/*initialize the packet*/
-	Packet->PacketSlot = PacketSlot;
-	Packet->Status = PACKET_STATUS_ALLOCATED;
 	memset(Packet->RuleBits, 0xFF, MAX_RULES/8);
+	Packet->Status = PACKET_STATUS_ALLOCATED;
+	Packet->PacketNum = CurPacketNum++;
+	Packet->Status = PACKET_STATUS_IDLE;
 	Packet->PacketLen = 0;
 	Packet->SaveCount = 0;
 	Packet->tv.tv_sec = 0;
 	Packet->tv.tv_usec = 0;
 	Packet->NumDecoderData = 0;
 	Packet->PassRawPacket = TRUE;
-	Packet->PacketNum = CurPacketNum++;
 	Packet->RawPacket = Packet->TypicalPacket;
 	Packet->LargePacket = FALSE;
 
@@ -497,7 +462,7 @@ int GetEmptyPacket() {
 void ReturnEmptyPacket(int PacketSlot) {
 	int 		i;
 	PacketRec*	p;
-	QNode*		aux;
+	Node*		aux;
 
 	DEBUGPATH;
 
@@ -517,63 +482,31 @@ void ReturnEmptyPacket(int PacketSlot) {
 			p->DecoderInfo[p->DecodersUsed[i]].Data=NULL;
 		}
 
-		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
-
 		switch(Globals.Packets[PacketSlot].Status){
 			case PACKET_STATUS_ALLOCATED:
-				aux = PacketQueue.Allocated;
-				PacketQueue.Allocated = PacketQueue.Allocated->next;
-
-				Globals.AllocatedCount--;
+				aux = StackPopNode (PacketQueue.Allocated);
 				break;
+
 			case PACKET_STATUS_PROCESSING:
-				aux = PacketQueue.Processing;
-				PacketQueue.Processing = PacketQueue.Processing->next;
-
-				Globals.ProcessingCount--;
+				aux = StackPopNode (PacketQueue.Processing);
 				break;
-			case PACKET_STATUS_SAVED:
-				aux = PacketQueue.Saved;
-				PacketQueue.Saved = PacketQueue.Saved->next;
 
-				Globals.SavedCount--;
+			case PACKET_STATUS_SAVED:
+				aux = StackPopNode (PacketQueue.Saved);
 				break;
 		}
 
-		aux->next = PacketQueue.Idle;
-		PacketQueue.Idle = aux;
-		aux->p = PacketSlot;
+		NodeSetData (aux,(void*)PacketSlot);
 
-		Globals.Packets[PacketSlot].Status = PACKET_STATUS_IDLE;
-
-		Globals.IdleCount++;
-
-		hlbr_mutex_unlock(&PacketMutex);
+		StackPushNode (PacketQueue.Idle, aux);
 	} else if (Globals.Packets[PacketSlot].Status == PACKET_STATUS_PROCESSING) {
-		hlbr_mutex_lock(&PacketMutex, RETURN_PACKET_1, &PacketLockID);
-
-		aux = PacketQueue.Processing;
-		PacketQueue.Processing = PacketQueue.Processing->next;
-
-		aux->next = PacketQueue.Saved;
-		PacketQueue.Saved = aux;
-
 		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
 
-		Globals.ProcessingCount--;
-		Globals.SavedCount++;
-
-		hlbr_mutex_unlock(&PacketMutex);
+		StackPushNode(PacketQueue.Saved, StackPopNode(PacketQueue.Processing));
 	}
 
 #ifdef DEBUG_PACKETS
-	printf("There are:\n");
-	printf("  %i Idle\n",Globals.IdleCount);
-	printf("  %i Pending\n",Globals.PendingCount);
-	printf("  %i Saved\n",Globals.SavedCount);
-	printf("  %i Allocated\n",Globals.AllocatedCount);
-	printf("  %i Processing\n",Globals.ProcessingCount);
-	printf("  %i The Total sum\n", Globals.IdleCount+Globals.PendingCount+Globals.SavedCount+Globals.AllocatedCount+Globals.ProcessingCount);
+	PrintPacketCount();
 #endif
 }
 

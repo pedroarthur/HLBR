@@ -63,7 +63,7 @@ int OpenLogFile(char* name)
 
 	snprintf(FileName, 1024, "%s%s", Globals.LogDir, name);
 
-	hlbr_mutex_lock(&LogThreadMutex, 0, &LockID);
+	pthread_mutex_lock(&LogThreadMutex);
 
 	for (i=0; i<NumLogFiles; i++) {
 		if (strcmp(name, LogFiles[i].fname) == 0) {
@@ -82,7 +82,7 @@ int OpenLogFile(char* name)
 		LogFiles[NumLogFiles].fp = fopen(FileName, "a");
 		if (!LogFiles[NumLogFiles].fp) {
 			fprintf(stderr, "Error opening log file: \"%s\"\n", FileName);
-			hlbr_mutex_unlock(&LogThreadMutex);
+			pthread_mutex_unlock(&LogThreadMutex);
 			return f;
 		}
 		//bzero(&LogFiles[NumLogFiles].FileMutex, sizeof(pthread_mutex_t));
@@ -91,7 +91,7 @@ int OpenLogFile(char* name)
 		f = NumLogFiles++;
 	}
 
-	hlbr_mutex_unlock(&LogThreadMutex);
+	pthread_mutex_unlock(&LogThreadMutex);
 
 	return f;
 }
@@ -107,32 +107,32 @@ void* LogBuffer(int Buffer)
  */
 int GetLogBuffer()
 {
-  int i, LockID;
-  int buf = LOGBUFFER_NOBUFFER;
+	int i, LockID;
+	int buf = LOGBUFFER_NOBUFFER;
 
-  if (NumLogBuffers >= MAX_LOG_BUFFERS)
-    return buf;
+	if (NumLogBuffers >= MAX_LOG_BUFFERS)
+		return buf;
 
-  hlbr_mutex_lock(&LogThreadMutex, 0, &LockID);
+	pthread_mutex_lock(&LogThreadMutex);
 
-  /* yes, check AGAIN, after the mutex lock */
-  if (NumLogBuffers >= MAX_LOG_BUFFERS)
-    return buf;
+	/* yes, check AGAIN, after the mutex lock */
+	if (NumLogBuffers >= MAX_LOG_BUFFERS)
+		return buf;
   
-  for (i=0; i < MAX_LOG_BUFFERS; i++)
-    if (LogBuffersDest[i] == LOGBUFFER_FREE) {
-      LogBuffersDest[i] = LOGBUFFER_RESERVED;
-      NumLogBuffers++;
+	for (i=0; i < MAX_LOG_BUFFERS; i++)
+		if (LogBuffersDest[i] == LOGBUFFER_FREE) {
+			LogBuffersDest[i] = LOGBUFFER_RESERVED;
+			NumLogBuffers++;
 #ifdef DEBUG
-      printf("NumLogBuffers is now %d\n", NumLogBuffers);
+			printf("NumLogBuffers is now %d\n", NumLogBuffers);
 #endif
-      buf = i;
-      break;
-    }
+			buf = i;
+			break;
+		}
 
-  hlbr_mutex_unlock(&LogThreadMutex);
+	pthread_mutex_unlock(&LogThreadMutex);
 
-  return buf;
+	return buf;
 }
 
 
@@ -190,10 +190,10 @@ void* ProcessLogFilesThread(void* v)
 #ifdef DEBUG
 			printf("ProcessLogFilesThread: Flushing %d message buffers...\n", NumLogBuffers);
 #endif
-			hlbr_mutex_lock(&LogThreadMutex, 0, &LockID);
+			pthread_mutex_lock(&LogThreadMutex);
 			for (i=0; i<MAX_LOG_BUFFERS; i++) {
 				if (LogBuffersDest[i] >= 0) {
-					//hlbr_mutex_lock(&Data->FileMutex, 0, &Data->FileLockID);
+					//pthread_mutex_lock(&Data->FileMutex);
 //#ifdef MTHREADS
 //				pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &ocs);
 //#endif
@@ -213,14 +213,14 @@ void* ProcessLogFilesThread(void* v)
 //#endif
 
 				//if (Data)
-				//	hlbr_mutex_unlock(&Data->FileMutex);
+				//	pthread_mutex_unlock(&Data->FileMutex);
 			}
 			NumLogBuffers = 0;
-			hlbr_mutex_unlock(&LogThreadMutex);
+			pthread_mutex_unlock(&LogThreadMutex);
 			if (sec > 0L)
 				sec -= SLEEP_SLICE;
 		} else {
-			printf("Sleeping for %ld microsecs\n", sec);
+			/* printf("Sleeping for %ld microsecs\n", sec); */
 			usleep(sec);
 			if (sec < SLEEP_TOTAL)
 				sec += SLEEP_SLICE;
