@@ -443,7 +443,6 @@ int GetEmptyPacket() {
 	memset(Packet->RuleBits, 0xFF, MAX_RULES/8);
 	Packet->Status = PACKET_STATUS_ALLOCATED;
 	Packet->PacketNum = CurPacketNum++;
-	Packet->Status = PACKET_STATUS_IDLE;
 	Packet->PacketLen = 0;
 	Packet->SaveCount = 0;
 	Packet->tv.tv_sec = 0;
