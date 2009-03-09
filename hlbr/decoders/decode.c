@@ -290,8 +290,7 @@ int Decode(int DecoderID, int PacketSlot)
 		test = Globals.Decoders[DecoderID].Tests;
 
 		while (test) {
-			if (test->Active)
-				if (test->TestFunc)
+			if (test->Active && test->TestFunc)
 					test->TestFunc(PacketSlot, test->TestNodes);
 			test = test->Next;
 		}

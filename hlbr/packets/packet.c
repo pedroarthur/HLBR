@@ -20,19 +20,25 @@
 #include "packet_solaris_dlpi.h"
 
 struct {
-	/* Stacks */
 	Stack* Idle;
-	Stack* Processing;
 	Stack* Allocated;
+
+	Stack* Processing;
+	Queue* Pending;
+
 	Stack* Saved;
 
-	/* Queue */
-	Queue* Pending;
+	/* For performing actions */
+	Queue* Waiting;
+	Stack* Performing;
+
+	/* For sending packet */
+	Queue** Scheduling;
+	Stack* Sending;
 } PacketQueue;
 
 extern GlobalVars Globals;
 
-sem_t					PendingSemaphore;
 int					PacketLockID=0;
 unsigned int 				CurPacketNum=0;
 
@@ -331,12 +337,24 @@ int WritePacket(int PacketSlot){
 }
 
 void PrintPacketCount () {
+	int i;
+
 	printf("There are:\n");
 	printf("  %i Idle\n", StackGetSize(PacketQueue.Idle));
 	printf("  %i Pending\n", QueueGetSize(PacketQueue.Pending));
 	printf("  %i Saved\n", StackGetSize(PacketQueue.Saved));
 	printf("  %i Allocated\n", StackGetSize(PacketQueue.Allocated));
 	printf("  %i Processing\n", StackGetSize(PacketQueue.Processing));
+	printf("  %i Waiting\n", QueueGetSize(PacketQueue.Waiting));
+	printf("  %i Performing\n", StackGetSize(PacketQueue.Performing));
+
+	for (i = 0 ; i < Globals.NumInterfaces ; i++) {
+		printf("  %i Beeing Scheduled on interface %s\n",
+		       QueueGetSize (PacketQueue.Scheduling[i]),
+		       Globals.Interfaces[i].Name);
+	}
+
+	printf("  %i Sending\n", StackGetSize(PacketQueue.Sending));
 }
 
 int InitPacketQueue (int max_packets) {
@@ -348,16 +366,34 @@ int InitPacketQueue (int max_packets) {
 	PacketQueue.Allocated = StackNew ();
 	PacketQueue.Processing = StackNew ();
 	PacketQueue.Saved = StackNew ();
-	PacketQueue.Pending = QueueNew();
+	PacketQueue.Pending = QueueNew ();
+	PacketQueue.Waiting = QueueNew ();
+	PacketQueue.Performing = StackNew ();
+	PacketQueue.Sending = StackNew ();
+
+	PacketQueue.Scheduling = (Queue **) calloc (Globals.NumInterfaces, sizeof(Queue*));
 
 	if (!PacketQueue.Idle ||
 	    !PacketQueue.Allocated ||
 	    !PacketQueue.Processing ||
 	    !PacketQueue.Saved ||
-	    !PacketQueue.Pending)
+	    !PacketQueue.Pending ||
+	    !PacketQueue.Waiting ||
+	    !PacketQueue.Performing ||
+	    !PacketQueue.Scheduling ||
+	    !PacketQueue.Sending)
 	{
 		fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
 		return FALSE;
+	}
+
+	for (i = 0 ; i < Globals.NumInterfaces ; i++){
+		PacketQueue.Scheduling[i] = QueueNew ();
+
+		if (!PacketQueue.Scheduling[i]) {
+			fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
+			return FALSE;
+		}
 	}
 
 	for (i = 0 ; i < max_packets ; i++){
@@ -368,57 +404,6 @@ int InitPacketQueue (int max_packets) {
 
 		Globals.Packets[i].PacketSlot = i;
 	}
-
-	sem_init (&PendingSemaphore, 0, 0);
-}
-
-/**
- * Marks a packet as 'pending' (thread safe, called from ReadPacket)
- * Gets called every time a packet gets put on the pending list. Uses a 
- * mutex lock (to avoid problems with threads).
- * This may be called more than once per ReadPacket request.
- * @see ReadPacket
- */
-int AddPacketToPending(int PacketSlot) {
-	Node* aux;
-
-	DEBUGPATH;
-
-	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
-
-	aux = StackPopNode(PacketQueue.Allocated);
-	NodeSetData(aux,(void*)PacketSlot);
-
-	QueueAddNode(PacketQueue.Pending, aux);
-
-	sem_post (&PendingSemaphore);
-
-	return TRUE;
-}
-
-/**
- * Pops a packet off the pending queue
- * Give the caller a packet off the pending queue (marked as 
- * PACKET_STATUS_PENDING)
- */
-int PopFromPending() {
-	int 	PacketSlot = PACKET_NONE;
-	Node*	aux;
-
-	DEBUGPATH;
-
-	if (sem_wait (&PendingSemaphore)) {
-		return PACKET_NONE;
-	}
-
-	aux = QueueGetNode (PacketQueue.Pending);
-	PacketSlot = (int)NodeGetData (aux);
-
-	StackPushNode (PacketQueue.Processing, aux);
-
-	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PROCESSING;
-
-	return PacketSlot;
 }
 
 /**
@@ -427,6 +412,8 @@ int PopFromPending() {
 int GetEmptyPacket() {
 	PacketRec*	Packet;
 	int		PacketSlot;
+
+	DEBUGPATH;
 
 	if (!StackGetSize(PacketQueue.Idle)) {
 		return PACKET_NONE;
@@ -452,7 +439,131 @@ int GetEmptyPacket() {
 	Packet->RawPacket = Packet->TypicalPacket;
 	Packet->LargePacket = FALSE;
 
-	return Packet->PacketSlot;
+	return PacketSlot;
+}
+
+/**
+ * Marks a packet as 'pending' (thread safe, called from ReadPacket)
+ * Gets called every time a packet gets put on the pending list. Uses a 
+ * mutex lock (to avoid problems with threads).
+ * This may be called more than once per ReadPacket request.
+ * @see ReadPacket
+ */
+int AddPacketToPending(int PacketSlot) {
+	Node* aux;
+
+	DEBUGPATH;
+
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
+
+	aux = StackPopNode(PacketQueue.Allocated);
+	NodeSetData(aux,(void*)PacketSlot);
+
+	QueueAddNode(PacketQueue.Pending, aux);
+	QueuePost(PacketQueue.Pending);
+
+	return TRUE;
+}
+
+/**
+ * Pops a packet off the pending queue
+ * Give the caller a packet off the pending queue (marked as 
+ * PACKET_STATUS_PENDING)
+ */
+int PopFromPending() {
+	int 	PacketSlot = PACKET_NONE;
+	Node*	aux;
+
+	DEBUGPATH;
+
+	if (!QueueWait(PacketQueue.Pending)) {
+		return PACKET_NONE;
+	}
+
+	aux = QueueGetNode (PacketQueue.Pending);
+
+	PacketSlot = (int)NodeGetData (aux);
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PROCESSING;
+
+	StackPushNode (PacketQueue.Processing, aux);
+
+	return PacketSlot;
+}
+
+int AddPacketToWaiting (int PacketSlot) {
+	Node* aux;
+
+	DEBUGPATH;
+
+	aux = StackPopNode (PacketQueue.Processing);
+
+	NodeSetData (aux,(void*)PacketSlot);
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_WAITING;
+
+	QueueAddNode (PacketQueue.Waiting, aux);
+	QueuePost(PacketQueue.Waiting);
+
+	return TRUE;
+}
+
+int PopFromWaiting () {
+	Node* aux;
+	int PacketSlot;
+
+	DEBUGPATH;
+
+	if (!QueueWait(PacketQueue.Waiting))
+		return PACKET_NONE;
+
+	aux = QueueGetNode (PacketQueue.Waiting);
+
+	PacketSlot = (int)NodeGetData (aux);
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PERFORMING;
+
+	StackPushNode (PacketQueue.Performing, aux);
+
+	return PacketSlot;
+}
+
+int SchedulePacket (int PacketSlot) {
+	Node* aux;
+	PacketRec* packet = &Globals.Packets[PacketSlot];
+
+	DEBUGPATH;
+
+	switch (packet->Status) {
+		case PACKET_STATUS_PROCESSING:
+			aux = StackPopNode (PacketQueue.Processing);
+			break;
+
+		case PACKET_STATUS_PERFORMING:
+			aux = StackPopNode (PacketQueue.Performing);
+	}
+
+	NodeSetData (aux,(void*) PacketSlot);
+	packet->Status = PACKET_STATUS_SCHEDULING;
+
+	QueueAddNode (PacketQueue.Scheduling[packet->TargetInterface], aux);
+	QueuePost (PacketQueue.Scheduling[packet->TargetInterface]);
+
+	return TRUE;
+}
+
+int GetScheduledPacket (int InterfaceID) {
+	Node* aux;
+	int PacketSlot;
+
+	DEBUGPATH;
+
+	QueueWait (PacketQueue.Scheduling[InterfaceID]);
+	aux = QueueGetNode (PacketQueue.Scheduling[InterfaceID]);
+
+	PacketSlot = (int)NodeGetData (aux);
+	Globals.Packets[PacketSlot].Status = PACKET_STATUS_SENDING;
+
+	StackPushNode (PacketQueue.Sending, aux);
+
+	return PacketSlot;
 }
 
 /**
@@ -493,6 +604,14 @@ void ReturnEmptyPacket(int PacketSlot) {
 			case PACKET_STATUS_SAVED:
 				aux = StackPopNode (PacketQueue.Saved);
 				break;
+
+			case PACKET_STATUS_PERFORMING:
+				aux = StackPopNode (PacketQueue.Performing);
+				break;
+
+			case PACKET_STATUS_SENDING:
+				aux = StackPopNode (PacketQueue.Sending);
+				break;
 		}
 
 		NodeSetData (aux,(void*)PacketSlot);
@@ -518,9 +637,6 @@ int StartInterfaceThread(int InterfaceID)
 
 	DEBUGPATH;
 
-#ifndef HAS_THREADS
-	return FALSE;
-#else
 	Interface = &Globals.Interfaces[InterfaceID];
 
 	switch(Interface->Type) {
@@ -548,7 +664,6 @@ int StartInterfaceThread(int InterfaceID)
 	}
 
 	return TRUE;
-#endif
 }
 
 /**********************************************

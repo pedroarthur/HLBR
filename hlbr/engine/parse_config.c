@@ -310,17 +310,12 @@ int ParseSystem(FILE* fp){
 					Globals.UseThreads=FALSE;
 					break;
 				default:
-#ifdef MTHREADS
 					if (*Current - '0' > 0 && *Current - '0' < 9){
 						Globals.UseThreads=strtol(Current, &Current, 10);
 					} else {
 						printf("I don't understand thread option %c\n",*Current);
 						Globals.UseThreads=TRUE;
 					}
-#else
-					printf("I don't understand thread option %c\n",*Current);
-					Globals.UseThreads=TRUE;
-#endif
 			}
 #ifdef DEBUG
 			printf("UseThreads is %i\n",Globals.UseThreads);

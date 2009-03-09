@@ -14,9 +14,7 @@
 
 #include <sys/time.h>
 
-#ifdef HAS_THREADS
 #include <pthread.h>
-#endif
 
 #include "hlbrlib.h"
 
@@ -26,9 +24,6 @@
 #define DEBUGPATH ;
 
 #define DEBUGLOCKS
-
-/* Still development feature! */
-#define MTHREADS
 
 #define MAJOR_VERSION	1
 #define MINOR_VERSION	6
@@ -187,7 +182,8 @@ typedef struct interface_rec{
 	char		IsPollable;
 	char		Role;
 	pthread_t	Thread;
-	int		ThreadID;
+	int		RxThreadID;
+	int		TxThreadID;
 	void*		User;
 	int		SBData; /* Data for Simple Bridge routing */
 } InterfaceRec;
@@ -337,11 +333,11 @@ typedef struct global_vars {
 
 	char			Done;
 	char			UseThreads;
-#ifdef MTHREADS
+
 	pthread_t*		Threads;
 	int*			ThreadsID;
 	pthread_key_t		ThreadsKey;
-#endif
+
 	char			ParseOnly;
 	char*			ConfigFilename;
 	char*			RulesFilename;
@@ -400,6 +396,7 @@ typedef struct global_vars {
 #ifdef LOGFILE_THREAD
 	pthread_t		logThread;
 #endif
+	pthread_t		AThread;
 } GlobalVars;
 
 

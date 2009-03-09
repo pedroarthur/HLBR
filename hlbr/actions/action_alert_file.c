@@ -62,9 +62,9 @@ int AlertFileMessage(char* Message, void* Data)
 /*
 	LogFileRec*	data;
 	FILE*		fp;
-#ifdef MTHREADS
+
 	int		ocs;
-#endif
+
 	
 	DEBUGPATH;
 
@@ -75,36 +75,36 @@ int AlertFileMessage(char* Message, void* Data)
 
 	data = OpenLogFile((LogFileRec*)Data);
 
-#ifdef MTHREADS
+
 	pthread_mutex_lock (&data->FileMutex);
-#endif
+
 	//fp = LogFile(data);
 	//fp = fopen(data->fname, "a");
 
 	//if (!fp) {
-#ifdef MTHREADS
+
 	//	pthread_mutex_unlock (&data->FileMutex);
-#endif
+
 	//	return FALSE;
 	//}
 
-#ifdef MTHREADS
+
 	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
-#endif
+
 
 	//fwrite(Message, strlen(Message), 1, fp);
 	//fwrite("\n", 1, 1, data->fp);
 	LogMessage(Message, data);
 
-#ifdef MTHREADS
+
 	pthread_setcancelstate (ocs, NULL);
-#endif
+
 
 	CloseLogFile(data);
 	//fclose(fp);
-#ifdef MTHREADS
+
 	pthread_mutex_unlock (&data->FileMutex);
-#endif
+
 
 	return TRUE;
 */
@@ -123,9 +123,9 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	FILE*		fp;
 	//LogFileRec*	data;
 	PacketRec*	p;
-#ifdef MTHREADS
+
 	int		ocs;
-#endif
+
 
 	DEBUGPATH;
 
@@ -159,23 +159,23 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 		return FALSE;
 	}
 /*
-#ifdef MTHREADS
+
 	pthread_mutex_lock (&data->FileMutex);
-#endif
+
 	//fp = LogFile(data);
 	//fp = fopen(data->fname, "a");
 
 	//if (!fp) {
 	//	fprintf(stderr, "AlertFileAction: Couldn't open \"%s\" for writing\n", data->fname);
-#ifdef MTHREADS
+
 	//	pthread_mutex_unlock (&data->FileMutex);
-#endif
+
 	//	return FALSE;
 	//}
 
-#ifdef MTHREADS
+
 	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
-#endif
+
 
 	//fwrite(Buff, strlen(Buff), 1, fp);
 	fwrite(" ", 1, 1, fp);
@@ -185,16 +185,16 @@ int AlertFileAction(int RuleNum, int PacketSlot, void* Data)
 	//fflush(fp);
 	//LogMessage(Buff, (LogFileRec*)Data);
 
-#ifdef MTHREADS
+
 	pthread_setcancelstate (ocs, NULL);
-#endif
+
 
 	//CloseLogFile(data);
 	//fclose(fp);
 
-#ifdef MTHREADS
+
 	pthread_mutex_unlock (&data->FileMutex);
-#endif
+
 */
 	return FlushLogBuffer(b, (int)Data);
 }

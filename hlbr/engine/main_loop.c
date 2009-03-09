@@ -20,10 +20,8 @@ extern GlobalVars	Globals;
 extern int		TCPDecoderID;
 extern int		UDPDecoderID;
 
-#ifdef MTHREADS
 pthread_mutex_t		StatsMutex;
 pthread_mutex_t		PLimitMutex;
-#endif
 
 /**
  * Called whenever hlbr is idle. 
@@ -87,22 +85,50 @@ int RouteAndSend(int PacketSlot)
 #ifdef DEBUG
 		printf("Routing rules dropped the packet\n");
 #endif
-		return TRUE;
+		ReturnEmptyPacket(PacketSlot);
+		return FALSE;
 	}
 
 	if (p->TargetInterface==-1){
 #ifdef DEBUG
 		printf("No Packet Handler set a route. Dropping.\n");
 #endif
+		ReturnEmptyPacket(PacketSlot);
 		return FALSE;
 	}
 
-#ifdef DEBUG1
-	if (p->InterfaceNum==2)
-		printf("Sending packet out interface %i(%s)\n",p->TargetInterface, Globals.Interfaces[p->TargetInterface].Name);
-#endif
+	return SchedulePacket(PacketSlot);
+}
 
-	return WritePacket(PacketSlot);
+void UpdateStats (int PacketSlot) {
+	static int	PacketSec=0;
+	static int	TCPSec=0;
+	static int	UDPSec=0;
+	static int	LastTime=0;
+	void*		data;
+
+	pthread_mutex_lock (&StatsMutex);
+
+	PacketSec++;
+
+	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
+		TCPSec++;
+	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
+		UDPSec++;
+
+	if (Globals.Packets[PacketSlot].tv.tv_sec != LastTime){
+		Globals.PacketsPerSec = PacketSec;
+		Globals.TCPPerSec = TCPSec;
+		Globals.UDPPerSec = UDPSec;
+
+		PacketSec = 0;
+		TCPSec = 0;
+		UDPSec = 0;
+
+		LastTime = Globals.Packets[PacketSlot].tv.tv_sec;
+	}
+
+	pthread_mutex_unlock (&StatsMutex);
 }
 
 /************************************
@@ -172,17 +198,11 @@ int HandleTimers(int Now){
  */
 int ProcessPacket(int PacketSlot){
 	PacketRec*	p;
-	static int	PacketSec=0;
-	static int	TCPSec=0;
-	static int	UDPSec=0;
-	static int	LastTime=0;
-	void*		data;
 
 	DEBUGPATH;
 
-#ifdef MTHREADS
 	pthread_mutex_lock (&PLimitMutex);
-#endif
+
 	if (Globals.PacketLimit == 0){
 		printf("Packet Limit Reached\n");
 		Globals.Done=TRUE;
@@ -190,9 +210,8 @@ int ProcessPacket(int PacketSlot){
 
 	if (Globals.PacketLimit > 0)
 		Globals.PacketLimit--;
-#ifdef MTHREADS
+
 	pthread_mutex_unlock (&PLimitMutex);
-#endif
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -207,43 +226,15 @@ int ProcessPacket(int PacketSlot){
 		printf("Error Processing Packet\n");
 	}
 
+	UpdateStats (PacketSlot);
+
 	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)) {
 #ifdef DEBUG
 		printf("There are rule matches\n");
 #endif
-		if (!PerformActions(PacketSlot)) {
-			printf("Failed to execute the actions\n");
-		}
-	}
-
-	RouteAndSend(PacketSlot);
-
-	/*update the packet statistics*/
-#ifdef MTHREADS
-	pthread_mutex_lock (&StatsMutex);
-#endif
-	PacketSec++;
-
-	if (GetDataByID(PacketSlot, TCPDecoderID, &data))
-		TCPSec++;
-	else if (GetDataByID(PacketSlot, UDPDecoderID, &data))
-		UDPSec++;
-
-	if (Globals.Packets[PacketSlot].tv.tv_sec != LastTime){
-		Globals.PacketsPerSec = PacketSec;
-		Globals.TCPPerSec = TCPSec;
-		Globals.UDPPerSec = UDPSec;
-
-		PacketSec = 0;
-		TCPSec = 0;
-		UDPSec = 0;
-
-		LastTime = Globals.Packets[PacketSlot].tv.tv_sec;
-	}
-#ifdef MTHREADS
-	pthread_mutex_unlock (&StatsMutex);
-#endif
-	ReturnEmptyPacket(PacketSlot);
+		AddPacketToWaiting (PacketSlot);
+	} else
+		RouteAndSend(PacketSlot);
 
 	return TRUE;
 }
@@ -257,9 +248,9 @@ void* ProcessPacketThread(void* v)
 	int	PacketSlot;
 
 	DEBUGPATH;
-#ifdef MTHREADS
+
 	pthread_setspecific (Globals.ThreadsKey, v);
-#endif
+
 	while (!Globals.Done) {
 		PacketSlot = PopFromPending();
 
@@ -273,77 +264,28 @@ void* ProcessPacketThread(void* v)
 	return NULL;
 }
 
-/** Main loop, polling version.
- * Poll the FD's to get packets
- */
-int MainLoopPoll()
-{
-	struct timeval		timeout;
-	int			result;
-	fd_set			set;
-	int			i;
-	int			highest;
-	int			PacketSlot;
+void* ProcessActions (void* v) {
+	int PacketSlot;
 
 	DEBUGPATH;
 
-#ifdef DEBUG
-	printf("Starting loop in poll mode\n");
-	printf("--------------------------\n");
-#endif
+	while (!Globals.Done) {
+		PacketSlot = PopFromWaiting ();
 
-	Globals.Done=FALSE;
-
-	while (!Globals.Done){
-		timeout.tv_sec = 0;
-		timeout.tv_usec = IDLE_TIMEOUT;
-
-		FD_ZERO(&set);
-		highest = -1;
-
-		for (i = 0 ; i < Globals.NumInterfaces ; i++){
-			FD_SET(Globals.Interfaces[i].FD, &set);
-
-			if (Globals.Interfaces[i].FD > highest)
-				highest = Globals.Interfaces[i].FD;
-		}
-
-		highest++;
-
-		result = select(highest, &set, NULL, NULL, &timeout);
-
-		if (result){
-#ifdef DEBUG
-			printf("A packet is waiting\n");
-#endif
-			/*pull the packets off*/
-			for (i=0;i<Globals.NumInterfaces;i++){
-				if (FD_ISSET(Globals.Interfaces[i].FD, &set)){
-#ifdef DEBUG
-					printf("Reading interface %s\n",Globals.Interfaces[i].Name);
-#endif
-					ReadPacket(i);
-				}
-			}
-			/*Now Process them*/
-			while((PacketSlot=PopFromPending()) != -1){
-				if (!ProcessPacket(PacketSlot)){
-					printf("Couldn't process packet\n");
-				}
-			}
-		}else{
-			//printf("Calling the idle func\n");
+		if (PacketSlot != PACKET_NONE) {
+			PerformActions (PacketSlot);
+			RouteAndSend (PacketSlot);
+		} else {
 			IdleFunc();
 		}
 	}
-
-	return TRUE;
 }
 
-/** Main loop, threaded version.
- * Spawn a thread for each interface
+/**
+ * Main loop, start handling packets.
+ * @return Always FALSE?
  */
-int MainLoopThreaded()
+int MainLoop()
 {
 	int i;
 
@@ -358,21 +300,22 @@ int MainLoopThreaded()
 	InitPacketQueue (MAX_PACKETS);
 
 	/* start up the interface threads */
-	for (i = 0 ; i < Globals.NumInterfaces ; i++)
+	for (i = 0 ; i < Globals.NumInterfaces ; i++){
 		if (!StartInterfaceThread(i)){
 			printf("Couldn't start thread for interface\n");
 			return FALSE;
 		}
+	}
 
+	pthread_create(&Globals.AThread, NULL, ProcessActions, NULL);
 #ifdef LOGFILE_THREAD
 	/* start up the log files keeper thread */
 	pthread_create(&Globals.logThread, NULL, ProcessLogFilesThread, NULL);
 #endif
+
 #ifdef LOGFILE_THREAD_NO
 	fprintf(stderr, "Thread for log file keeping won't be created because we're running in non-threaded mode.\n");
 #endif
-
-#ifdef MTHREADS
 	Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads) * sizeof(pthread_t));
 
 	if (!Globals.Threads) {
@@ -394,39 +337,9 @@ int MainLoopThreaded()
 
 	for (i = 0 ; i < Globals.UseThreads ; i++)
 		pthread_join (Globals.Threads[i], NULL);
-#else
-	ProcessPacketThread(NULL);
-#endif
-	return FALSE;
-}
-
-/**
- * Main loop, start handling packets. Calls one of the two other functions:
- * MainLoopThreaded() if HLBR is running in multi-thread mode, or 
- * MainLoopPolling() if in single-thread mode.
- * @return Always FALSE?
- */
-int MainLoop()
-{
-	int i;
-	
-	DEBUGPATH;
-
-	if (!Globals.UseThreads){
-		for (i = 0 ; i < Globals.NumInterfaces ; i++){
-			if (!Globals.Interfaces[i].IsPollable){
-				printf("Error. All interfaces must be able to poll in single thread mode.\n");
-				return FALSE;
-			}
-		}
-		return MainLoopPoll();
-	}else{
-		return MainLoopThreaded();
-	}
 
 	return FALSE;
 }
-
 
 #ifdef DEBUG
 #undef DEBUG

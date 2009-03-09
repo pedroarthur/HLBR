@@ -255,11 +255,21 @@ void HandleSignal(int signal){
 		case SIGQUIT:
 		case SIGTERM:
 			printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());
-#ifdef MTHREADS
+
 			for (i = 0 ; i < Globals.UseThreads ; i++) {
 				pthread_cancel (Globals.Threads[i]);
 			}
-#endif
+
+			for (i = 0 ; i < Globals.NumInterfaces ; i++) {
+				if (Globals.Interfaces[i].RxThreadID)
+					pthread_cancel (Globals.Interfaces[i].RxThreadID);
+
+				if (Globals.Interfaces[i].TxThreadID)
+					pthread_cancel (Globals.Interfaces[i].TxThreadID);
+			}
+
+			pthread_cancel (Globals.AThread);
+
 			if (remove(Globals.PidFilename))
 				fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
 
@@ -348,13 +358,6 @@ int main(int argc, char**argv)
 	signal(SIGQUIT, HandleSignal);
 	signal(SIGTERM, HandleSignal);
 	signal(SIGPIPE, SIG_IGN);
-
-#ifndef HAS_THREADS
-	Globals.UseThreads=FALSE;
-#ifdef DEBUG
-	printf("No Thread Suppport. Forcing Non-Threaded Mode.\n");
-#endif
-#endif
 
 	MainLoop();
 

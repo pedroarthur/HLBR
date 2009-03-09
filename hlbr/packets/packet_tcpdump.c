@@ -68,7 +68,7 @@ int OpenInterfaceTCPDump(int InterfaceID){
 	Interface->FD=fd;
 	Interface->MTU=Header.snaplen;
 	Interface->IsPollable=TRUE;
-	
+
 	return TRUE;
 }
 
@@ -136,15 +136,15 @@ int ReadPacketTCPDump(int InterfaceID){
 ****************************************************/
 int WritePacketTCPDump(int InterfaceID, unsigned char* Packet, int PacketLen){	
 
-  DEBUGPATH;
-	
+	DEBUGPATH;
+
 	return FALSE;
 }
 
 /**********************************************
 * The thread func
 **********************************************/
-void* TCPDumpLoopFunc(void* v){
+void* TCPDumpRxLoopFunc(void* v){
 	int				InterfaceID;
 
 	DEBUGPATH;
@@ -157,30 +157,45 @@ void* TCPDumpLoopFunc(void* v){
 	return NULL;
 }
 
+void* TCPDumpTxLoopFunc(void* v){
+	int InterfaceID;
+	int PacketSlot;
+
+	DEBUGPATH;
+
+	InterfaceID = (int)v;
+
+	while (!Globals.Done){
+		ReturnEmptyPacket (GetScheduledPacket(InterfaceID));
+	}
+
+	return NULL;
+}
+
 /**********************************************
 * Start a thread to continuously read
 **********************************************/
 int LoopThreadTCPDump(int InterfaceID){
-
-  DEBUGPATH;
-
-#ifndef HAS_THREADS
-	return FALSE;
-#else
+	DEBUGPATH;
 
 #ifdef DEBUG
 	printf("Starting Thread for interface %s\n",Globals.Interfaces[InterfaceID].Name);
 #endif
 
-	Globals.Interfaces[InterfaceID].ThreadID=pthread_create(
+	Globals.Interfaces[InterfaceID].RxThreadID=pthread_create(
 		&Globals.Interfaces[InterfaceID].Thread,
 		NULL,
-		TCPDumpLoopFunc,
+		TCPDumpRxLoopFunc,
 		(void*)InterfaceID
 	);
-	
-	return (!Globals.Interfaces[InterfaceID].ThreadID);
-#endif
-	
+
+	Globals.Interfaces[InterfaceID].TxThreadID = pthread_create(
+			&Globals.Interfaces[InterfaceID].Thread,
+			NULL,
+			TCPDumpTxLoopFunc,
+			(void*)InterfaceID
+	);
+
+	return TRUE;
 }
 

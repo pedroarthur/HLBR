@@ -24,23 +24,27 @@ extern GlobalVars	Globals;
 * Get the MTU of interface named "name"
 *********************************************/
 int GetIfrMTU(char *name) {
-    int fd;
-    struct ifreq ifr;
-    int retval;
+	int fd;
+	struct ifreq ifr;
+	int retval;
 
-    retval = -1;
-    fd = socket(AF_INET, SOCK_DGRAM, 0);
-    if ( fd < 0) {
-        printf("Couldn't create socket for MTU\n");
-        return -1;
-    }
+	retval = -1;
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
 
-    strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
-    if (ioctl(fd, SIOCGIFMTU, &ifr) == 0)
-        retval = ifr.ifr_metric;
-    else
-        printf("ioctl(SIOCGIFMTU)");    
-    close(fd);
+	if (fd < 0) {
+		printf("Couldn't create socket for MTU\n");
+		return -1;
+	}
+
+	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+
+	if (ioctl(fd, SIOCGIFMTU, &ifr) == 0)
+		retval = ifr.ifr_metric;
+	else
+		printf("ioctl(SIOCGIFMTU)");
+
+	close(fd);
+
 	return retval;
 }
 
@@ -62,7 +66,7 @@ int get_device_id(int fd, char* name){
 **********************************************/
 int OpenInterfaceLinuxRaw(int InterfaceID){
 
-  DEBUGPATH;
+	DEBUGPATH;
 
 	int 				fd;
 	struct sockaddr_ll	sll;
@@ -189,7 +193,7 @@ int WritePacketLinuxRaw(int InterfaceID, unsigned char* Packet, int PacketLen){
 /**********************************************
 * The thread func
 **********************************************/
-void* LinuxRawLoopFunc(void* v){
+void* LinuxRawRxLoopFunc(void* v){
 	int				InterfaceID;
 
 	DEBUGPATH;
@@ -203,6 +207,26 @@ void* LinuxRawLoopFunc(void* v){
 	return NULL;
 }
 
+void* LinuxRawTxLoopFunc(void* v){
+	int InterfaceID;
+	int PacketSlot;
+
+	DEBUGPATH;
+
+	InterfaceID = (int)v;
+
+	while (!Globals.Done){
+		PacketSlot = GetScheduledPacket(InterfaceID);
+		WritePacketLinuxRaw (InterfaceID,
+				     Globals.Packets[PacketSlot].RawPacket,
+	 			     Globals.Packets[PacketSlot].PacketLen);
+
+		ReturnEmptyPacket (PacketSlot);
+	}
+
+	return NULL;
+}
+
 /**
  * Start a thread to continuously read (for Linux systems)
  */
@@ -210,24 +234,25 @@ int LoopThreadLinuxRaw(int InterfaceID)
 {
 	DEBUGPATH;
 
-#ifndef HAS_THREADS
-	return FALSE;
-#else
-
 #ifdef DEBUG
 	printf("Starting Thread for interface %s\n",Globals.Interfaces[InterfaceID].Name);
 #endif
 
-	Globals.Interfaces[InterfaceID].ThreadID = pthread_create(
+	Globals.Interfaces[InterfaceID].RxThreadID = pthread_create(
 		&Globals.Interfaces[InterfaceID].Thread,
 		NULL,
-		LinuxRawLoopFunc,
+		LinuxRawRxLoopFunc,
 		(void*)InterfaceID
 	);
-	
-	return (!Globals.Interfaces[InterfaceID].ThreadID);
-#endif
-	
+
+	Globals.Interfaces[InterfaceID].TxThreadID = pthread_create(
+			&Globals.Interfaces[InterfaceID].Thread,
+			NULL,
+			LinuxRawTxLoopFunc,
+			(void*)InterfaceID
+	);
+
+	return TRUE;
 }
 
 #endif /*if linux*/

@@ -177,9 +177,9 @@ void* ProcessLogFilesThread(void* v)
 	useconds_t	sec;
 #define SLEEP_TOTAL	1000000
 #define SLEEP_SLICE	250000
-#ifdef MTHREADS
+
 	int		ocs;
-#endif
+
 
 	sec = SLEEP_TOTAL;
 
@@ -194,9 +194,9 @@ void* ProcessLogFilesThread(void* v)
 			for (i=0; i<MAX_LOG_BUFFERS; i++) {
 				if (LogBuffersDest[i] >= 0) {
 					//pthread_mutex_lock(&Data->FileMutex);
-//#ifdef MTHREADS
+
 //				pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, &ocs);
-//#endif
+
 					len = strlen(LogBuffers[i]);
 					fwrite(LogBuffers[i], len, 1, LogFiles[LogBuffersDest[i]].fp);
 					if (fwrite("\n", 1, 1, LogFiles[LogBuffersDest[i]].fp) == 0)
@@ -208,9 +208,9 @@ void* ProcessLogFilesThread(void* v)
 
 					LogBuffersDest[i] = LOGBUFFER_FREE;
 				}
-//#ifdef MTHREADS
+
 //				pthread_setcancelstate(ocs, NULL);
-//#endif
+
 
 				//if (Data)
 				//	pthread_mutex_unlock(&Data->FileMutex);

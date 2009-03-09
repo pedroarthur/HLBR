@@ -7,9 +7,7 @@
 
 extern GlobalVars	Globals;
 
-#ifdef MTHREADS
 pthread_mutex_t		ConsoleMutex;
-#endif
 
 /******************************************
 * handle info messages
@@ -17,13 +15,13 @@ pthread_mutex_t		ConsoleMutex;
 int AlertConsoleMessage(char* Message, void* Data){
 
 	DEBUGPATH;
-#ifdef MTHREADS
+
 	pthread_mutex_lock (&ConsoleMutex);
-#endif
+
 	printf("%s\n",Message);
-#ifdef MTHREADS
+
 	pthread_mutex_unlock (&ConsoleMutex);
-#endif
+
 	return TRUE;
 }
 
@@ -42,9 +40,9 @@ int AlertConsoleAction(int RuleNum, int PacketSlot, void* Data){
 		printf("Couldn't apply message to packet\n");
 		return FALSE;
 	}
-#ifdef MTHREADS
+
 	pthread_mutex_lock (&ConsoleMutex);
-#endif
+
 	printf("%s ", Buff);
 
 	if (!ApplyMessage(Globals.Rules[RuleNum].MessageFormat, PacketSlot, Buff, 1024)){
@@ -53,9 +51,8 @@ int AlertConsoleAction(int RuleNum, int PacketSlot, void* Data){
 	}
 
 	printf("%s\n",Buff);
-#ifdef MTHREADS
+
 	pthread_mutex_unlock (&ConsoleMutex);
-#endif
 
 	return TRUE;
 }

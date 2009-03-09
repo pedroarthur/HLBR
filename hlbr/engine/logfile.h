@@ -1,13 +1,6 @@
 #ifndef _LOGFILE_H_
 #define _LOGFILE_H_
 
-#ifdef LOGFILE_THREAD
-#ifndef HAS_THREADS	/* Won't create log file keeping thread if isn't in threaded mode */
-#define LOGFILE_THREAD_NO
-#undef LOGFILE_THREAD
-#endif
-#endif
-
 #define LOGBUFFER_NOBUFFER	-1  /**< No free buffer found */
 #define LOGFILE_NOFILE		-1  /**< No LogFile was allocated */
 #define LOGBUFFER_FREE		-2  /**< Buffer is free for take */

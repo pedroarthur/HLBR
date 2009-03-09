@@ -37,10 +37,8 @@ struct dump_pcap_file_header {
 
 typedef struct dump_packet_rec{
 	char		fname[1024];
-#ifdef MTHREADS
+
 	pthread_mutex_t	DumpMutex;
-	int		DumpLockID;
-#endif
 } DumpPacketRec;
 
 extern GlobalVars	Globals;
@@ -115,9 +113,9 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 	DumpPacketRec*			data;
 	PacketRec*			p;
 	struct dump_pcap_pkthdr		Header;
-#ifdef MTHREADS
+
 	int				ocs;
-#endif
+
 	
 	DEBUGPATH;
 
@@ -135,36 +133,31 @@ int DumpPacketAction(int RuleNum, int PacketSlot, void* Data){
 	Header.ts=p->tv;
 	Header.caplen=p->PacketLen;
 	Header.len=p->PacketLen;
-#ifdef MTHREADS
+
 	pthread_mutex_lock (&data->DumpMutex);
-#endif
+
 	fp=fopen(data->fname, "a");
 	if (!fp){
 #ifdef DEBUG	
 		printf("Couldn't open \"%s\" for appending\n",data->fname);
 #endif
 
-#ifdef MTHREADS
+
 		pthread_mutex_unlock (&data->DumpMutex);
-#endif
+
 		return FALSE;
 	}
 
-#ifdef MTHREADS
 	pthread_setcancelstate (PTHREAD_CANCEL_DISABLE, &ocs);
-#endif
 
 	fwrite(&Header, sizeof(struct dump_pcap_pkthdr),1,fp);
 	fwrite(p->RawPacket, p->PacketLen, 1, fp);
 
-#ifdef MTHREADS
 	pthread_setcancelstate (ocs, NULL);
-#endif
 
 	fclose(fp);
-#ifdef MTHREADS
+
 	pthread_mutex_unlock (&data->DumpMutex);
-#endif
 
 	return TRUE;
 }

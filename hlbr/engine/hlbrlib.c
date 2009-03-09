@@ -6,6 +6,8 @@
 #include "hlbr.h"
 #include "hlbrlib.h"
 
+#include <errno.h>
+
 /****************************/ 
 /* STRING RELATED FUNCTIONS */
 /****************************/ 
@@ -374,13 +376,22 @@ int QueuePost (Queue* q) {
 }
 
 int QueueWait (Queue* q) {
-	while (sem_wait(&q->semaphore)) {
+	while (TRUE) {
+		switch (sem_wait(&q->semaphore)) {
+			case EINTR:
 #ifdef DEBUG
-		fprintf (stderr, "%s: error while waiting for semaphore\n", __FUNCTION__);
+				fprintf(stderr, "%s: Wait Interrupted\n", __FUNCTION__);
 #endif
+				break;
+			case EINVAL:
+				fprintf (stderr, "Waiting on a invalid semaphore!\n");
+				return FALSE;
+			default:
+				return TRUE;
+		}
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 int QueueGetSize (Queue* q) {
