@@ -403,6 +403,7 @@ int InitPacketQueue (int max_packets) {
 		}
 
 		Globals.Packets[i].PacketSlot = i;
+		StackPost (PacketQueue.Idle);
 	}
 }
 
@@ -412,18 +413,15 @@ int InitPacketQueue (int max_packets) {
 int GetEmptyPacket() {
 	PacketRec*	Packet;
 	int		PacketSlot;
+	Node* 		aux;
 
 	DEBUGPATH;
 
-	if (!StackGetSize(PacketQueue.Idle)) {
-		return PACKET_NONE;
-	} else {
-		Node* aux = StackPopNode(PacketQueue.Idle);
+	StackWait (PacketQueue.Idle);
+	aux = StackPopNode(PacketQueue.Idle);
 
-		PacketSlot = (int) NodeGetData(aux);
-
-		StackPushNode (PacketQueue.Allocated, aux);
-	}
+	PacketSlot = (int) NodeGetData(aux);
+	StackPushNode (PacketQueue.Allocated, aux);
 
 	Packet = &Globals.Packets[PacketSlot];
 
@@ -617,6 +615,7 @@ void ReturnEmptyPacket(int PacketSlot) {
 		NodeSetData (aux,(void*)PacketSlot);
 
 		StackPushNode (PacketQueue.Idle, aux);
+		StackPost (PacketQueue.Idle);
 	} else if (Globals.Packets[PacketSlot].Status == PACKET_STATUS_PROCESSING) {
 		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
 

@@ -59,8 +59,10 @@ int RouteAndSend(int PacketSlot)
 		return TRUE;
 
 	/*dropped by rules*/
-	if (!p->PassRawPacket)
+	if (!p->PassRawPacket){
+		ReturnEmptyPacket(PacketSlot);
 		return TRUE;
+	}
 
 	p->TargetInterface=-1;
 

@@ -266,16 +266,16 @@ Queue* QueueNew () {
 	Queue* q = (Queue *) calloc (1, sizeof(Queue));
 
 	if (q) {
-		int kind;
+		int type;
 #ifdef _LINUX_
-		kind = PTHREAD_MUTEX_RECURSIVE_NP;
+		type = PTHREAD_MUTEX_RECURSIVE_NP;
 #else
-		kind = PTHREAD_MUTEX_RECURSIVE;
+		type = PTHREAD_MUTEX_RECURSIVE;
 #endif
 
 		pthread_mutexattr_t attr;
 		pthread_mutexattr_init (&attr);
-		pthread_mutexattr_setkind_np (&attr, kind);
+		pthread_mutexattr_settype (&attr, type);
 
 		pthread_mutex_init (&q->mutex, &attr);
 
@@ -413,20 +413,22 @@ Stack* StackNew () {
 	Stack* s = (Stack*) calloc (1, sizeof(Stack));
 
 	if (s) {
-		int kind;
+		int type;
 #ifdef _LINUX_
-		kind = PTHREAD_MUTEX_RECURSIVE_NP;
+		type = PTHREAD_MUTEX_RECURSIVE_NP;
 #else
-		kind = PTHREAD_MUTEX_RECURSIVE;
+		type = PTHREAD_MUTEX_RECURSIVE;
 #endif
 
 		pthread_mutexattr_t attr;
 		pthread_mutexattr_init (&attr);
-		pthread_mutexattr_setkind_np (&attr, kind);
+		pthread_mutexattr_settype (&attr, type);
 
 		pthread_mutex_init (&s->mutex, &attr);
 
 		pthread_mutexattr_destroy (&attr);
+
+		sem_init (&s->semaphore, 0, 0);
 
 		return s;
 	}
@@ -502,6 +504,32 @@ Node* StackPopNode (Stack* s) {
 
 	pthread_mutex_unlock (&s->mutex);
 	return NULL;
+}
+
+int StackPost (Stack* s) {
+	if (sem_post(&s->semaphore))
+		return FALSE;
+	else
+		return TRUE;
+}
+
+int StackWait (Stack* s) {
+	while (TRUE) {
+		switch (sem_wait(&s->semaphore)) {
+			case EINTR:
+#ifdef DEBUG
+				fprintf(stderr, "%s: Wait Interrupted\n", __FUNCTION__);
+#endif
+				break;
+			case EINVAL:
+				fprintf (stderr, "Waiting on a invalid semaphore!\n");
+				return FALSE;
+			default:
+				return TRUE;
+		}
+	}
+
+	return FALSE;
 }
 
 int StackGetSize (Stack* s) {

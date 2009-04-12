@@ -80,20 +80,34 @@ typedef struct stack {
 	int size;
 
 	void (*pfree)(void*);
+
 	pthread_mutex_t mutex;
+	sem_t semaphore;
 } Stack;
 
+/* Stack creation */
 Stack* StackNew ();
 
+/* Stack Destruction */
 void StackAddDestroyHandler (Stack* s, void (*pfree)(void*));
 void StackDestroy (Stack* s);
 
+/* Pushing Data  */
 int StackPushData (Stack* s, void* data);
 int StackPushNode (Stack* s, Node* node);
 
+/* Poping Data */
 void* StackPopData (Stack* s);
 Node* StackPopNode (Stack* s);
 
+/* Synchonization */
+int StackLock (Stack* s);
+int StackUnlock (Stack* s);
+
+int StackPost (Stack* s);
+int StackWait (Stack* s);
+
+/* Misc */
 int StackGetSize (Stack* s);
 
 #endif /* _HLBR_LIB_H_ */

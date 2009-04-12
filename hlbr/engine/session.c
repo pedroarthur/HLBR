@@ -317,7 +317,8 @@ int UpdateTime(PP* Port){
 	}
 	
 	Port->TimePrev->TimeNext=Port->TimeNext;
-	Port->TimeNext->TimePrev=Port->TimePrev;
+	if (Port->TimeNext)
+		Port->TimeNext->TimePrev=Port->TimePrev;
 	Port->TimeNext=NULL;
 	TimeTail->TimeNext=Port;
 	Port->TimePrev=TimeTail;
