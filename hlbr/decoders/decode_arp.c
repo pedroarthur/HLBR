@@ -1,3 +1,4 @@
+//#define DEBUG
 #include "decode_arp.h"
 #include "decode_ethernet.h"
 #include "../packets/packet.h"
@@ -6,15 +7,14 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-//#define DEBUG
 
 extern GlobalVars	Globals;
 
 int	EthernetDecoderID;
 
-/***************************************
-* Apply the arp decoding
-****************************************/
+/**
+ * Apply the arp decoding.
+ */
 void* DecodeARP(int PacketSlot){
 	ARPData*		data;
 	EthernetData*	edata;
@@ -23,18 +23,18 @@ void* DecodeARP(int PacketSlot){
 	
 	DEBUGPATH;
 
-	p=&Globals.Packets[PacketSlot];
+	p = &Globals.Packets[PacketSlot];
 
 	if (!GetDataByID(PacketSlot, EthernetDecoderID, (void**)&edata)){
-		printf("Ethernet decoder ID is %i\n",EthernetDecoderID);
-		printf("1Failed to get Ethernet header data\n");
+		fprintf(stderr, "Ethernet decoder ID is %i\n",EthernetDecoderID);
+		fprintf(std, "Failed to get Ethernet header data\n");
 		return NULL;
 	}
 
-	etype=ntohs(edata->Header->Type);
+	etype = ntohs(edata->Header->Type);
 	
-	if (etype!=ETHERNET_TYPE_ARP){
-#ifdef DEBUG1
+	if (etype != ETHERNET_TYPE_ARP) {
+#ifdef DEBUG
 		printf("Ethernet doesn't think this is an ARP packet %04x\n",etype);
 #endif		
 		return NULL;
@@ -69,7 +69,7 @@ void* DecodeARP(int PacketSlot){
 			data->EthernetARPHeader->TargetMac[5]);
 		printf("(%s)\n",inet_ntoa(*(struct in_addr*)&data->EthernetARPHeader->TargetIP[0]));
 #endif
-	}else if (ntohs(data->Header->Operation)==ARP_OP_REPLY){
+	} else if (ntohs(data->Header->Operation)==ARP_OP_REPLY){
 #ifdef DEBUG	
 		printf("ARP Reply:\n");		
 #endif		
@@ -94,22 +94,23 @@ void* DecodeARP(int PacketSlot){
 			data->EthernetARPHeader->TargetMac[5]);
 		printf("(%s)\n",inet_ntoa(*(struct in_addr*)&data->EthernetARPHeader->TargetIP[0]));
 #endif
-	}else{
+	} else {
 		printf("Unknown ARP Operation %04x\n", ntohs(data->Header->Operation));
 	}
 
 	return data;
 }
 
-/*************************************
-* Set up the decoder
-*************************************/
-int InitDecoderARP(){
+/**
+ * Set up the ARP decoder.
+ */
+int InitDecoderARP()
+{
 	int DecoderID;
 
 	DEBUGPATH;
 	
-	if ((DecoderID=CreateDecoder("ARP"))==DECODER_NONE){
+	if ((DecoderID = CreateDecoder("ARP")) == DECODER_NONE) {
 #ifdef DEBUG
 		printf("Couldn't Allocate ARP Decoder\n");
 #endif	
@@ -119,15 +120,20 @@ int InitDecoderARP(){
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeARP;
 	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("Ethernet"), DecoderID)){
-		printf("Failed to Bind ARP Decoder to Ethernet Decoder\n");
+		fprintf(stderr, "Failed to Bind ARP Decoder to Ethernet Decoder\n");
 		return FALSE;
 	}
 
 	EthernetDecoderID=GetDecoderByName("Ethernet");
 
-	/*for testing*/
-	Globals.Decoders[DecoderID].Active=TRUE;
-	/*end testing*/
+	/* for testing */
+	Globals.Decoders[DecoderID].Active = TRUE;
+	/* end testing */
 
 	return TRUE;
 }
+
+
+#ifdef DEBUG
+#undef DEBUG
+#endif

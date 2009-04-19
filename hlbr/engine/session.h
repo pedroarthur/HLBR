@@ -9,11 +9,13 @@
 #define PORT_START	5
 #define PORT_GROW	10
 
-#define SESSION_FORCE_TIMEOUT	60
+/* Timeout for a (TCP) session */
+#define SESSION_FORCE_TIMEOUT		60
 
-#define SESSION_UNKNOWN				0
-#define SESSION_IP1_SERVER			1
-#define SESSION_IP2_SERVER			2
+/* TCP session direction */
+#define SESSION_UNKNOWN			0
+#define SESSION_IP1_SERVER		1
+#define SESSION_IP2_SERVER		2
 #define SESSION_IP1_SERVER_MAYBE	3
 #define SESSION_IP2_SERVER_MAYBE	4
 
@@ -29,16 +31,29 @@
 struct ip_pair;
 struct ip_bin;
 
-typedef struct port_pair{
+/**
+ * Struct that represents the actual (TCP) session.
+ * Holds the source/dest ports, a pointer to the ip_pair struct, and other
+ * info about the session (packet counts, connection state etc.)
+ * @see ip_pair
+ */
+typedef struct port_pair {
 	unsigned int		SessionID;
 	unsigned short		Port1;
 	unsigned short		Port2;
 	struct ip_pair*		Parent;
 	
-	long int			FirstTime;
-	long int			LastTime;
+	long int		FirstTime;
+	long int		LastTime;
 	unsigned char		Direction;
 	unsigned char		Error;
+	/* Notes: this (Error) is being used to flag:
+	   - srv->cli:ServerAck doesn't match ClientSeq+1 during handshake1
+	   - srv->cli:ServerAck/ClientSeq don't match stored ones in handshake2
+	   - srv->cli:any unexpected packet order
+	   - cli->srv:any unexpected packet order (both with no fin/rst and
+	     with any of them)
+	*/
 	
 	unsigned short		TCPCount;
 	unsigned short		UDPCount;
@@ -54,10 +69,24 @@ typedef struct port_pair{
 	unsigned int		ClientAck;
 	unsigned char		ClientFin;
 
+	/** These two fields (TimeNext and TimePrev) are used to track
+	 * port_pair structs that are in the "time list".
+	 * @see AddToTime
+	 * @see UpdateTime
+	 * @see TimeoutSessions
+	 */
 	struct port_pair*	TimeNext;
 	struct port_pair*	TimePrev;
 } PP;
 
+/**
+ * Struct that represents the two IPs in a session (?).
+ * The two IPs are supposed to be server/client IPs. This struct doesn't hold
+ * info about the actual session, only about the source/destination IPs.
+ * Info about the session lies in the struct port_pair. 
+ * @see port_pair
+ * @see FindIPPair()
+ */
 typedef struct ip_pair{
 	unsigned int	IP1;
 	unsigned int	IP2;

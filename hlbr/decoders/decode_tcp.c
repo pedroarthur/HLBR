@@ -1,3 +1,4 @@
+//#define DEBUG
 #include "decode_tcp.h"
 #include "decode_ip.h"
 #include "../packets/packet.h"
@@ -5,16 +6,16 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 
-//#define DEBUG
 
 extern GlobalVars	Globals;
 
 int	IPDecoderID;
 
-/***************************************
-* Apply the tcp decoding
-****************************************/
-void* DecodeTCP(int PacketSlot){
+/**
+ * Apply the TCP decoding.
+ */
+void* DecodeTCP(int PacketSlot)
+{
 	TCPData*		data;
 	IPData*			ip_data;
 	unsigned char	ip_proto;
@@ -25,7 +26,7 @@ void* DecodeTCP(int PacketSlot){
 	p=&Globals.Packets[PacketSlot];
 
 	if (!GetDataByID(PacketSlot, IPDecoderID, (void**)&ip_data)){
-		printf("Failed to get IP header data\n");
+		fprintf(stderr, "Failed to get IP header data\n");
 		return NULL;
 	}
 
@@ -53,10 +54,11 @@ void* DecodeTCP(int PacketSlot){
 	return data;
 }
 
-/*************************************
-* Set up the decoder
-*************************************/
-int InitDecoderTCP(){
+/**
+ * Set up the TCP decoder.
+ */
+int InitDecoderTCP()
+{
 	int DecoderID;
 
 	DEBUGPATH;
@@ -71,7 +73,7 @@ int InitDecoderTCP(){
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeTCP;
 	Globals.Decoders[DecoderID].Free=free;
 	if (!DecoderAddDecoder(GetDecoderByName("IPDefrag"), DecoderID)){
-		printf("Failed to Bind TCP Decoder to IPDefrag Decoder\n");
+		fprintf(stderr, "Failed to Bind TCP Decoder to IPDefrag Decoder\n");
 		return FALSE;
 	}
 
@@ -79,3 +81,8 @@ int InitDecoderTCP(){
 
 	return TRUE;
 }
+
+
+#ifdef DEBUG
+#undef DEBUG
+#endif

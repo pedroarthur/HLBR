@@ -161,6 +161,7 @@ int FlushLogBuffer(int Buffer, int LogFile)
 	if (fflush(LogFiles[LogFile].fp))
 		fprintf(stderr, "Error flushing to log #%d (%s), message: %s\n", 
 			LogFile, LogFiles[LogFile].fname, LogBuffers[Buffer]);
+	LogBuffersDest[Buffer] = LOGBUFFER_FREE;
 #endif
 
 	return TRUE;

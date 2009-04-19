@@ -70,13 +70,13 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
 
 
 /**
- * Print out the version number.
+ * Prints out the version number.
  */
-void PrintVersion()
+void PrintVersion() 
 {
 	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
 	printf("http://hlbr.sourceforge.net\n\n");
-	printf("(Based in Jason Larsen's Hogwash)\n\n\n");
+	printf("(based on Jason Larsen's Hogwash)\n\n\n");
 }
 
 /**
@@ -89,7 +89,7 @@ void PrintUsage()
 	PrintVersion();
 
 	printf("HLBR eh um IPS brasileiro e alguns arquivos possuem frases em portugues e ingles.\n");
-	printf("HLBR is a brazilian IPS and some files have text in portuguese and english.\n\n\n");
+	printf("HLBR is a Brazilian IPS and some files has phrases in portuguese and english.\n\n\n");
 	printf("Utilizacao / Usage:\n");
 	printf("------------------\n");
 	printf("hlbr <args>\n");
@@ -108,10 +108,11 @@ void PrintUsage()
 	printf("The configuration files and rules are in /etc/hlbr/.\n\n\n");	
 }
 
-/******************************************
-* Detach this process
-******************************************/
-int hlbr_daemon(int nochdir, int noclose){
+/**
+ * Detach this process (runs in daemon mode).
+ */
+int hlbr_daemon(int nochdir, int noclose)
+{
 	int fd;
 
 	printf("Entering Daemon Mode\n");
@@ -156,10 +157,12 @@ int hlbr_daemon(int nochdir, int noclose){
 	return TRUE;
 }
 
-/***********************************
-* Make sense of the command line
-************************************/
-int ParseArgs(int argc, char **argv){
+/**
+ * Make sense out of the command line.
+ * Parse the parameters received by the main() function.
+ */
+int ParseArgs(int argc, char **argv)
+{
 	int c;
 
 	DEBUGPATH;
@@ -242,10 +245,11 @@ int ParseArgs(int argc, char **argv){
 	return TRUE;
 }
 
-/*************************************
-* Handle the signals
-*************************************/
-void HandleSignal(int signal){
+/**
+ * Handle POSIX signals.
+ */
+void HandleSignal(int signal)
+{
 	int i;
 
 	DEBUGPATH;
@@ -383,11 +387,12 @@ int GetListByName(char* Name){
 	return LIST_NONE;
 }
 
-/*****************************************
-* Add a function to be called during
-* shutdown
-****************************************/
-int AddShutdownHandler(int (*func)(void* data), void* data){
+/**
+ * Add a function to be called during shutdown.
+ * Defines a callback function.
+ */
+int AddShutdownHandler(int (*func)(void* data), void* data)
+{
 	FuncList*	f;
 	FuncList*	this;
 
@@ -412,10 +417,12 @@ int AddShutdownHandler(int (*func)(void* data), void* data){
 	}
 }
 
-/****************************************
-* Let everything shutdown gracefully
-****************************************/
-int CallShutdownHandlers(){
+/**
+ * Let everything shutdown gracefully.
+ * Calls callback functions defined for shutdown.
+ */
+int CallShutdownHandlers()
+{
 	FuncList*	this;
 	
 	DEBUGPATH;
