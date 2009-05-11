@@ -408,9 +408,10 @@ int InitPacketQueue (int max_packets) {
 }
 
 /**
- * Get an emoty, unused packet struct from the pool.
+ * Get an empty, unused packet struct from the pool.
  */
-int GetEmptyPacket() {
+int GetEmptyPacket()
+{
 	PacketRec*	Packet;
 	int		PacketSlot;
 	Node* 		aux;

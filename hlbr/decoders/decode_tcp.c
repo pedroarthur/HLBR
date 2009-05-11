@@ -49,7 +49,9 @@ void* DecodeTCP(int PacketSlot)
 	printf("In PacketSlot %i TCP %u->%u\n",PacketSlot, ntohs(data->Header->source), ntohs(data->Header->dest)); 
 #endif	
 
+#ifdef TCP_STREAM_REASSEMBLY
 	AssignSessionTCP(PacketSlot, (void*)data);
+#endif
 
 	return data;
 }

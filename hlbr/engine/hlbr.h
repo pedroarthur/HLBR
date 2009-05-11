@@ -37,6 +37,8 @@
  */
 #define LOGFILE_THREAD
 
+//#define TCP_STREAM_REASSEMBLY
+
 #define MAX_PACKET_SIZE		65536+14+1
 #define TYPICAL_PACKET_SIZE	16000
 #define MAX_NAME_LEN		20
@@ -113,15 +115,6 @@
     free(x); \
   } \
 }
-
-
-#ifdef HLBR_LITTLE_ENDIAN
-#define IP_BYTES(IP)	(IP & 0x000000ff), (IP & 0x0000ff00)>>8, (IP & 0x00ff0000)>>16, IP>>24
-#else
-#define IP_BYTES(IP)	IP>>24, (IP & 0x00ff0000)>>16, (IP & 0x0000ff00)>>8, (IP & 0x000000ff)
-#endif
-
-
 
 
 /**

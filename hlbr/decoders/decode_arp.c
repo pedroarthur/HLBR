@@ -27,7 +27,7 @@ void* DecodeARP(int PacketSlot){
 
 	if (!GetDataByID(PacketSlot, EthernetDecoderID, (void**)&edata)){
 		fprintf(stderr, "Ethernet decoder ID is %i\n",EthernetDecoderID);
-		fprintf(std, "Failed to get Ethernet header data\n");
+		fprintf(stderr, "Failed to get Ethernet header data\n");
 		return NULL;
 	}
 
