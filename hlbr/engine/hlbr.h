@@ -178,7 +178,9 @@ typedef struct interface_rec{
 	int		RxThreadID;
 	int		TxThreadID;
 	void*		User;
-	int		SBData; /* Data for Simple Bridge routing */
+
+	int		RouteID;
+	void*		RouteData; /* Data for Simple Bridge routing */
 } InterfaceRec;
 
 typedef struct test_node{

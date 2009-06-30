@@ -1,9 +1,8 @@
 Current version:
 
-- changes in packet scheduling introduced a new bug - when using MacFilter
-  sometimes an interface number 99 is used (means broadcast) and the code
-  crashes when trying PacketQueue.Scheduling[packet->TargetInterface]
-  and TargetInterface being 99
+- Rewrite the route engine (and make it more efficient);
+   Improvements would make unnecessary RouteBroadcast and RouteArp.
+   Futher, it would remove the loop in Route(int PacketSlot).
 - finish implementation of the logThread (keeps/updates all logfiles);
    implement function to manage string buffers for messages;
    define KEEP_LOGFILE_OPEN and fix stuff so that works; change

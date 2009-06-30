@@ -11,6 +11,8 @@
 
 extern GlobalVars	Globals;
 
+int 			SBridgeID;
+
 /*********************************
 * Send it out the other interface
 **********************************/
@@ -21,8 +23,8 @@ int RouteSBridge(int PacketSlot){
 
 	p=&Globals.Packets[PacketSlot];
 
-	if (Globals.Interfaces[p->InterfaceNum].SBData) {
-		p->TargetInterface = Globals.Interfaces[p->InterfaceNum].SBData & (~SBMask);
+	if (Globals.Interfaces[p->InterfaceNum].RouteID == SBridgeID) {
+		p->TargetInterface = (int) Globals.Interfaces[p->InterfaceNum].RouteData;
 		return ROUTE_RESULT_DONE;
 	}
 
@@ -55,22 +57,24 @@ int RouteSBridgeAddNode(int RouteID, char* Args){
 		return FALSE;
 	}
 
-	if (Globals.Interfaces[InterfaceA].SBData) {
-		fprintf (stderr, "%s: Interface %s already in a Simple Bridge",
+	if (Globals.Interfaces[InterfaceA].RouteID != ROUTE_NONE) {
+		fprintf (stderr, "%s: Interface %s already routed\n",
 			 __FUNCTION__, Globals.Interfaces[InterfaceA].Name);
 
 		return FALSE;
 	}
 
-	if (Globals.Interfaces[InterfaceB].SBData) {
-		fprintf (stderr, "%s: Interface %s already in a Simple Bridge",
+	if (Globals.Interfaces[InterfaceB].RouteID != ROUTE_NONE) {
+		fprintf (stderr, "%s: Interface %s already routed\n",
 			 __FUNCTION__, Globals.Interfaces[InterfaceB].Name);
 
 		return FALSE;
 	}
 
-	Globals.Interfaces[InterfaceA].SBData = SBMask | InterfaceB;
-	Globals.Interfaces[InterfaceB].SBData = SBMask | InterfaceA;
+	Globals.Interfaces[InterfaceA].RouteData = (void *) InterfaceB;
+	Globals.Interfaces[InterfaceB].RouteData = (void *) InterfaceA;
+
+	Globals.Interfaces[InterfaceB].RouteID = SBridgeID;
 
 	return TRUE;
 }
@@ -79,17 +83,15 @@ int RouteSBridgeAddNode(int RouteID, char* Args){
 * Set up everything to do simple bridging
 **********************************/
 int InitSBridge(){
-	int RouteID;
-
 	DEBUGPATH;
 	
-	if ((RouteID=CreateRoute("SBridge"))==ROUTE_NONE){
+	if ((SBridgeID=CreateRoute("SBridge"))==ROUTE_NONE){
 		printf("Couldn't create route SBridge\n");
 		return FALSE;
 	}
 	
-	Globals.Routes[RouteID].RouteFunc=RouteSBridge;
-	Globals.Routes[RouteID].AddNode=RouteSBridgeAddNode;
+	Globals.Routes[SBridgeID].RouteFunc=RouteSBridge;
+	Globals.Routes[SBridgeID].AddNode=RouteSBridgeAddNode;
 	
 	return TRUE;
 }

@@ -29,51 +29,64 @@ int GetLine(FILE* fp, char* buff, int buff_len)
 	char	LineBuff[65536];
 	char*	Begin;
 	char*	End;
-	
+
 	DEBUGPATH;
 
 	bzero(buff, buff_len);
 	Done=FALSE;
+
 	while (!Done){
-		if (!fgets(LineBuff, 65536, fp)) return FALSE;
-		if (LineBuff[0]=='#') continue;
-		
+		if (!fgets(LineBuff, 65536, fp))
+			return FALSE;
+
+		if (LineBuff[0]=='#')
+			continue;
+
 		/*erase any whitespace at the front*/
 		Begin=LineBuff;
+
 		while (((*Begin==' ') || (*Begin=='\t')) && (*Begin!='\n') && (*Begin!='\0')) Begin++;
-		if (*Begin=='\0') continue;
-		if (*Begin=='\n') continue;
-		
+
+		if (*Begin=='\0')
+			continue;
+
+		if (*Begin=='\n')
+			continue;
+
 		/*erase the line feed at the end*/
 		End=Begin+strlen(Begin)-1;
+
 		if (*End=='\n'){
 			*End='\0';
 			End--;
 		}
-		
+
 		if (*End==0x09){
 			*End='\0';
 			End--;
 		}
-		
+
 		if (*End==';'){
 			*End='\0';
 			End--;
 		}
-		
+
 		/*if the line ends with a slash, read in the next line*/
 		if (*End=='\\'){
 #ifdef DEBUG1
 			printf("Line ends with a continuation character\n");
-#endif			
-			if (!fgets(End-1, 65536, fp)) return FALSE;
-					/*erase the line feed at the end*/
+#endif
+			if (!fgets(End-1, 65536, fp))
+				return FALSE;
+
+			/*erase the line feed at the end*/
 			End=Begin+strlen(Begin)-1;
+
 			if (*End=='\n'){
 				*End='\0';
 				End--;
 			}
-		
+
 			if (*End==0x09){
 				*End='\0';
 				End--;
@@ -85,11 +98,11 @@ int GetLine(FILE* fp, char* buff, int buff_len)
 			}
 
 		}
-				
+	
 		snprintf(buff, buff_len, "%s", Begin);
 		return TRUE;
-	}	
-	
+	}
+
 	return FALSE;
 }
 
@@ -100,11 +113,14 @@ int ParseList(FILE* fp, char* Name, int ListType){
 	char		LineBuff[10240];
 	int 		ListID;
 	GlobalList*	List;
-	
+
 	DEBUGPATH;
 
-	if (!Name) return FALSE;	
-	while (*Name==' ') Name++;
+	if (!Name)
+		return FALSE;
+
+	while (*Name==' ')
+		Name++;
 
 #ifdef DEBUG
 	printf("Setting for list %s\n",Name);
@@ -117,19 +133,22 @@ int ParseList(FILE* fp, char* Name, int ListType){
 	}
 
 	List=&Globals.Lists[Globals.NumLists];
-	
+
 	List->List=InitNumList(LIST_TYPE_NORMAL);
 	snprintf(List->Name, MAX_NAME_LEN, Name);
+
 #ifdef DEBUG
 	printf("Setting list name to \"%s\"\n",List->Name);
 #endif	
 
 	while(GetLine(fp, LineBuff, 10240)){
-		if (*LineBuff=='#') continue;
+		if (*LineBuff=='#')
+			continue;
+
 		if (strcasecmp(LineBuff, "</list>")==0){
 #ifdef DEBUG
 			printf("All done with list \"%s\"\n",List->Name);
-#endif			
+#endif
 			Globals.NumLists++;
 			return TRUE;
 		}else{
@@ -141,7 +160,7 @@ int ParseList(FILE* fp, char* Name, int ListType){
 				}
 #ifdef DEBUG
 				printf("Added %s to ip list %s\n",LineBuff, List->Name);
-#endif				
+#endif
 				break;
 			default:
 				printf("I don't understand that list type\n");
@@ -149,7 +168,6 @@ int ParseList(FILE* fp, char* Name, int ListType){
 			}
 		}
 	}
-
 
 	return FALSE;
 }
@@ -258,9 +276,12 @@ int ParseSystem(FILE* fp){
 	DEBUGPATH;
 
 	/*set the defaults*/
-	if (Globals.SensorName) free(Globals.SensorName);
+	if (Globals.SensorName)
+		free(Globals.SensorName);
+
 	Globals.SensorName=(char*)calloc(strlen(DEFAULT_SENSOR_NAME)+2, sizeof(char));
 	snprintf(Globals.SensorName, strlen(DEFAULT_SENSOR_NAME)+1, DEFAULT_SENSOR_NAME);
+
 	Globals.SensorID=0;
 
 	/*loop through the lines*/
@@ -268,30 +289,31 @@ int ParseSystem(FILE* fp){
 		if (strcasecmp(LineBuff, "</system>")==0){
 #ifdef DEBUG
 			printf("All Done with system options\n");
-#endif		
+#endif
 			return TRUE;
 		}else if (strncasecmp(LineBuff, "name=",5)==0){
 			Current=LineBuff+strlen("name=");
 
 			if (Globals.SensorName)
 				free(Globals.SensorName);
+
 			Globals.SensorName=(char*)calloc(strlen(Current)+2, sizeof(char));
 			snprintf(Globals.SensorName, strlen(Current)+1, Current);
 #ifdef DEBUG
 			printf("Sensor Name is %s\n",Globals.SensorName);
-#endif			
+#endif
 		}else if (strncasecmp(LineBuff, "ID=",3)==0){
 			Current=LineBuff+strlen("ID=");
 			Globals.SensorID=atoi(Current);
 #ifdef DEBUG
 			printf("Sensor ID is %i\n",Globals.SensorID);
-#endif			
+#endif
 		}else if (strncasecmp(LineBuff, "AlertHeader=",12)==0){
 			Current=LineBuff+strlen("AlertHeader=");
 			Globals.AlertHeader=ParseMessageString(Current);
 #ifdef DEBUG
 			printf("AlertHeader set\n");
-#endif			
+#endif
 		}else if (strncasecmp(LineBuff, "Threads=",8)==0){
 			Current=LineBuff+strlen("Threads=");
 			switch (*Current){
@@ -338,9 +360,9 @@ int ParseSystem(FILE* fp){
 *******************************************/
 int ParseInterface(FILE* fp, char* Name){
 	char			LineBuff[10240];
-	InterfaceRec*	Interface;
+	InterfaceRec*		Interface;
 	char*			Current;
-	
+
 	DEBUGPATH;
 
 	/*get the next free interface*/
@@ -348,45 +370,52 @@ int ParseInterface(FILE* fp, char* Name){
 		printf("You can only have a maximum of %i interfaces\n",MAX_INTERFACES);
 		return FALSE;
 	}
+
 	Interface=&Globals.Interfaces[Globals.NumInterfaces];
 	Interface->ID=Globals.NumInterfaces;
 	Globals.NumInterfaces++;
-	
+
 	/*set the defaults*/
 	Interface->Type=PACKET_TYPE_NONE;
-	Interface->MTU=1500;
 	Interface->Proto=PACKET_PROTO_ETHERNET;
+
+	Interface->MTU=1500;
 	Interface->FD=-1;
+
+	Interface->RouteID = ROUTE_NONE;
+	Interface->RouteData = NULL;
+
 	snprintf(Interface->Name, MAX_INTERFACE_NAME_LEN, Name);
+
 #ifdef DEBUG
 	printf("Interface Name is %s\n",Interface->Name);
-#endif			
+#endif
 	
 	/*loop through the lines*/
 	while(GetLine(fp, LineBuff, 10240)){
 		if (strcasecmp(LineBuff, "</interface>")==0){
 #ifdef DEBUG
 			printf("All Done with this interface\n");
-#endif		
+#endif
 			return TRUE;
 		}else if (strncasecmp(LineBuff, "type=",5)==0){
 			Current=LineBuff+strlen("type=");
 			Interface->Type=GetPacketTypeByName(Current);
 #ifdef DEBUG
 			printf("Interface Type is %i\n",Interface->Type);
-#endif			
+#endif
 		}else if (strncasecmp(LineBuff, "proto=",6)==0){
 			Current=LineBuff+strlen("proto=");
 			Interface->Proto=GetPacketProtoByName(Current);
 #ifdef DEBUG
 			printf("Interface Proto is %i\n",Interface->Proto);
-#endif			
+#endif
 		}else if (strncasecmp(LineBuff, "role=",5)==0){
 			Current=LineBuff+strlen("role=");
 			Interface->Role=GetPacketRoleByName(Current);
 #ifdef DEBUG
 			printf("Interface role is %i\n",Interface->Role);
-#endif			
+#endif
 		}else{
 			printf("Warning: Unknown Interface Option: %s\n",LineBuff);
 		}
@@ -403,7 +432,7 @@ int ParseRouting(FILE* fp){
 	int				RouteID;
 	char*			Pos;
 	char*			Pos2;
-		
+
 	DEBUGPATH;
 
 	/*set the defaults*/
@@ -413,7 +442,7 @@ int ParseRouting(FILE* fp){
 		if (strcasecmp(LineBuff, "</routing>")==0){
 #ifdef DEBUG
 			printf("All Done with routing options\n");
-#endif		
+#endif
 			return TRUE;
 		}else{
 			Pos=strchr(LineBuff, '(');
@@ -430,7 +459,7 @@ int ParseRouting(FILE* fp){
 				printf("ERROR: Unknown Routing Option: %s\n",LineBuff);
 				return FALSE;
 			}
-			
+
 			if (Pos){
 				if (!RouteAdd(RouteID, Pos+1)){
 					printf("Routing option \"%s\" failed\n",LineBuff);
@@ -441,7 +470,8 @@ int ParseRouting(FILE* fp){
 				if (!RouteAdd(RouteID, NULL)){
 					printf("Routing option \"%s\" failed\n",LineBuff);
 					return FALSE;
-				}				
+				}
+
 				Globals.Routes[RouteID].Active=TRUE;
 			}
 		}
@@ -479,12 +509,12 @@ int ParseConfig(){
 	char		LineBuff[10240];
 	char*		End;
 	char*		Start;
-	
+
 	DEBUGPATH;
 
 	/*set some defaults*/
 	Globals.UseThreads=TRUE;
-	
+
 	fp=fopen(Globals.ConfigFilename, "r");
 	if (!fp){
 		printf("Couldn't open config file %s\n",Globals.ConfigFilename);
@@ -495,10 +525,14 @@ int ParseConfig(){
 
 		if (strncasecmp(LineBuff, "<system>",8)==0){
 			/*Process the system options*/
-			if (!ParseSystem(fp)) return FALSE;
+			if (!ParseSystem(fp))
+				return FALSE;
 		}else if(strncasecmp(LineBuff, "<interface",10)==0){
 			Start=LineBuff+10;
-			while (*Start==' ') Start++;
+
+			while (*Start==' ')
+				Start++;
+
 			if (*Start=='>'){
 				printf("Error parsing %s\nFormat <interface NAME>\n",LineBuff);
 				return FALSE;
@@ -509,12 +543,15 @@ int ParseConfig(){
 				return FALSE;
 			}
 			*End=0x00;
-			if (!ParseInterface(fp, Start)) return FALSE;
+			if (!ParseInterface(fp, Start))
+				return FALSE;
 		}else if (strncasecmp(LineBuff, "<routing>",11)==0){
-			if (!ParseRouting(fp)) return FALSE;			
+			if (!ParseRouting(fp))
+				return FALSE;
 		}else if(strncasecmp(LineBuff, "<action",7)==0){
 			Start=LineBuff+7;
-			while (*Start==' ') Start++;
+			while (*Start==' ')
+				Start++;
 			if (*Start=='>'){
 				printf("Error parsing %s\nFormat <action NAME>\n",LineBuff);
 				return FALSE;
@@ -525,10 +562,12 @@ int ParseConfig(){
 				return FALSE;
 			}
 			*End=0x00;
-			if (!ParseAction(fp, Start)) return FALSE;
+			if (!ParseAction(fp, Start))
+				return FALSE;
 		}else if(strncasecmp(LineBuff, "<module ",8)==0){
 			Start=LineBuff+7;
-			while (*Start==' ') Start++;
+			while (*Start==' ')
+				Start++;
 			if (*Start=='>'){
 				printf("Error parsing %s\nFormat <module NAME>\n",LineBuff);
 				return FALSE;
@@ -538,10 +577,11 @@ int ParseConfig(){
 				printf("Expected \">\"\n");
 				return FALSE;
 			}
-			*End=0x00;		
+			*End=0x00;
 		}else if(strncasecmp(LineBuff, "<iplist ",8)==0){
 			Start=LineBuff+7;
-			while (*Start==' ') Start++;
+			while (*Start==' ')
+				Start++;
 			if (*Start=='>'){
 				printf("Error parsing %s\nFormat <iplist NAME>\n",LineBuff);
 				return FALSE;
@@ -551,8 +591,9 @@ int ParseConfig(){
 				printf("Expected \">\"\n");
 				return FALSE;
 			}
-			*End=0x00;		
-			if (!ParseList(fp, Start, LIST_TYPE_IP)) return FALSE;			
+			*End=0x00;
+			if (!ParseList(fp, Start, LIST_TYPE_IP))
+				return FALSE;
 		}else if(strncasecmp(LineBuff, "<decoder ", 9) == 0){
 			Start=LineBuff+9;
 			while(*Start == ' ') Start++;
@@ -565,13 +606,13 @@ int ParseConfig(){
 				printf("Expected \">\"\n");
 			}
 			*End=0x00;
-			if (!ParseDecoder(fp, Start)) return FALSE;
+			if (!ParseDecoder(fp, Start))
+				return FALSE;
 		}else{
 			printf("Unexpected section %s\n",LineBuff);
 			return FALSE;
 		}
 	}
-
 
 	return TRUE;
 }
