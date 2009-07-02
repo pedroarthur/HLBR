@@ -1,3 +1,8 @@
+2009-07-02
+
+ * added debug situation to screen warnings about ID, Proto and adding slot in
+   fragment identification in decoders/decode_ip_defrag.c (ERI)
+
 2009-03-08
 
  * Improved paralelism (PAJ)

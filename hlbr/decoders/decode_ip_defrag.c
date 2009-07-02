@@ -296,10 +296,10 @@ void* DecodeIPDefrag(int PacketSlot){
 		Key.saddr=idata->Header->saddr;
 		Key.daddr=idata->Header->daddr;
 		Key.proto=idata->Header->protocol;
-
+#ifdef DEBUG
 		printf("ID is %u\n",ntohs(idata->Header->id));
 		printf("Proto is %u\n",idata->Header->protocol);
-
+#endif
 		/*check to see if we have all the pieces*/
 		pthread_mutex_lock(&FragMutex);
 		CI=CacheGet(FragCache, (unsigned char*)&Key, sizeof(Key), p->tv.tv_sec);
@@ -344,7 +344,9 @@ void* DecodeIPDefrag(int PacketSlot){
 			if (!SortFragArray(Frags, NumFrags)){
 				/*send this packet off to the cache*/
 				/*to wait for the rest of the pieces*/
-				printf("Adding slot %i\n",PacketSlot);				
+#ifdef DEBUG
+				printf("Adding slot %i\n",PacketSlot);
+#endif
 				CacheAdd(FragCache, (unsigned char*)&Key, sizeof(struct defrag_key), (unsigned char*)&PacketSlot, sizeof(int), Globals.Packets[PacketSlot].tv.tv_sec);
 				Globals.Packets[PacketSlot].SaveCount++;
 #ifdef DEBUG
