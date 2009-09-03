@@ -1,3 +1,8 @@
+2009-09-03
+
+ * Actualy implementation of MacFilter routing method (PAJ)
+ * BUGFIX: SchedulePacket(int PacketSlot) rewrited (PAJ)
+
 2009-07-02
 
  * added debug situation to screen warnings about ID, Proto and adding slot in

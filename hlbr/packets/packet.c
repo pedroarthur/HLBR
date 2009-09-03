@@ -19,6 +19,8 @@
 #include "packet_tcpdump.h"
 #include "packet_solaris_dlpi.h"
 
+#include "../routes/route_macfilter.h"
+
 struct {
 	Stack* Idle;
 	Stack* Allocated;
@@ -45,6 +47,7 @@ unsigned int 				CurPacketNum=0;
 //#define DEBUG
 //#define DEBUGPACKETS
 //#define DEBUGLOCKS
+// #define DEBUG_SCHEDULE
 
 /**************************************
 * Given the name of a packet type,
@@ -456,6 +459,7 @@ int AddPacketToPending(int PacketSlot) {
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_PENDING;
 
 	aux = StackPopNode(PacketQueue.Allocated);
+
 	NodeSetData(aux,(void*)PacketSlot);
 
 	QueueAddNode(PacketQueue.Pending, aux);
@@ -494,7 +498,18 @@ int AddPacketToWaiting (int PacketSlot) {
 
 	DEBUGPATH;
 
-	aux = StackPopNode (PacketQueue.Processing);
+	switch (Globals.Packets[PacketSlot].Status) {
+		case PACKET_STATUS_PROCESSING:
+			aux = StackPopNode (PacketQueue.Processing);
+			break;
+
+		case PACKET_STATUS_ALLOCATED:
+			aux = StackPopNode (PacketQueue.Allocated);
+			break;
+
+		default:
+			return FALSE;
+	}
 
 	NodeSetData (aux,(void*)PacketSlot);
 	Globals.Packets[PacketSlot].Status = PACKET_STATUS_WAITING;
@@ -530,20 +545,79 @@ int SchedulePacket (int PacketSlot) {
 
 	DEBUGPATH;
 
-	switch (packet->Status) {
-		case PACKET_STATUS_PROCESSING:
-			aux = StackPopNode (PacketQueue.Processing);
-			break;
+	if (packet->TargetInterface != INTERFACE_BROADCAST) {
+		#ifdef DEBUG_SCHEDULE
+		fprintf (stderr, "%s: sending packet %d\n", __FUNCTION__, PacketSlot);
+		fprintf (stderr, "%s: TargetInterface: %d (%s)\n", __FUNCTION__, packet->TargetInterface,
+									Globals.Interfaces[packet->TargetInterface].Name);
+		#endif
 
-		case PACKET_STATUS_PERFORMING:
-			aux = StackPopNode (PacketQueue.Performing);
+		switch (packet->Status) {
+			case PACKET_STATUS_PROCESSING:
+				aux = StackPopNode (PacketQueue.Processing);
+				break;
+
+			case PACKET_STATUS_PERFORMING:
+				aux = StackPopNode (PacketQueue.Performing);
+				break;
+
+			case PACKET_STATUS_ALLOCATED:
+				aux = StackPopNode (PacketQueue.Allocated);
+				break;
+		}
+
+		NodeSetData (aux,(void*) PacketSlot);
+
+		packet->Status = PACKET_STATUS_SCHEDULING;
+
+		QueueAddNode (PacketQueue.Scheduling[packet->TargetInterface], aux);
+		QueuePost (PacketQueue.Scheduling[packet->TargetInterface]);
+	} else {
+		MacFilterNode *node = (MacFilterNode *) Globals.Interfaces[packet->InterfaceNum].RouteData;
+		PacketRec clone;
+
+		int i;
+
+		#ifdef DEBUG_SCHEDULE
+		fprintf (stderr, "%s: sending packet %d through BROADCAST Interface\n", __FUNCTION__, PacketSlot);
+		for (i = 0 ; i < node->IfacesCount ; i++)
+			fprintf (stderr, "%s: Target interface %d: %d (%s)\n", __FUNCTION__, i, node->IfaceArray[i],
+										Globals.Interfaces[node->IfaceArray[i]].Name);
+		#endif
+
+		if (!ClonePacket (&clone, packet)) {
+			ReturnEmptyPacket (PacketSlot);
+			return FALSE;
+		}
+
+		if (node->IfaceArray[0] == clone.InterfaceNum) {
+			packet->TargetInterface = node->IfaceArray[1];
+			i = 2;
+		} else {
+			packet->TargetInterface = node->IfaceArray[0];
+			i = 1;
+		}
+
+		SchedulePacket (PacketSlot);
+
+		while(i < node->IfacesCount) {
+			if (node->IfaceArray[i] != clone.InterfaceNum){
+				PacketSlot = GetEmptyPacket();
+				packet = &Globals.Packets[PacketSlot];
+
+				if (!ClonePacket(packet, &clone)) {
+					ReturnEmptyPacket (PacketSlot);
+					return FALSE;
+				}
+
+				packet->TargetInterface = node->IfaceArray[i];
+
+				SchedulePacket(PacketSlot);
+			}
+
+			i++;
+		}
 	}
-
-	NodeSetData (aux,(void*) PacketSlot);
-	packet->Status = PACKET_STATUS_SCHEDULING;
-
-	QueueAddNode (PacketQueue.Scheduling[packet->TargetInterface], aux);
-	QueuePost (PacketQueue.Scheduling[packet->TargetInterface]);
 
 	return TRUE;
 }
@@ -702,3 +776,35 @@ int GetInterfaceByName(char* Name){
 
 	return INTERFACE_NONE;
 }
+
+/**
+* Clone two packets, but preserves decoders and rule bitmaps
+*/
+
+int ClonePacket (PacketRec* dst, PacketRec* src) {
+	dst->TargetInterface = src->TargetInterface;
+	dst->InterfaceNum = src->InterfaceNum;
+
+	dst->LargePacket = src->LargePacket;
+	dst->PacketLen = src->PacketLen;
+
+	if (!dst->LargePacket) {
+		dst->RawPacket = dst->TypicalPacket;
+	} else {
+		dst->RawPacket = (char *) malloc (dst->PacketLen * sizeof(char));
+
+		if (!dst->RawPacket) {
+			fprintf (stderr, "Can't allocate memory for large packet cloning\n");
+			return FALSE;
+		}
+	}
+
+	memcpy (dst->RawPacket, src->RawPacket, dst->PacketLen);
+	memcpy (&dst->tv, &src->tv, sizeof(struct timeval));
+
+	return TRUE;
+}
+
+#ifdef DEBUG_SCHEDULE
+#undef DEBUG_SCHEDULE
+#endif

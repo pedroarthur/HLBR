@@ -16,6 +16,14 @@ typedef struct mac_rec{
 	int				Count;
 } MacRec;
 
+typedef struct macfilternode {
+	int *IfaceArray;
+	int IfacesCount;
+	
+	MacRec Macs[MAX_MACS];
+	int NumMacs;
+} MacFilterNode;
+
 int InitMacFilter();
 
 

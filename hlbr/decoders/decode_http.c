@@ -143,10 +143,10 @@ void *DecodeHTTP (int PacketSlot) {
 	for (i = 0 ; i < psaux ; i++, pbaux++)
 		if (*pbaux == ' ')
 			continue;
-	else if (*pbaux >= '!' && *pbaux <= '~')
-		break;
-	else
-		return NULL;
+		else if (*pbaux >= '!' && *pbaux <= '~')
+			break;
+		else
+			return NULL;
 
 	if (i == psaux)
 		return NULL;
