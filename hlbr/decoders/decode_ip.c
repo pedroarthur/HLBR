@@ -10,17 +10,17 @@
 
 extern GlobalVars	Globals;
 
-int	EthernetDecoderID;
+int			EthernetDecoderID;
 
 /***************************************
 * Apply the ip decoding
 ****************************************/
 void* DecodeIP(int PacketSlot){
 	IPData*			data;
-	EthernetData*	edata;
-	unsigned short	etype;
+	EthernetData*		edata;
+	unsigned short		etype;
 	PacketRec*		p;
-	
+
 	DEBUGPATH;
 
 	p=&Globals.Packets[PacketSlot];
@@ -31,22 +31,22 @@ void* DecodeIP(int PacketSlot){
 	}
 
 	etype=ntohs(edata->Header->Type);
-	
+
 	if (etype!=ETHERNET_TYPE_IP){
 #ifdef DEBUG
 		printf("Ethernet doesn't think this is an IP packet %04x\n",etype);
-#endif		
+#endif
 		return NULL;
 	}
-		
+
 	data=malloc(sizeof(IPData));
 	data->Header=(IPHdr*)(p->RawPacket+p->BeginData);
 	p->BeginData+=(data->Header->ihl*4);
-	
+
 #ifdef DEBUG
 	printf("IP %s->",inet_ntoa(*(struct in_addr*)&data->Header->saddr));
 	printf("%s\n",inet_ntoa(*(struct in_addr*)&data->Header->daddr));
-#endif	
+#endif
 
 	return data;
 }
@@ -58,16 +58,17 @@ int InitDecoderIP(){
 	int DecoderID;
 
 	DEBUGPATH;
-	
+
 	if ((DecoderID=CreateDecoder("IP"))==DECODER_NONE){
 #ifdef DEBUG
 		printf("Couldn't Allocate IP Decoder\n");
-#endif	
+#endif
 		return FALSE;
 	}
-	
+
 	Globals.Decoders[DecoderID].DecodeFunc=DecodeIP;
 	Globals.Decoders[DecoderID].Free=free;
+
 	if (!DecoderAddDecoder(GetDecoderByName("Ethernet"), DecoderID)){
 		printf("Failed to Bind IP Decoder to Ethernet Decoder\n");
 		return FALSE;

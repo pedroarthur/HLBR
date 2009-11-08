@@ -56,40 +56,46 @@ int get_device_id(int fd, char* name){
 	struct ifreq	ifr;
 
 	bzero(&ifr, sizeof(struct ifreq));
-	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));	
-	if (ioctl(fd, SIOGIFINDEX, &ifr) == -1) return -1;
-	return ifr.ifr_ifindex;	
+
+	strncpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+
+	if (ioctl(fd, SIOGIFINDEX, &ifr) == -1)
+		return -1;
+
+	return ifr.ifr_ifindex;
 }
 
 /*********************************************
 * Open an interface via Linux Raw Sockets
 **********************************************/
 int OpenInterfaceLinuxRaw(int InterfaceID){
-
-	DEBUGPATH;
-
-	int 				fd;
+	int 			fd;
 	struct sockaddr_ll	sll;
-	int					ssize;
-	int					errnum;
+	int			ssize;
+	int			errnum;
 	struct packet_mreq	mr;
 	InterfaceRec*		Interface;
 
+	DEBUGPATH;
 
-	Interface=&Globals.Interfaces[InterfaceID];
+	Interface = &Globals.Interfaces[InterfaceID];
 
 #ifdef DEBUG
-	printf("Opening interface %s\n", Interface->Name);
+	printf("%s: Opening interface %s\n", __FUNCTION__, Interface->Name);
 #endif
 
-	fd=socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-	bzero(&sll,sizeof(struct sockaddr_ll));
-	sll.sll_family=AF_PACKET;
-	sll.sll_ifindex=get_device_id(fd, Interface->Name);
-	sll.sll_protocol=htons(ETH_P_ALL);
-	ssize=sizeof(struct sockaddr_ll);
+	fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 
-	errnum=bind(fd, (struct sockaddr*)&sll, sizeof(sll));
+	bzero(&sll,sizeof(struct sockaddr_ll));
+
+	sll.sll_family = AF_PACKET;
+	sll.sll_ifindex = get_device_id(fd, Interface->Name);
+	sll.sll_protocol = htons(ETH_P_ALL);
+
+	ssize = sizeof(struct sockaddr_ll);
+
+	errnum = bind(fd, (struct sockaddr*)&sll, sizeof(sll));
+
 	if (errnum==-1){
 		printf("Error Binding socket\n");
 		return FALSE;
@@ -97,18 +103,22 @@ int OpenInterfaceLinuxRaw(int InterfaceID){
 	
 	/*set promisc mode*/
 	memset(&mr, 0, sizeof(mr));
-	mr.mr_ifindex=get_device_id(fd, Interface->Name);
-	mr.mr_type=PACKET_MR_PROMISC;
-	if (setsockopt(fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr))==-1){
-		printf("Failed to set promisc mode\n");
+
+	mr.mr_ifindex = get_device_id(fd, Interface->Name);
+	mr.mr_type = PACKET_MR_PROMISC;
+
+	if (setsockopt(fd, SOL_PACKET, PACKET_ADD_MEMBERSHIP, &mr, sizeof(mr)) == -1){
+		printf("%s: Failed to set interface %s in promiscous mode\n", __FUNCTION__, Interface->Name);
 		return FALSE;
 	}
 
-	Interface->FD=fd;
-	Interface->MTU=GetIfrMTU(Interface->Name);
-	if (Interface->MTU==-1) Interface->MTU=1500;
+	Interface->FD = fd;
+	Interface->MTU = GetIfrMTU(Interface->Name);
 
-	Interface->IsPollable=TRUE;
+	if (Interface->MTU==-1)
+		Interface->MTU=1500;
+
+	Interface->IsPollable = TRUE;
 
 	return TRUE;
 }
@@ -129,7 +139,9 @@ int ReadPacketLinuxRaw(int InterfaceID){
 
 	Interface=&Globals.Interfaces[InterfaceID];
 
-	if ((PacketSlot=GetEmptyPacket()) == -1){
+	PacketSlot = GetEmptyPacket();
+
+	if (PacketSlot == -1){
 		printf("Unable to allocate packet for reading\n");
 #ifdef DEBUG
 		PrintPacketCount();
@@ -137,7 +149,7 @@ int ReadPacketLinuxRaw(int InterfaceID){
 		return FALSE;
 	}
 
-	p=&Globals.Packets[PacketSlot];
+	p = &Globals.Packets[PacketSlot];
 
 	p->InterfaceNum = InterfaceID;
 
@@ -145,7 +157,7 @@ int ReadPacketLinuxRaw(int InterfaceID){
 
 	if (count == -1){
 #ifdef DEBUG	
-		printf("Failed to read packet. FD %i\n", Interface->FD);
+		printf("%s: Failed to read packet on interface %s. FD is %i\n", __FUNCTION__, Interface->Name, Interface->FD);
 #endif
 		ReturnEmptyPacket(PacketSlot);
 		return FALSE;
@@ -155,14 +167,14 @@ int ReadPacketLinuxRaw(int InterfaceID){
 
 	if (ioctl(Interface->FD, SIOCGSTAMP, &p->tv) == -1){
 #ifdef DEBUG	
-		printf("Failed to get timestamp\n");
+		printf("%s: Failed to get timestamp\n", __FUNCTION__);
 #endif
 		ReturnEmptyPacket(PacketSlot);
 		return FALSE;
 	}
 
 	if (!AddPacketToPending(PacketSlot)){
-		printf("Coulnd't add packet to pending queue\n");
+		printf("%s: Coulnd't add packet to pending queue\n", __FUNCTION__);
 		ReturnEmptyPacket(PacketSlot);
 		return FALSE;
 	}
@@ -174,19 +186,20 @@ int ReadPacketLinuxRaw(int InterfaceID){
 * Send a packet off to the raw interface
 ****************************************************/
 int WritePacketLinuxRaw(int InterfaceID, unsigned char* Packet, int PacketLen){
-	int count;
-	InterfaceRec* interface;
+	int 		count;
+	InterfaceRec*	interface;
 	
 	DEBUGPATH;
 
-	interface=&Globals.Interfaces[InterfaceID];
-	
-	count=write(interface->FD, Packet, PacketLen);
+	interface = &Globals.Interfaces[InterfaceID];
+
+	count = write(interface->FD, Packet, PacketLen);
+
 	if (count==-1){
-		printf("Failed to write packet to interface %s\n",interface->Name);
+		printf("%s: Failed to write packet to interface %s\n", __FUNCTION__, interface->Name);
 		return FALSE;
 	}
-	
+
 	return TRUE;
 }
 
@@ -217,6 +230,7 @@ void* LinuxRawTxLoopFunc(void* v){
 
 	while (!Globals.Done){
 		PacketSlot = GetScheduledPacket(InterfaceID);
+
 		WritePacketLinuxRaw (InterfaceID,
 				     Globals.Packets[PacketSlot].RawPacket,
 	 			     Globals.Packets[PacketSlot].PacketLen);

@@ -4,9 +4,9 @@
 #include "../config.h"
 #include "hlbr.h"
 
-#define CACHE_MAX_KEYS				256
+#define CACHE_MAX_KEYS			256
 #define CACHE_MAX_ITEMS_PER_KEY		64
-#define CACHE_NONE					-1
+#define CACHE_NONE			-1
 
 typedef struct cache_item{
 	unsigned char*	Data;
@@ -15,19 +15,19 @@ typedef struct cache_item{
 
 typedef struct cache_items{
 	unsigned char*	Key;
-	int				KeyLen;	
-	
-	CacheItem		Items[CACHE_MAX_ITEMS_PER_KEY];
+	int		KeyLen;
+
+	CacheItem	Items[CACHE_MAX_ITEMS_PER_KEY];
 	unsigned int	NumItems;
-	
-	long			LastTime;
+
+	long		LastTime;
 }CacheItems;
 
 typedef struct cache{
-	CacheItems		Keys[CACHE_MAX_KEYS];
+	CacheItems	Keys[CACHE_MAX_KEYS];
 	unsigned int	NumKeys;
-	
-	long			TimeoutLen;
+
+	long		TimeoutLen;
 } Cache;
 
 Cache* InitCache(int TimeoutLen);

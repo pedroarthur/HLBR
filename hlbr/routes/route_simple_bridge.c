@@ -74,6 +74,7 @@ int RouteSBridgeAddNode(int RouteID, char* Args){
 	Globals.Interfaces[InterfaceA].RouteData = (void *) InterfaceB;
 	Globals.Interfaces[InterfaceB].RouteData = (void *) InterfaceA;
 
+	Globals.Interfaces[InterfaceA].RouteID = SBridgeID;
 	Globals.Interfaces[InterfaceB].RouteID = SBridgeID;
 
 	return TRUE;

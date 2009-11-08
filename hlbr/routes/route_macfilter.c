@@ -182,7 +182,7 @@ int RouteMacFilterAddNode(int RouteID, char* Args){
 	InterfaceRec *iface;
 
 	#ifdef DEBUG
-	printf ("AddNode was called with args %s\n", Args);
+	printf ("%s was called with args %s\n", __FUNCTION__, Args);
 	#endif
 
 	if (!Args)
@@ -222,7 +222,7 @@ int RouteMacFilterAddNode(int RouteID, char* Args){
 		iface = &Globals.Interfaces[node->IfaceArray[i]];
 
 		if (iface->RouteID != ROUTE_NONE) {
-			fprintf(stderr, "%s: Interface %s already routed\n", __FUNCTION__, iface->Name);
+			fprintf(stderr, "%s: Interface %s route already setted\n", __FUNCTION__, iface->Name);
 
 			StackDestroy(astack);
 			free(node->IfaceArray);
@@ -241,54 +241,6 @@ int RouteMacFilterAddNode(int RouteID, char* Args){
 	StackDestroy(astack);
 
 	return TRUE;
-// 	NumAlias*	Aliases;
-// 	int		i;
-// 	int		Count;
-// 	
-// 	DEBUGPATH;
-// 
-// #ifdef DEBUG
-// 	printf ("AddNode was called with args %s\n", Args)
-// #endif
-// 
-// 	if (!Args)
-// 		return FALSE;
-// 
-// 	Aliases=calloc(sizeof(NumAlias),Globals.NumInterfaces);
-// 
-// 	for (i=0;i<Globals.NumInterfaces;i++){
-// 		snprintf(Aliases[i].Alias, 512, Globals.Interfaces[i].Name);
-// 		Aliases[i].Num=Globals.Interfaces[i].ID;
-// 	}
-// 
-// 	if (!AddRangesString(MacFilterInterfaceList, Args, Aliases, Globals.NumInterfaces)){
-// 		printf("Failed to parse interface list\n");
-// 		free(Aliases);
-// 		return FALSE;
-// 	}
-// 
-// 	Count=0;
-// 
-// 	for (i=0;i<Globals.NumInterfaces;i++)
-// 		if (IsInList(MacFilterInterfaceList, i)){
-// #ifdef DEBUG
-// 			printf("Interface %s is handled by macfilter\n",Globals.Interfaces[i].Name);
-// #endif
-// 			Count++;
-// 		}else{
-// #ifdef DEBUG
-// 			printf("interface %s is not a macfilter interface\n",Globals.Interfaces[i].Name);
-// #endif
-// 		}
-// 
-// 	if (Count<2){
-// 		printf("You must specify at least two interfaces to use macfilter\n");
-// 		free(Aliases);
-// 		return FALSE;
-// 	}
-// 
-// 	free(Aliases);
-// 	return TRUE;
 }
 
 /*********************************
@@ -298,19 +250,19 @@ int RouteMacFilterAddNode(int RouteID, char* Args){
 int InitMacFilter(){
 	DEBUGPATH;
 
-// 	bzero(Macs, sizeof(MacRec) * MAX_MACS);
+	MacFilterRouteID = CreateRoute("MacFilter");
 
-	if ((MacFilterRouteID=CreateRoute("MacFilter"))==ROUTE_NONE){
+	if (MacFilterRouteID == ROUTE_NONE){
 		printf("Couldn't create route MacFilter\n");
 		return FALSE;
 	}
 
-	Globals.Routes[MacFilterRouteID].RouteFunc=RouteMacFilter;
-	Globals.Routes[MacFilterRouteID].AddNode=RouteMacFilterAddNode;
+	Globals.Routes[MacFilterRouteID].RouteFunc = RouteMacFilter;
+	Globals.Routes[MacFilterRouteID].AddNode = RouteMacFilterAddNode;
 
-// 	MacFilterInterfaceList=InitNumList(LIST_TYPE_NORMAL);
+	EthernetDecoderID = GetDecoderByName("Ethernet");
 
-	if ((EthernetDecoderID=GetDecoderByName("Ethernet"))==DECODER_NONE){
+	if (EthernetDecoderID == DECODER_NONE){
 		printf("Couldn't find the Ethernet Deoder\n");
 		return FALSE;
 	}

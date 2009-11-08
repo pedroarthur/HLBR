@@ -131,15 +131,8 @@ void EMailMessage(EMailData* data, char* Message){
 	data->Message=malloc(1024);
 	snprintf(data->Message, 1024, "%s", Message);
 
-	if (!Globals.UseThreads){
-		if (!fork()){
-			EMailMessageReal(data);
-			exit(0);
-		}	
-	}else{	
-		pthread_create(&email_thread, NULL, EMailMessageReal, data);
-		pthread_detach(email_thread);
-	}
+	pthread_create(&email_thread, NULL, EMailMessageReal, data);
+	pthread_detach(email_thread);
 
 }
 

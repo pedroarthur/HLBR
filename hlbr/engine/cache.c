@@ -10,12 +10,12 @@
 ***************************************/
 Cache* InitCache(int TimeoutLen){
 	Cache*		NewCache;
-	
+
 	DEBUGPATH;
-	
-	NewCache=calloc(sizeof(Cache),1);
-	NewCache->TimeoutLen=TimeoutLen;
-	
+
+	NewCache = calloc(sizeof(Cache),1);
+	NewCache->TimeoutLen = TimeoutLen;
+
 	return NewCache;
 }
 
@@ -24,7 +24,7 @@ Cache* InitCache(int TimeoutLen){
 **********************************************/
 int CacheGetBin(Cache* c, unsigned char* Key, int KeyLen){
 	int		i;
-	
+
 #ifdef DEBGUPATH
 	printf("In CacheGetBin\n");
 #endif
@@ -36,7 +36,7 @@ int CacheGetBin(Cache* c, unsigned char* Key, int KeyLen){
 			}
 		}
 	}
-	
+
 	return CACHE_NONE;
 }
 
@@ -45,13 +45,13 @@ int CacheGetBin(Cache* c, unsigned char* Key, int KeyLen){
 *********************************************/
 int CacheCreateBin(Cache* c, unsigned char* Key, int KeyLen){
 
-  DEBUGPATH;
+DEBUGPATH;
 
 	/*check to see if we're full*/
 	if (c->NumKeys>=CACHE_MAX_KEYS){
-#ifdef DEBUG	
+#ifdef DEBUG
 		printf("Cache is full\n");
-#endif		
+#endif
 		return CACHE_NONE;
 	}
 
@@ -62,7 +62,7 @@ int CacheCreateBin(Cache* c, unsigned char* Key, int KeyLen){
 	c->Keys[c->NumKeys].NumItems=0;
 
 	c->NumKeys++;
-	
+
 	return c->NumKeys-1;
 }
 
@@ -72,21 +72,21 @@ int CacheCreateBin(Cache* c, unsigned char* Key, int KeyLen){
 *********************************************/
 int CacheBinAdd(CacheItems* ci, unsigned char* Data, int DataLen){
 
-  DEBUGPATH;
+DEBUGPATH;
 
 	if (ci->NumItems==CACHE_MAX_ITEMS_PER_KEY){
 #ifdef DEBUG
 		printf("This key if full\n");
-#endif	
+#endif
 		return FALSE;
 	}
-	
+
 	ci->Items[ci->NumItems].Data=malloc(DataLen);
 	memcpy(ci->Items[ci->NumItems].Data, Data, DataLen);
 	ci->Items[ci->NumItems].DataLen=DataLen;
-	
+
 	ci->NumItems++;
-		
+
 	return TRUE;
 }
 
@@ -95,7 +95,7 @@ int CacheBinAdd(CacheItems* ci, unsigned char* Data, int DataLen){
 ************************************************/
 void CacheTimeout(Cache* c, int Now){
 	int		i;
-	
+
 	DEBUGPATH;
 
 	for (i=0;i<c->NumKeys;i++){
@@ -111,21 +111,22 @@ void CacheTimeout(Cache* c, int Now){
 *********************************************/
 int CacheAdd(Cache* c, unsigned char* Key, int KeyLen, unsigned char* Data, int DataLen, int Now){
 	int	BinID;
-	
+
 	DEBUGPATH;
 
 	/*go find the bin, if it exists*/
-	BinID=CacheGetBin(c, Key, KeyLen);
-	if (BinID==CACHE_NONE){
+	BinID = CacheGetBin(c, Key, KeyLen);
+	if (BinID == CACHE_NONE){
 #ifdef DEBUG
 		printf("First Item in this bin\n");
 #endif
-		BinID=CacheCreateBin(c, Key, KeyLen);		
+		BinID=CacheCreateBin(c, Key, KeyLen);
 	}
-	if (BinID==CACHE_NONE){
+
+	if (BinID == CACHE_NONE){
 #ifdef DEBUG
 		printf("Failed to create a new bin\n");
-#endif	
+#endif
 		return FALSE;
 	}
 
@@ -133,13 +134,14 @@ int CacheAdd(Cache* c, unsigned char* Key, int KeyLen, unsigned char* Data, int 
 	if (!CacheBinAdd(&c->Keys[BinID], Data, DataLen)){
 #ifdef DEBUG
 		printf("Failed to add to key. full?\n");
-#endif	
+#endif
 		return FALSE;
 	}
-	c->Keys[BinID].LastTime=Now;
+
+	c->Keys[BinID].LastTime = Now;
 
 	CacheTimeout(c, Now);
-		
+
 	return TRUE;
 }
 
@@ -147,42 +149,47 @@ int CacheAdd(Cache* c, unsigned char* Key, int KeyLen, unsigned char* Data, int 
 * We're done with this key, kill it
 *************************************************/
 int CacheDelKey(Cache* c, unsigned char* Key, int KeyLen, int Now){
-	int			KeyID;
-	int			i;
+	int		KeyID;
+	int		i;
 	CacheItems*	ci;
-	
+
 	DEBUGPATH;
 
 	/*go find the bin*/
-	KeyID=CacheGetBin(c, Key, KeyLen);
-	if (KeyID==CACHE_NONE){
+	KeyID = CacheGetBin(c, Key, KeyLen);
+	if (KeyID == CACHE_NONE){
 #ifdef DEBUG
 		printf("There is no such key\n");
-#endif	
+#endif
 		return FALSE;
 	}
-	
+
 	/*get rid of the items in that bin*/
 	ci = &c->Keys[KeyID];
-	for (i=0;i<ci->NumItems;i++){
-		if (ci->Items[i].Data) free(ci->Items[i].Data);
-		ci->Items[i].Data=NULL;
-		ci->Items[i].DataLen=0;
+
+	for (i = 0; i < ci->NumItems ; i++){
+		if (ci->Items[i].Data)
+			free(ci->Items[i].Data);
+
+		ci->Items[i].Data = NULL;
+		ci->Items[i].DataLen = 0;
 	}
-	
+
 	/*get rid of the bin*/
-	if (ci->Key) free(ci->Key);
-	ci->Key=NULL;
-	ci->KeyLen=0;
-	ci->NumItems=0;
-	
+	if (ci->Key)
+		free(ci->Key);
+
+	ci->Key = NULL;
+	ci->KeyLen = 0;
+	ci->NumItems = 0;
+
 	/*move everything up*/
 	memcpy(&c->Keys[KeyID], &c->Keys[KeyID+1], sizeof(CacheItems) * (c->NumKeys-KeyID));
 	c->NumKeys--;
-	
+
 	CacheTimeout(c, Now);
-		
-	return TRUE;	
+
+	return TRUE;
 }
 
 /********************************************
@@ -193,8 +200,8 @@ CacheItems* CacheGet(Cache* c, unsigned char* Key, int KeyLen, int Now){
 	
 	DEBUGPATH;
 
-	KeyID=CacheGetBin(c, Key, KeyLen);
-	if (KeyID==CACHE_NONE){
+	KeyID = CacheGetBin(c, Key, KeyLen);
+	if (KeyID == CACHE_NONE){
 #ifdef DEBUG
 		printf("No Such key\n");
 #endif	
@@ -214,13 +221,16 @@ void DestroyCache(Cache* c){
 
 	DEBUGPATH;
 
-	for (i=0;i<c->NumKeys;i++){
-		for (j=0;j<c->Keys[i].NumItems;j++){
-			if (c->Keys[i].Items[j].Data) free(c->Keys[i].Items[j].Data);
+	for (i = 0; i < c->NumKeys ; i++){
+		for (j = 0; j < c->Keys[i].NumItems ; j++){
+			if (c->Keys[i].Items[j].Data)
+				free(c->Keys[i].Items[j].Data);
 		}
-		if (c->Keys[i].Key) free(c->Keys[i].Key);
+
+		if (c->Keys[i].Key)
+			free(c->Keys[i].Key);
 	}
 	
 	free(c);
-	c=NULL;
+	c = NULL;
 }

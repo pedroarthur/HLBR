@@ -68,4 +68,5 @@ void ReturnEmptyPacket(int PacketSlot);
 int RuleIsActive(int PacketSlot, int RuleNum);
 int SetRuleInactive(int PacketSlot, int RuleNum);
 
+int ClonePacket (PacketRec* dst, PacketRec* src);
 #endif

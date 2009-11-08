@@ -22,16 +22,20 @@
 #
 #    Utilizado para identificar o sensor (maquina com o IPS). Util no caso
 #    de logs centralizados.
-#   
+#
 # ID=ID do sensor
 #
 #    Assim como o Name, o ID servirah para identificar o sensor nos logs.
 #
-# Threads=1 / 0
+# DecodingThreads=1 .. n
 #
-#    O valor 0 farah com que o HLBR execute apenas uma thread para controlar
-#    o daemon e as interfaces de rede. O valor 1 abrirah n+1 threads, onde n
-#    eh a quantidade de interfaces de rede.
+#    Número de threads de decodificação iniciadas pelo HLBR. Caso não
+#    esteja especificado, o valor padrão é 2.
+#
+# PerformingThreads=1 .. n
+#
+#    Número de threads de ações iniciadas pelo HLBR. Caso não seja
+#    especificado, o valor padrão é 1.
 #
 # AlertHeader=
 #
@@ -53,7 +57,8 @@
 <system>
 Name=HLBR_1
 ID=1
-Threads=1
+DecodingThreads=1
+PerformingThreads=1
 AlertHeader=%ac %d/%m/%y %h:%min:%s %sip:%sp->%dip:%dp
 PidFile=/var/run/hlbr.pid
 </system>

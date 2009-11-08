@@ -1,3 +1,16 @@
+2009-11-03
+
+ * Added the possibility to control the thread's subsystem
+   through HLBR's configuration file; (PAJ)
+ * hlbr.config.pt_BR update with information about the
+   feature cited above; (PAJ)
+ * Refactoring of some functions in engine/main_loop.c; (PAJ)
+ * BUGFIX: Refactoring of the IPDefrag decoder. No more
+   race conditions exists. Now, the code is a little bit
+   more efficient; (PAJ)
+ * BUGFIX: HLBR was returning 1 instead of zero on
+   sucessful shutdowns. (PAJ)
+
 2009-09-03
 
  * Actualy implementation of MacFilter routing method (PAJ)

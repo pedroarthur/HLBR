@@ -4,17 +4,19 @@
 
 #include "main_loop.h"
 #include "logfile.h"
-#include <stdio.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
 #include "../packets/packet.h"
 #include "../decoders/decode.h"
 #include "../routes/route.h"
 #include "../actions/action.h"
 #include "bits.h"
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 extern GlobalVars	Globals;
 extern int		TCPDecoderID;
@@ -183,84 +185,77 @@ int HandleTimers(int Now){
 }
 
 /**
- * Check the packet for rules matches.
- * This is one of the main functions responsible for everything HLBR does;
- * the other is Decode(), called here. Decode() is called with the 'root'
- * packet decoder, so all registered decoders (TCP, UDP, etc.) will 
- * be called, with all their respective registered tests (according to the
- * rules defined by the user). After this, the RuleBits field of the packet 
- * structure is tested to see if any rule matched, and the necessary actions
- * performed. Then finally the packet is 'routed' and sent.
- * @return Always TRUE?
+ * Start up a thread to process packets from the queue and Check the packet for rules
+ * matches. This is one of the main functions responsible for everything HLBR does; the
+ * other is Decode(), called here. Decode() is called with the 'root' packet decoder,
+ * so all registered decoders (TCP, UDP, etc.) will be called, with all their respective
+ * registered tests (according to the rules defined by the user). After this, the RuleBits
+ * field of the packet structure is tested to see if any rule matched, and the necessary
+ * actions performed. Then finally the packet is 'routed' and sent.
+ *
+ * @return Null when it's done;
  * @remarks Basically this is what ProcessPacket does:
+ * @li Get a packet from the packet's queue 
  * @li Calls HandleTimers()
  * @li Calls the 'root' decoder (defined in Globals.DecoderRoot) with Decode()
  * @li Tests the RuleBits packet field (results of the tests/rules); if any rule matched, calls PerformActions()
  * @li Then, the packet is routed with RouteAndSend()
  */
-int ProcessPacket(int PacketSlot){
-	PacketRec*	p;
-
-	DEBUGPATH;
-
-	pthread_mutex_lock (&PLimitMutex);
-
-	if (Globals.PacketLimit == 0){
-		printf("Packet Limit Reached\n");
-		Globals.Done=TRUE;
-	}
-
-	if (Globals.PacketLimit > 0)
-		Globals.PacketLimit--;
-
-	pthread_mutex_unlock (&PLimitMutex);
-
-	p=&Globals.Packets[PacketSlot];
-
-#ifdef DEBUG
-	printf("++++++++++++++++++++++++++++++++%u\n",p->PacketNum);
-#endif
-
-	if (p->tv.tv_sec)
-		HandleTimers(p->tv.tv_sec);
-
-	if (!Decode(Globals.DecoderRoot, PacketSlot)) {
-		printf("Error Processing Packet\n");
-	}
-
-	UpdateStats (PacketSlot);
-
-	if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)) {
-#ifdef DEBUG
-		printf("There are rule matches\n");
-#endif
-		AddPacketToWaiting (PacketSlot);
-	} else
-		RouteAndSend(PacketSlot);
-
-	return TRUE;
-}
-
 /**
- * Start up a thread to process packets from the queue.
+ * 
  * There may be more than one of these.
  */
-void* ProcessPacketThread(void* v)
-{
-	int	PacketSlot;
+void* ProcessPackets(void* v) {
+	PacketRec*	p;
+	int		PacketSlot;
 
 	DEBUGPATH;
 
-	pthread_setspecific (Globals.ThreadsKey, v);
+	pthread_setspecific (Globals.DThreadsKey, v);
 
 	while (!Globals.Done) {
 		PacketSlot = PopFromPending();
 
-		if (PacketSlot != PACKET_NONE) {
-			ProcessPacket(PacketSlot);
-		} else {
-			IdleFunc();
+		if (PacketSlot == PACKET_NONE)
+			break;
+
+		pthread_mutex_lock (&PLimitMutex);
+
+		if (Globals.PacketLimit == 0){
+			printf("Packet Limit Reached\n");
+			Globals.Done=TRUE;
 		}
+
+		if (Globals.PacketLimit > 0)
+			Globals.PacketLimit--;
+
+		pthread_mutex_unlock (&PLimitMutex);
+
+		p=&Globals.Packets[PacketSlot];
+
+		#ifdef DEBUG
+		printf("++++++++++++++++++++++++++++++++%u\n",p->PacketNum);
+		#endif
+
+		if (p->tv.tv_sec)
+			HandleTimers(p->tv.tv_sec);
+
+		if (!Decode(Globals.DecoderRoot, PacketSlot)) {
+			printf("Error Processing Packet\n");
+		}
+
+		UpdateStats (PacketSlot);
+
+		if (!BitFieldIsEmpty(p->RuleBits,Globals.NumRules)) {
+			#ifdef DEBUG
+			printf("There are rule matches\n");
+			#endif
+			AddPacketToWaiting (PacketSlot);
+		} else {
+			RouteAndSend(PacketSlot);
+		}
+
+		/* And we are done with this packet */
 	}
 
 	return NULL;
@@ -274,13 +269,97 @@ void* ProcessActions (void* v) {
 	while (!Globals.Done) {
 		PacketSlot = PopFromWaiting ();
 
-		if (PacketSlot != PACKET_NONE) {
-			PerformActions (PacketSlot);
-			RouteAndSend (PacketSlot);
-		} else {
-			IdleFunc();
+		if (PacketSlot == PACKET_NONE)
+			break;
+
+		PerformActions (PacketSlot);
+		RouteAndSend (PacketSlot);
+	}
+
+	return NULL;
+}
+
+int InitPacketProcessingThreads () {
+	int i;
+
+	/* In case we don't find a value in hlbr.conf */
+	if (!Globals.DThreadsNum) {
+		printf ("Number of DecodingThreads not defined.\nUsing default value: 2\n");
+		Globals.DThreadsNum = 2;
+	}
+
+	Globals.DThreads = (pthread_t *) malloc ((Globals.DThreadsNum) * sizeof(pthread_t));
+	
+	if (!Globals.DThreads) {
+		fprintf (stderr, "Couldn't allocate decoding Threads\n");
+		return FALSE;
+	}
+	
+	Globals.DThreadsID = (int *) malloc ((Globals.DThreadsNum) * sizeof(int));
+	
+	if (!Globals.DThreadsID) {
+		fprintf (stderr, "Couldn't allocate decoding Threads ID\n");
+		return FALSE;
+	}
+	
+	for (i = 0 ; i < Globals.DThreadsNum ; i++) {
+		Globals.DThreadsID[i] = i;
+		
+		if (pthread_create (&Globals.DThreads[i], NULL, ProcessPackets, (void *)&Globals.DThreadsID[i])) {
+			fprintf(stderr, "Couldn't create packet decoding thread\n");
+			return FALSE;
 		}
 	}
+	
+	return TRUE;
+}
+
+int InitActionsProcessingThreads() {
+	int i;
+
+	/* In case we don't find a value in hlbr.conf */
+	if (!Globals.AThreadsNum) {
+		printf ("Number of PerformingThreads not defined.\nUsing default value: 1\n");
+		Globals.AThreadsNum = 1;
+	}
+
+	Globals.AThreads = (pthread_t *) malloc ((Globals.AThreadsNum) * sizeof(pthread_t));
+
+	if (!Globals.AThreads) {
+		fprintf (stderr, "Couldn't allocate Actions Processing Threads\n");
+		return FALSE;
+	}
+
+	Globals.AThreadsID = (int *) malloc ((Globals.AThreadsNum) * sizeof(int));
+
+	if (!Globals.AThreadsID) {
+		fprintf (stderr, "Couldn't allocate Actions Processing Threads ID\n");
+		return FALSE;
+	}
+
+	for (i = 0 ; i < Globals.AThreadsNum ; i++) {
+		Globals.AThreadsID[i] = i;
+
+		if (pthread_create (&Globals.AThreads[i], NULL, ProcessActions, (void *)&Globals.AThreadsID[i])) {
+			fprintf (stderr, "Couldn't create actions processing thread\n");
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+int InitInterfacesThreads() {
+	int i;
+
+	for (i = 0 ; i < Globals.NumInterfaces ; i++){
+		if (!StartInterfaceThread(i)){
+			printf("Couldn't start thread for interface\n");
+			return FALSE;
+		}
+	}
+
+	return TRUE;
 }
 
 /**
@@ -290,6 +369,7 @@ void* ProcessActions (void* v) {
 int MainLoop()
 {
 	int i;
+	sigset_t set;
 
 	DEBUGPATH;
 
@@ -297,19 +377,32 @@ int MainLoop()
 	printf("Starting loop in Threaded mode\n");
 #endif
 
+	/*
+		Won't let an arbitrary thread get signals.
+		Only this thread will do it. We will let
+		the signal inheritance do the job.
+	*/
+	sigemptyset(&set);
+
+	sigaddset(&set, SIGINT);
+	sigaddset(&set, SIGQUIT);
+	sigaddset(&set, SIGTERM);
+
+	i = pthread_sigmask(SIG_BLOCK, &set, NULL);
+
+	if (i) {
+		fprintf (stderr, "Can't set the thread's signal mask");
+		return FALSE;
+	}
+
 	Globals.Done=FALSE;
 
 	InitPacketQueue (MAX_PACKETS);
 
-	/* start up the interface threads */
-	for (i = 0 ; i < Globals.NumInterfaces ; i++){
-		if (!StartInterfaceThread(i)){
-			printf("Couldn't start thread for interface\n");
-			return FALSE;
-		}
+	if (!InitInterfacesThreads()) {
+		return FALSE;
 	}
 
-	pthread_create(&Globals.AThread, NULL, ProcessActions, NULL);
 #ifdef LOGFILE_THREAD
 	/* start up the log files keeper thread */
 	pthread_create(&Globals.logThread, NULL, ProcessLogFilesThread, NULL);
@@ -318,27 +411,18 @@ int MainLoop()
 #ifdef LOGFILE_THREAD_NO
 	fprintf(stderr, "Thread for log file keeping won't be created because we're running in non-threaded mode.\n");
 #endif
-	Globals.Threads = (pthread_t *) malloc ((Globals.UseThreads) * sizeof(pthread_t));
 
-	if (!Globals.Threads) {
-		fprintf (stderr, "Couldn't allocate Threads\n");
+	if (!InitActionsProcessingThreads()) {
 		return FALSE;
 	}
 
-	Globals.ThreadsID = (int *) malloc ((Globals.UseThreads) * sizeof(int));
-
-	if (!Globals.ThreadsID) {
-		fprintf (stderr, "Couldn't allocate ThreadsID\n");
+	if (!InitPacketProcessingThreads()) {
 		return FALSE;
 	}
 
-	for (i = 0 ; i < Globals.UseThreads ; i++) {
-		Globals.ThreadsID[i] = i;
-		pthread_create (&Globals.Threads[i], NULL, ProcessPacketThread, (void *)&Globals.ThreadsID[i]);
-	}
-
-	for (i = 0 ; i < Globals.UseThreads ; i++)
-		pthread_join (Globals.Threads[i], NULL);
+	/* Just to recall: this thread will handle the signals */
+	pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+	while (pause() != -1);
 
 	return FALSE;
 }

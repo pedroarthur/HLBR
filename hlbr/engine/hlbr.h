@@ -327,11 +327,16 @@ typedef struct global_vars {
 	int			SensorID;
 
 	char			Done;
-	char			UseThreads;
 
-	pthread_t*		Threads;
-	int*			ThreadsID;
-	pthread_key_t		ThreadsKey;
+	pthread_t*		DThreads;
+	int*			DThreadsID;
+	pthread_key_t		DThreadsKey;
+	int			DThreadsNum;
+
+	pthread_t*		AThreads;
+	int*			AThreadsID;
+	pthread_key_t		AThreadsKey;
+	int			AThreadsNum;
 
 	char			ParseOnly;
 	char*			ConfigFilename;
@@ -391,7 +396,6 @@ typedef struct global_vars {
 #ifdef LOGFILE_THREAD
 	pthread_t		logThread;
 #endif
-	pthread_t		AThread;
 } GlobalVars;
 
 

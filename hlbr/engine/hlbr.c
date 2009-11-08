@@ -260,8 +260,8 @@ void HandleSignal(int signal)
 		case SIGTERM:
 			printf("Signal %i recieved. Shutting down pid %i\n", signal, getpid());
 
-			for (i = 0 ; i < Globals.UseThreads ; i++) {
-				pthread_cancel (Globals.Threads[i]);
+			for (i = 0 ; i < Globals.DThreadsNum ; i++) {
+				pthread_cancel (Globals.DThreads[i]);
 			}
 
 			for (i = 0 ; i < Globals.NumInterfaces ; i++) {
@@ -272,7 +272,9 @@ void HandleSignal(int signal)
 					pthread_cancel (Globals.Interfaces[i].TxThreadID);
 			}
 
-			pthread_cancel (Globals.AThread);
+			for (i = 0 ; i < Globals.AThreadsNum ; i++) {
+				pthread_cancel (Globals.AThreads[i]);
+			}
 
 			if (remove(Globals.PidFilename))
 				fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
@@ -368,7 +370,7 @@ int main(int argc, char**argv)
 	printf("HLBR is all done.  Calling shutdown handlers\n");
 	CallShutdownHandlers();
 
-	return TRUE;
+	return 0;
 }
 
 /**************************************

@@ -7,12 +7,7 @@
 #include "../engine/bits.h"
 #include "../engine/hlbr.h"
 #include "../engine/hlbrlib.h"
-//#include "../mangle/mangle.h"
 
-/*****************************************
-* Includes for all the interface types
-* goes here
-*****************************************/
 #include "packet_linux_raw.h"
 #include "packet_obsd_bpf.h"
 #include "packet_osx_bpf.h"
@@ -41,18 +36,14 @@ struct {
 
 extern GlobalVars Globals;
 
-int					PacketLockID=0;
-unsigned int 				CurPacketNum=0;
+int		PacketLockID = 0;
+unsigned int 	CurPacketNum = 0;
 
 //#define DEBUG
 //#define DEBUGPACKETS
 //#define DEBUGLOCKS
 // #define DEBUG_SCHEDULE
 
-/**************************************
-* Given the name of a packet type,
-* return its ID
-**************************************/
 int GetPacketTypeByName(char* Name){
 
 	DEBUGPATH;
@@ -74,10 +65,6 @@ int GetPacketTypeByName(char* Name){
 	return PACKET_TYPE_NONE;
 }
 
-/**************************************
-* Given the name of a protocol,
-* return its ID
-**************************************/
 int GetPacketProtoByName(char* Name){
 
 	DEBUGPATH;
@@ -89,10 +76,6 @@ int GetPacketProtoByName(char* Name){
 	return PACKET_PROTO_NONE;
 }
 
-/**************************************
-* Given the name of a role,
-* return its ID
-**************************************/
 int GetPacketRoleByName(char* Name){
 
 	DEBUGPATH;
@@ -110,9 +93,6 @@ int GetPacketRoleByName(char* Name){
 	return PACKET_ROLE_NORMAL;
 }
 
-/******************************************
-* Sets an interface up for reading/writing
-******************************************/
 int OpenInterface(int InterfaceID){
 	InterfaceRec*	Interface;
 
@@ -150,10 +130,6 @@ int OpenInterface(int InterfaceID){
 	return FALSE;
 }
 
-
-/******************************************
-* Open up all the interfaces
-******************************************/
 int OpenInterfaces(){
 	int 	i;
 
@@ -165,10 +141,6 @@ int OpenInterfaces(){
 	return TRUE;
 }
 
-/******************************************
-* Read packet(s) from an interface
-* Packets will be put on the pending queue
-******************************************/
 int ReadPacket(int InterfaceID){
 	InterfaceRec*	Interface;
 
@@ -203,9 +175,6 @@ int ReadPacket(int InterfaceID){
 	return FALSE;
 }
 
-/*****************************************************
-* Send off the packet
-*****************************************************/
 int WritePacket(int PacketSlot){
 	InterfaceRec*		Interface;
 	int			InterfaceID;
@@ -216,24 +185,13 @@ int WritePacket(int PacketSlot){
 
 	DEBUGPATH;
 
-	InterfaceID=Globals.Packets[PacketSlot].TargetInterface;
-	Packet=Globals.Packets[PacketSlot].RawPacket;
-	PacketLen=Globals.Packets[PacketSlot].PacketLen;
+	InterfaceID = Globals.Packets[PacketSlot].TargetInterface;
+	Packet = Globals.Packets[PacketSlot].RawPacket;
+	PacketLen = Globals.Packets[PacketSlot].PacketLen;
 
-	if (InterfaceID!=INTERFACE_BROADCAST){
+	if (InterfaceID != INTERFACE_BROADCAST){
 		Interface=&Globals.Interfaces[InterfaceID];
-/*	
-#ifdef DEBUG
-		printf("Applying mangling to non-broadcast packet\n");
-#endif	
 
-		if (!Mangle(PacketSlot, Globals.Packets[PacketSlot].InterfaceNum, InterfaceID)){
-#ifdef DEBUG
-			printf("Failed to mangle packet\n");
-#endif		
-			return FALSE;
-		}
-*/	
 		switch (Interface->Type){
 			case PACKET_TYPE_LINUX_RAW:
 #ifdef _LINUX_
@@ -273,22 +231,10 @@ int WritePacket(int PacketSlot){
 				return FALSE;
 		}
 	}else{
-		/*this is a broadcast packet*/
 		for (i=0;i<Globals.NumInterfaces;i++){
-			if (i!=InterfaceID){
+			if (i != InterfaceID){
 				Interface=&Globals.Interfaces[i];
-/*
-#ifdef DEBUG
-				printf("Applying mangling to broadcast packet\n");
-#endif	
 
-				if (!Mangle(PacketSlot, Globals.Packets[PacketSlot].InterfaceNum, i)){
-#ifdef DEBUG
-					printf("Failed to mangle packet\n");
-#endif		
-					break;
-				}
-*/
 				switch (Interface->Type){
 #ifdef _LINUX_
 					case PACKET_TYPE_LINUX_RAW:
@@ -386,7 +332,7 @@ int InitPacketQueue (int max_packets) {
 	    !PacketQueue.Scheduling ||
 	    !PacketQueue.Sending)
 	{
-		fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
+		fprintf (stderr, "%s: Couldn't allocate memory for Packets tickets\n", __FUNCTION__);
 		return FALSE;
 	}
 
@@ -394,14 +340,14 @@ int InitPacketQueue (int max_packets) {
 		PacketQueue.Scheduling[i] = QueueNew ();
 
 		if (!PacketQueue.Scheduling[i]) {
-			fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
+			fprintf (stderr, "%s: Couldn't allocate memory for Packets tickets\n", __FUNCTION__);
 			return FALSE;
 		}
 	}
 
 	for (i = 0 ; i < max_packets ; i++){
 		if (!StackPushData(PacketQueue.Idle, (void*)i)) {
-			fprintf (stderr, "Couldn't allocate memory for Packets tickets\n");
+			fprintf (stderr, "%s: Couldn't allocate memory for Packets tickets\n", __FUNCTION__);
 			return FALSE;
 		}
 
@@ -410,9 +356,6 @@ int InitPacketQueue (int max_packets) {
 	}
 }
 
-/**
- * Get an empty, unused packet struct from the pool.
- */
 int GetEmptyPacket()
 {
 	PacketRec*	Packet;
@@ -444,13 +387,6 @@ int GetEmptyPacket()
 	return PacketSlot;
 }
 
-/**
- * Marks a packet as 'pending' (thread safe, called from ReadPacket)
- * Gets called every time a packet gets put on the pending list. Uses a 
- * mutex lock (to avoid problems with threads).
- * This may be called more than once per ReadPacket request.
- * @see ReadPacket
- */
 int AddPacketToPending(int PacketSlot) {
 	Node* aux;
 
@@ -468,11 +404,6 @@ int AddPacketToPending(int PacketSlot) {
 	return TRUE;
 }
 
-/**
- * Pops a packet off the pending queue
- * Give the caller a packet off the pending queue (marked as 
- * PACKET_STATUS_PENDING)
- */
 int PopFromPending() {
 	int 	PacketSlot = PACKET_NONE;
 	Node*	aux;
@@ -546,11 +477,11 @@ int SchedulePacket (int PacketSlot) {
 	DEBUGPATH;
 
 	if (packet->TargetInterface != INTERFACE_BROADCAST) {
-		#ifdef DEBUG_SCHEDULE
+#ifdef DEBUG_SCHEDULE
 		fprintf (stderr, "%s: sending packet %d\n", __FUNCTION__, PacketSlot);
 		fprintf (stderr, "%s: TargetInterface: %d (%s)\n", __FUNCTION__, packet->TargetInterface,
 									Globals.Interfaces[packet->TargetInterface].Name);
-		#endif
+#endif
 
 		switch (packet->Status) {
 			case PACKET_STATUS_PROCESSING:
@@ -578,14 +509,17 @@ int SchedulePacket (int PacketSlot) {
 
 		int i;
 
-		#ifdef DEBUG_SCHEDULE
+#ifdef DEBUG_SCHEDULE
 		fprintf (stderr, "%s: sending packet %d through BROADCAST Interface\n", __FUNCTION__, PacketSlot);
+
 		for (i = 0 ; i < node->IfacesCount ; i++)
 			fprintf (stderr, "%s: Target interface %d: %d (%s)\n", __FUNCTION__, i, node->IfaceArray[i],
 										Globals.Interfaces[node->IfaceArray[i]].Name);
-		#endif
+#endif
 
 		if (!ClonePacket (&clone, packet)) {
+			fprintf (stderr, "%s: Can't clone packet for broadcasting\n", __FUNCTION__);
+
 			ReturnEmptyPacket (PacketSlot);
 			return FALSE;
 		}
@@ -702,11 +636,7 @@ void ReturnEmptyPacket(int PacketSlot) {
 #endif
 }
 
-/**
- * Start a new dedicated thread to read the network interface.
- */
-int StartInterfaceThread(int InterfaceID)
-{
+int StartInterfaceThread(int InterfaceID) {
 	InterfaceRec*	Interface;
 
 	DEBUGPATH;
@@ -794,7 +724,7 @@ int ClonePacket (PacketRec* dst, PacketRec* src) {
 		dst->RawPacket = (char *) malloc (dst->PacketLen * sizeof(char));
 
 		if (!dst->RawPacket) {
-			fprintf (stderr, "Can't allocate memory for large packet cloning\n");
+			fprintf (stderr, "%s: Can't allocate memory for large packet cloning\n", __FUNCTION__);
 			return FALSE;
 		}
 	}

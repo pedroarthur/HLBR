@@ -314,35 +314,31 @@ int ParseSystem(FILE* fp){
 #ifdef DEBUG
 			printf("AlertHeader set\n");
 #endif
-		}else if (strncasecmp(LineBuff, "Threads=",8)==0){
-			Current=LineBuff+strlen("Threads=");
-			switch (*Current){
-				case 'Y':
-				case 'y':
-				case '1':
-				case 't':
-				case 'T':
-					Globals.UseThreads=TRUE;
-					break;
-				case 'n':
-				case 'N':
-				case '0':
-				case 'f':
-				case 'F':
-					Globals.UseThreads=FALSE;
-					break;
-				default:
-					if (*Current - '0' > 0 && *Current - '0' < 9){
-						Globals.UseThreads=strtol(Current, &Current, 10);
-					} else {
-						printf("I don't understand thread option %c\n",*Current);
-						Globals.UseThreads=TRUE;
-					}
+		}else if (strncasecmp(LineBuff, "DecodingThreads=", 16) == 0){
+			Current = LineBuff + strlen("DecodingThreads=");
+
+			if (*Current - '0' > 0 && *Current - '0' < 9){
+				Globals.DThreadsNum = strtol(Current, &Current, 10);
+			} else {
+				fprintf(stderr, "I don't understand DecodingThreads option %c\n", *Current);
+				return FALSE;
 			}
 #ifdef DEBUG
-			printf("UseThreads is %i\n",Globals.UseThreads);
+			printf("DecodingThreads is %i\n",Globals.DThreadsNum);
 #endif
-		}else if (strncasecmp(LineBuff, "PidFile=", 8) == 0) {
+		} else if (strncasecmp(LineBuff, "PerformingThreads=", 18) == 0) {
+			Current = LineBuff + strlen ("PerformingThreads=");
+
+			if (*Current - '0' > 0 && *Current - '0' < 9) {
+				Globals.AThreadsNum = strtol (Current, &Current, 10);
+			} else {
+				fprintf (stderr, "I don't understand PerformingThreads option %c\n", *Current);
+				return FALSE;
+			}
+#ifdef DEBUG
+			printf("PerformingThreads is %i\n",Globals.AThreadsNum);
+#endif
+		} else if (strncasecmp(LineBuff, "PidFile=", 8) == 0) {
 			Current=LineBuff+8;
 
 			if (!ParsePidFile(Current))
@@ -511,9 +507,6 @@ int ParseConfig(){
 	char*		Start;
 
 	DEBUGPATH;
-
-	/*set some defaults*/
-	Globals.UseThreads=TRUE;
 
 	fp=fopen(Globals.ConfigFilename, "r");
 	if (!fp){
