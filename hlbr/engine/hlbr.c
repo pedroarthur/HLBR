@@ -74,7 +74,7 @@ int CreateTimer(char* Name, unsigned int Interval, int (*TimerFunc)(int TimerID,
  */
 void PrintVersion() 
 {
-	printf("\n\nHogwash Light BR (HLBR) v%i.%i\n", MAJOR_VERSION, MINOR_VERSION);
+	printf("\n\nHogwash Light BR (HLBR) v%i.%i.%i\n", MAJOR_VERSION, MINOR_VERSION, CODE_REVISION);
 	printf("http://hlbr.sourceforge.net\n\n");
 	printf("(based on Jason Larsen's Hogwash)\n\n\n");
 }

@@ -12,18 +12,26 @@
 extern GlobalVars	Globals;
 
 int			IPDecoderID;
+
 Cache*			FragCache;
 pthread_mutex_t		FragMutex;
 int			FragLockID;
 
-struct defrag_item{
+typedef struct defrag_item{
 	int		begin;
 	int		end;
 	int		PacketSlot;
 	IPData*		idata;
 	int		more;
 	char		done;
-};
+} DefragItem;
+
+typedef struct defrag_key{
+	unsigned short	IPID;
+	unsigned int	saddr;
+	unsigned int	daddr;
+	unsigned char	proto;
+} DefragKey;
 
 /************************************************************************
 * We have to recalc the IP header checksum
@@ -76,7 +84,7 @@ unsigned short checksum(unsigned short *b1, unsigned int len1, unsigned short *b
 * Build the packet back together and push it on the pending queue
 * TODO: Don't assume ethernet
 *************************************************************/
-int RebuildPacket(int PacketSlot, struct defrag_item* Frags, int NumFrags){
+int RebuildPacket(int PacketSlot, DefragItem* Frags, int NumFrags){
 	PacketRec	newp;
 
 	IPData*		idata;
@@ -164,7 +172,7 @@ int RebuildPacket(int PacketSlot, struct defrag_item* Frags, int NumFrags){
 /*************************************************************
 * Sort the Frag Array. Return TRUE if all pieces are present
 *************************************************************/
-int SortFragArray(struct defrag_item* Frags, int NumFrags){
+int SortFragArray(DefragItem* Frags, int NumFrags){
 	int 	i;
 	int	all_done;
 	int	found, last, next;
@@ -248,22 +256,15 @@ int SortFragArray(struct defrag_item* Frags, int NumFrags){
 * Reassemble fragmented ip packets
 ****************************************/
 void* DecodeIPDefrag(int PacketSlot){
-	struct defrag_key{
-		unsigned short	IPID;
-		unsigned int	saddr;
-		unsigned int	daddr;
-		unsigned char	proto;
-	};
-
 	CacheItems*		CI;
 	IPDefragData*		data = NULL;
 	IPData*			idata;
 	int			flags;
 	int			offset;
-	struct defrag_key	Key;
+	DefragKey		Key;
 
 	PacketRec*		ThisPacket;
-	struct defrag_item	Frags[128];
+	DefragItem		Frags[128];
 	int			NumFrags;
 	int			i;
 
@@ -275,6 +276,10 @@ void* DecodeIPDefrag(int PacketSlot){
 	printf("----------------------------\n");
 	printf("Defragmenting IP\n");
 #endif
+
+	pthread_mutex_lock(&FragMutex);
+	CacheTimeout(FragCache, time(NULL));
+	pthread_mutex_unlock(&FragMutex);
 
 	p=&Globals.Packets[PacketSlot];
 
@@ -366,37 +371,34 @@ void* DecodeIPDefrag(int PacketSlot){
 #ifdef DEBUG
 				printf("Adding slot %i\n",PacketSlot);
 #endif
-				CacheAdd(FragCache, (unsigned char*)&Key, sizeof(struct defrag_key), (unsigned char*)&PacketSlot, sizeof(int), Globals.Packets[PacketSlot].tv.tv_sec);
+				CacheAdd(FragCache, (unsigned char*)&Key, sizeof(DefragKey), (unsigned char*)&PacketSlot, sizeof(int), Globals.Packets[PacketSlot].tv.tv_sec);
 				Globals.Packets[PacketSlot].SaveCount++;
 #ifdef DEBUG
 				printf("Still more packets\n");
 #endif
 			}else{
 				/*tell the engine we're done with these packets*/
-				RebuildPacket(PacketSlot, Frags, NumFrags);
+				if (!RebuildPacket(PacketSlot, Frags, NumFrags)) {
+					CacheDelKey(FragCache, (unsigned char*)&Key, sizeof(DefragKey), Globals.Packets[PacketSlot].tv.tv_sec);
+					pthread_mutex_unlock(&FragMutex);
 
-				for (i=0;i<CI->NumItems;i++){
-					Globals.Packets[*(int*)CI->Items[i].Data].SaveCount--;
-
-					if (*(int*)CI->Items[i].Data != PacketSlot)
-						ReturnEmptyPacket(*(int*)CI->Items[i].Data);
+					return NULL;
 				}
-
-				CacheDelKey(FragCache, (unsigned char*)&Key, sizeof(struct defrag_key), Globals.Packets[PacketSlot].tv.tv_sec);
 #ifdef DEBUG
 				printf("Packet was rebuilt\n");
 #endif
 				data=calloc(sizeof(IPDefragData),1);
-
 				if (!data){
 					pthread_mutex_unlock(&FragMutex);
 					return NULL;
 				}
 
 				data->IsRebuilt=TRUE;
+
+				CacheDelKey(FragCache, (unsigned char*)&Key, sizeof(DefragKey), Globals.Packets[PacketSlot].tv.tv_sec);
 			}
 		}else{
-			CacheAdd(FragCache, (unsigned char*)&Key, sizeof(struct defrag_key), (unsigned char*)&PacketSlot, sizeof(int), Globals.Packets[PacketSlot].tv.tv_sec);
+			CacheAdd(FragCache, (unsigned char*)&Key, sizeof(DefragKey), (unsigned char*)&PacketSlot, sizeof(int), Globals.Packets[PacketSlot].tv.tv_sec);
 			Globals.Packets[PacketSlot].SaveCount++;
 #ifdef DEBUG
 			printf("First piece\n");
@@ -412,9 +414,27 @@ void* DecodeIPDefrag(int PacketSlot){
 	return data;
 }
 
-/*************************************
-* Set up the decoder
-*************************************/
+void IPDefragCacheFreeFunction (void *pointer) {
+	int PacketSlot = *(int*)pointer;
+
+	DEBUGPATH;
+
+	if (Globals.Packets[PacketSlot].LargePacket)
+		return;
+
+	#ifdef DEBUG
+	printf("Returning slot %i\n", PacketSlot);
+	#endif
+
+	Globals.Packets[PacketSlot].SaveCount--;
+
+	#ifdef DEBUG
+	printf("SaveCount is now %i\n",Globals.Packets[PacketSlot].SaveCount);
+	#endif
+
+	ReturnEmptyPacket(*(int*)pointer);
+}
+
 int InitDecoderIPDefrag(){
 	int DecoderID;
 
@@ -430,14 +450,14 @@ int InitDecoderIPDefrag(){
 	Globals.Decoders[DecoderID].DecodeFunc = DecodeIPDefrag;
 	Globals.Decoders[DecoderID].Free = free;
 
-	if (!DecoderAddDecoder(GetDecoderByName("IP"), DecoderID)){
+	IPDecoderID = GetDecoderByName("IP");
+
+	if (!DecoderAddDecoder(IPDecoderID, DecoderID)){
 		printf("Failed to Bind IP Defrag Decoder to IP Decoder\n");
 		return FALSE;
 	}
 
-	IPDecoderID = GetDecoderByName("IP");
-
-	FragCache = InitCache(FRAG_TIMEOUT);
+	FragCache = InitCache(FRAG_TIMEOUT, IPDefragCacheFreeFunction);
 
 	return TRUE;
 }

@@ -27,10 +27,12 @@ typedef struct cache{
 	CacheItems	Keys[CACHE_MAX_KEYS];
 	unsigned int	NumKeys;
 
+	void (*Free)	(void *pointer);
+
 	long		TimeoutLen;
 } Cache;
 
-Cache* InitCache(int TimeoutLen);
+Cache* InitCache(int TimeoutLen, void (*Free)(void *));
 int CacheAdd(Cache* c, unsigned char* Key, int KeyLen, unsigned char* Data, int DataLen, int Now);
 int CacheDelKey(Cache* c, unsigned char* Key, int KeyLen, int Now);
 CacheItems* CacheGet(Cache* c, unsigned char* Key, int KeyLen, int Now);

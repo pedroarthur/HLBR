@@ -8,13 +8,14 @@
 /***************************************
 * Set up a new cache
 ***************************************/
-Cache* InitCache(int TimeoutLen){
+Cache* InitCache(int TimeoutLen, void (*Free)(void *)){
 	Cache*		NewCache;
 
 	DEBUGPATH;
 
 	NewCache = calloc(sizeof(Cache),1);
 	NewCache->TimeoutLen = TimeoutLen;
+	NewCache->Free = Free;
 
 	return NewCache;
 }
@@ -29,8 +30,8 @@ int CacheGetBin(Cache* c, unsigned char* Key, int KeyLen){
 	printf("In CacheGetBin\n");
 #endif
 
-	for (i=0;i<c->NumKeys;i++){
-		if (c->Keys[i].KeyLen==KeyLen){
+	for (i = 0 ; i < c->NumKeys ; i++){
+		if (c->Keys[i].KeyLen == KeyLen){
 			if (memcmp(c->Keys[i].Key, Key, KeyLen)==0){
 				return i;
 			}
@@ -44,11 +45,10 @@ int CacheGetBin(Cache* c, unsigned char* Key, int KeyLen){
 * Create a new bin to put stuff in
 *********************************************/
 int CacheCreateBin(Cache* c, unsigned char* Key, int KeyLen){
-
-DEBUGPATH;
+	DEBUGPATH;
 
 	/*check to see if we're full*/
-	if (c->NumKeys>=CACHE_MAX_KEYS){
+	if (c->NumKeys >= CACHE_MAX_KEYS){
 #ifdef DEBUG
 		printf("Cache is full\n");
 #endif
@@ -56,14 +56,12 @@ DEBUGPATH;
 	}
 
 	/*allocate a new one*/
-	c->Keys[c->NumKeys].Key=malloc(KeyLen);
+	c->Keys[c->NumKeys].Key = malloc(KeyLen);
 	memcpy(c->Keys[c->NumKeys].Key, Key, KeyLen);
-	c->Keys[c->NumKeys].KeyLen=KeyLen;
-	c->Keys[c->NumKeys].NumItems=0;
+	c->Keys[c->NumKeys].KeyLen = KeyLen;
+	c->Keys[c->NumKeys].NumItems = 0;
 
-	c->NumKeys++;
-
-	return c->NumKeys-1;
+	return c->NumKeys++;
 }
 
 
@@ -71,19 +69,18 @@ DEBUGPATH;
 * put a new item in a cache bin
 *********************************************/
 int CacheBinAdd(CacheItems* ci, unsigned char* Data, int DataLen){
+	DEBUGPATH;
 
-DEBUGPATH;
-
-	if (ci->NumItems==CACHE_MAX_ITEMS_PER_KEY){
+	if (ci->NumItems == CACHE_MAX_ITEMS_PER_KEY){
 #ifdef DEBUG
 		printf("This key if full\n");
 #endif
 		return FALSE;
 	}
 
-	ci->Items[ci->NumItems].Data=malloc(DataLen);
+	ci->Items[ci->NumItems].Data = malloc(DataLen);
 	memcpy(ci->Items[ci->NumItems].Data, Data, DataLen);
-	ci->Items[ci->NumItems].DataLen=DataLen;
+	ci->Items[ci->NumItems].DataLen = DataLen;
 
 	ci->NumItems++;
 
@@ -94,8 +91,8 @@ DEBUGPATH;
 * Kill any keys that have timed out
 ************************************************/
 void CacheTimeout(Cache* c, int Now){
-	int		i;
-
+	int	i;
+	
 	DEBUGPATH;
 
 	for (i=0;i<c->NumKeys;i++){
@@ -120,9 +117,8 @@ int CacheAdd(Cache* c, unsigned char* Key, int KeyLen, unsigned char* Data, int 
 #ifdef DEBUG
 		printf("First Item in this bin\n");
 #endif
-		BinID=CacheCreateBin(c, Key, KeyLen);
+		BinID = CacheCreateBin(c, Key, KeyLen);
 	}
-
 	if (BinID == CACHE_NONE){
 #ifdef DEBUG
 		printf("Failed to create a new bin\n");
@@ -160,16 +156,15 @@ int CacheDelKey(Cache* c, unsigned char* Key, int KeyLen, int Now){
 	if (KeyID == CACHE_NONE){
 #ifdef DEBUG
 		printf("There is no such key\n");
-#endif
+#endif	
 		return FALSE;
 	}
 
 	/*get rid of the items in that bin*/
 	ci = &c->Keys[KeyID];
-
-	for (i = 0; i < ci->NumItems ; i++){
+	for (i = 0 ; i < ci->NumItems ; i++){
 		if (ci->Items[i].Data)
-			free(ci->Items[i].Data);
+			c->Free (ci->Items[i].Data);
 
 		ci->Items[i].Data = NULL;
 		ci->Items[i].DataLen = 0;
@@ -197,19 +192,19 @@ int CacheDelKey(Cache* c, unsigned char* Key, int KeyLen, int Now){
 ********************************************/
 CacheItems* CacheGet(Cache* c, unsigned char* Key, int KeyLen, int Now){
 	int	KeyID;
-	
+
 	DEBUGPATH;
 
 	KeyID = CacheGetBin(c, Key, KeyLen);
 	if (KeyID == CACHE_NONE){
 #ifdef DEBUG
 		printf("No Such key\n");
-#endif	
+#endif
 		return NULL;
 	}
-	
+
 	CacheTimeout(c, Now);
-	
+
 	return &c->Keys[KeyID];
 }
 
@@ -221,16 +216,16 @@ void DestroyCache(Cache* c){
 
 	DEBUGPATH;
 
-	for (i = 0; i < c->NumKeys ; i++){
-		for (j = 0; j < c->Keys[i].NumItems ; j++){
+	for (i = 0 ; i < c->NumKeys ; i++){
+		for (j = 0 ; j < c->Keys[i].NumItems ; j++){
 			if (c->Keys[i].Items[j].Data)
-				free(c->Keys[i].Items[j].Data);
+				c->Free (c->Keys[i].Items[j].Data);
 		}
 
 		if (c->Keys[i].Key)
 			free(c->Keys[i].Key);
 	}
-	
+
 	free(c);
 	c = NULL;
 }
