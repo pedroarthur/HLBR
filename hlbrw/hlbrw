@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# hlbrw - assistant to help make new rules to HLBR
+# Copyright 2009-2010 Joao Eriberto Mota Filho <eriberto@eriberto.pro.br>
+
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+HLBRLOG=/var/log/hlbr/hlbr.log
+LOGPATH=/var/log/hlbrw
+TIME=300
+ADDR=$(tail -n 1 $HLBRLOG | cut -d" " -f4 | cut -d: -f1)
+DATE=$(date '+%Y%m%d-%T.%N')
+LOG=hlbrw'_'$ADDR'_'$DATE.dump
+TCPDUMPPID=/var/run/tcpdump.$DATE.pid
+
+# starting and killing tcpdump
+tcpdump -n -s0 host $ADDR tcp[13] == 24 or tcp[13]== 25 -w $LOGPATH/$LOG &
+echo $! > $TCPDUMPPID
+echo "ADD: $LOG created." >> $LOGPATH/hlbrw.log
+sleep $TIME
+kill $(cat $TCPDUMPPID)
+rm -f $TCPDUMPPID
+
+# removing empty dump files
+LOGSIZE=$(ls -l $LOGPATH/$LOG | tr -s " " | cut -d" " -f5)
+if [ $LOGSIZE -lt 25 ]
+then
+    rm -f $LOGPATH/$LOG;
+    echo "DEL: $LOG empty. Removed." >> $LOGPATH/hlbrw.log;
+fi

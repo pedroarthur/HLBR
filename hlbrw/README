@@ -1,0 +1,44 @@
+# hlbrw - assistant to help make new rules to HLBR
+
+  1. WHAT IS HLBRW? HOW IT WORKS?
+
+Please, read the manpage.
+
+
+  2. HOW TO INSTALL IT?
+
+This program is a script in shell Bash and depends of this:
+
+   * bash (http://www.gnu.org/software/bash)
+   * hlbr (http://hlbr.sf.net)
+   * iwatch (http://iwatch.sourceforge.net)
+
+To install, type # make install.
+
+You must use the file iwatch.xml.sample as configuration for iwatch program.
+Then copy iwatch.xml.sample as /etc/iwatch/iwatch.xml (or other file name if you
+know iwatch mechanism). The iwatch.xml file will activate HLBRW when needed.
+
+IMPORTANT: iwatch must be running as daemon.
+
+
+  3. HOW TO USE IT?
+
+HLBRW will make tcpdump files in /var/log/hlbr. You need analyse that files with
+tcpdump or wireshark. The appropriate tcpdump command is:
+
+    # tcpdump -n -S -s0 -A -r <file.dump>
+
+Is very important know frames detected and blocked by HLBR doesn't will arrive
+to layer 3 (OSI model). Then tcpdump doesn't see it and is very common the
+capture made by HLBRW + tcpdump doesn't show the frames dropped by HLBR. You will
+find those frames in hlbr.dump log.
+
+
+  4. CAN I SEND MY NEW RULES TO HLBR PROJECT?
+
+Yes! We need new rules. You can send good rules to eriberto@eriberto.pro.br. Your
+rules will be analysed and if relevant to project, will be put in next version of
+the HLBR project. Please, be selective and don't send imperfect or useless rules.
+
+Thanks a lot for use HLBR and HLBRW.

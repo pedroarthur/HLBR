@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<!DOCTYPE config SYSTEM "/etc/iwatch/iwatch.dtd" >
+
+<config>
+  <guard email="" name=""/>
+  <watchlist>
+    <title>HLBR Log</title>
+    <contactpoint email="" name=""/>
+    <path type="single" events="modify" exec="/usr/bin/hlbrw">/var/log/hlbr/hlbr.log</path>
+  </watchlist>
+</config>
