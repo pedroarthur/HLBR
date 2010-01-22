@@ -16,27 +16,70 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-HLBRLOG=/var/log/hlbr/hlbr.log
-LOGPATH=/var/log/hlbrw
-#TIME=300
-TIME=60
+# Get, test and define variables
+
+if [ ! -e "/etc/hlbrw.conf" ]; then
+    echo "File /etc/hlbrw.conf doesn't exist.";
+    exit 1;
+fi
+
+source /etc/hlbrw.conf
+
+[ "$HLBRLOG" ] || exit 1
+[ "$TIME" ] || exit 1
+
+VERSION=0.1
 ADDR=$(tail -n 1 $HLBRLOG | cut -d" " -f4 | cut -d: -f1)
 DATE=$(date '+%Y%m%d-%T.%N')
 LOG=hlbrw'_'$ADDR'_'$DATE.dump
+LOGPATH=/var/log/hlbrw
 TCPDUMPPID=/var/run/tcpdump.$DATE.pid
 
-# starting and killing tcpdump
-tcpdump -n -s0 host $ADDR and '(tcp[13] == 24 or tcp[13] == 25)' -w $LOGPATH/$LOG &
-echo $! > $TCPDUMPPID
-echo $(date '+%b %e %T') "ADD: $LOG created." >> $LOGPATH/hlbrw.log
-sleep $TIME
-kill $(cat $TCPDUMPPID)
-rm -f $TCPDUMPPID
+# HLBRW engine...
 
-# removing empty dump files
-LOGSIZE=$(ls -l $LOGPATH/$LOG | tr -s " " | cut -d" " -f5)
-if [ $LOGSIZE -lt 25 ]
-then
-    rm -f $LOGPATH/$LOG;
-    echo $(date '+%b %e %T') "DEL: $LOG empty. Removed." >> $LOGPATH/hlbrw.log;
-fi
+function hlbrw
+{
+    # starting and killing tcpdump
+    tcpdump -n -s0 host $ADDR and '(tcp[13] == 24 or tcp[13] == 25 or ! tcp)' -w $LOGPATH/$LOG &
+    echo $! > $TCPDUMPPID
+    echo $(date '+%b %e %T') "ADD: $LOG created." >> $LOGPATH/hlbrw.log
+    sleep $TIME
+    kill $(cat $TCPDUMPPID)
+    rm -f $TCPDUMPPID
+
+    # removing empty dump files
+    LOGSIZE=$(ls -l $LOGPATH/$LOG | tr -s " " | cut -d" " -f5)
+    if [ $LOGSIZE -lt 25 ]
+    then
+	rm -f $LOGPATH/$LOG;
+	echo $(date '+%b %e %T') "DEL: $LOG empty. Removed." >> $LOGPATH/hlbrw.log;
+    fi
+}
+
+
+# HLBRW run manager
+
+case "$1" in
+-v|--version)
+    echo -e "\nHLBRW $VERSION\n"
+    exit 0
+    ;;
+
+-h|--help)
+    echo -e "Usage: hlbrw [OPTION]\n"
+    echo -e " -h, --help\tShows this help."
+    echo -e " -v, --version\tShows the HLBRW version."
+    echo -e "\nIf called without any option, runs HLBRW program."
+    exit 0
+    ;;
+
+"")
+    $(hlbrw)
+    exit 0
+    ;;
+
+*)
+    echo -e "\nSyntax error. Please, run $ hlbrw -h.\n"
+    exit 0
+    ;;
+esac
