@@ -18,16 +18,17 @@
 
 HLBRLOG=/var/log/hlbr/hlbr.log
 LOGPATH=/var/log/hlbrw
-TIME=300
+#TIME=300
+TIME=60
 ADDR=$(tail -n 1 $HLBRLOG | cut -d" " -f4 | cut -d: -f1)
 DATE=$(date '+%Y%m%d-%T.%N')
 LOG=hlbrw'_'$ADDR'_'$DATE.dump
 TCPDUMPPID=/var/run/tcpdump.$DATE.pid
 
 # starting and killing tcpdump
-tcpdump -n -s0 host $ADDR tcp[13] == 24 or tcp[13]== 25 -w $LOGPATH/$LOG &
+tcpdump -n -s0 host $ADDR and '(tcp[13] == 24 or tcp[13] == 25)' -w $LOGPATH/$LOG &
 echo $! > $TCPDUMPPID
-echo "ADD: $LOG created." >> $LOGPATH/hlbrw.log
+echo $(date '+%b %e %T') "ADD: $LOG created." >> $LOGPATH/hlbrw.log
 sleep $TIME
 kill $(cat $TCPDUMPPID)
 rm -f $TCPDUMPPID
@@ -37,5 +38,5 @@ LOGSIZE=$(ls -l $LOGPATH/$LOG | tr -s " " | cut -d" " -f5)
 if [ $LOGSIZE -lt 25 ]
 then
     rm -f $LOGPATH/$LOG;
-    echo "DEL: $LOG empty. Removed." >> $LOGPATH/hlbrw.log;
+    echo $(date '+%b %e %T') "DEL: $LOG empty. Removed." >> $LOGPATH/hlbrw.log;
 fi
