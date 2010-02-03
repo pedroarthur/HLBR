@@ -24,12 +24,12 @@ IMPORTANT: iwatch must be running as daemon.
 
   3. HOW TO USE IT?
 
-HLBRW will make tcpdump files in /var/log/hlbr. You need to analyse that files 
+HLBRW will make tcpdump files in /var/log/hlbr. You need to analyse that files
 with tcpdump or wireshark. The appropriate tcpdump command is:
 
     # tcpdump -n -S -s0 -A -r <file.dump>
 
-It is very important to know that frames detected and blocked by HLBR won't 
+It is very important to know those frames detected and blocked by HLBR won't
 reach layer 3 (OSI model). So tcpdump won't see it and it's very common for the
 capture made by HLBRW + tcpdump to not show the frames dropped by HLBR. You will
 find those frames in hlbr.dump log.
@@ -38,8 +38,8 @@ find those frames in hlbr.dump log.
   4. CAN I SEND MY NEW RULES TO HLBR PROJECT?
 
 Yes! We need new rules. You can send good rules to eriberto@eriberto.pro.br. Your
-rules will be analysed and if relevant to the project, will be added in the next 
-version of the HLBR project. Please, be selective and don't send imperfect or 
+rules will be analysed and if relevant to the project, will be added in the next
+version of the HLBR project. Please, be selective and don't send imperfect or
 useless rules.
 
 Thanks a lot for using HLBR and HLBRW.
