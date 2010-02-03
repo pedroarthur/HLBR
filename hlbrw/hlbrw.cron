@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# -c 52 = 1 ano/year
+# by eriberto
+
+LOGPATH=/var/log/hlbrw
+
+if [ -d $LOGPATH ];
+    then
+
+	savelog -m 640 -u root -c 52 -l -n -t $LOGPATH/hlbrw.log > /dev/null
+
+fi

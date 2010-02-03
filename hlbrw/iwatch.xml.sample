@@ -7,5 +7,6 @@
     <title>HLBR Log</title>
     <contactpoint email="" name=""/>
     <path type="single" events="modify" exec="/usr/bin/hlbrw">/var/log/hlbr/hlbr.log</path>
+    <path type="single" events="delete_self" exec="/usr/share/hlbrw/iwatch-restart.sh">/var/log/hlbr/hlbr.log</path>
   </watchlist>
 </config>

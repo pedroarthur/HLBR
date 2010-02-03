@@ -28,9 +28,10 @@ source /etc/hlbrw.conf
 [ "$HLBRLOG" ] || exit 1
 [ "$TIME" ] || exit 1
 
-VERSION=0.1
+VERSION=0.2
 ADDR=$(tail -n 1 $HLBRLOG | cut -d" " -f4 | cut -d: -f1)
 DATE=$(date '+%Y%m%d-%T.%N')
+DIRDATE=$(date '+%Y-%m-%d')
 LOG=hlbrw'_'$ADDR'_'$DATE.dump
 LOGPATH=/var/log/hlbrw
 TCPDUMPPID=/var/run/tcpdump.$DATE.pid
@@ -53,6 +54,14 @@ function hlbrw
     then
 	rm -f $LOGPATH/$LOG;
 	echo $(date '+%b %e %T') "DEL: $LOG empty. Removed." >> $LOGPATH/hlbrw.log;
+    else
+	# moving dump
+	if [ ! -d $LOGPATH/$DIRDATE ]
+	then
+	    mkdir $LOGPATH/$DIRDATE;
+	fi
+	mv $LOGPATH/$LOG $LOGPATH/$DIRDATE;
+	echo $(date '+%b %e %T') "MOV: $LOG moved." >> $LOGPATH/hlbrw.log;
     fi
 }
 

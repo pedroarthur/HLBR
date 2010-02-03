@@ -7,7 +7,7 @@ Please, read the manpage.
 
   2. HOW TO INSTALL IT?
 
-This program is a script in shell Bash and depends of this:
+This program is a script in shell Bash and depends:
 
    * bash (http://www.gnu.org/software/bash)
    * hlbr (http://hlbr.sf.net)
@@ -17,28 +17,34 @@ To install, type # make install.
 
 You must use the file iwatch.xml.sample as configuration for iwatch program.
 Then copy iwatch.xml.sample as /etc/iwatch/iwatch.xml (or other file name if you
-know iwatch mechanism). The iwatch.xml file will activate HLBRW when needed.
+know iwatch mechanism). The iwatch program, using iwatch.xml file, will activate
+HLBRW when needed.
 
 IMPORTANT: iwatch must be running as daemon.
 
+You can see good references about iwatch here:
 
-  3. HOW TO USE IT?
+    * http://iwatch.sourceforge.net/documentation.html
+    * http://www.linux-magazine.com/w3/issue/77/iWatch.pdf
 
-HLBRW will make tcpdump files in /var/log/hlbr. You need to analyse that files
+
+  3. HOW TO USE HLBRW?
+
+HLBRW will make tcpdump files in /var/log/hlbrw. You need analyse those files
 with tcpdump or wireshark. The appropriate tcpdump command is:
 
     # tcpdump -n -S -s0 -A -r <file.dump>
 
-It is very important to know those frames detected and blocked by HLBR won't
-reach layer 3 (OSI model). So tcpdump won't see it and it's very common for the
-capture made by HLBRW + tcpdump to not show the frames dropped by HLBR. You will
+Is very important know frames detected and blocked by HLBR won't arrive to
+layer 3 (OSI model). Then tcpdump won't see it and is very common the capture
+made by HLBRW + tcpdump doesn't show the frames dropped by HLBR. You will
 find those frames in hlbr.dump log.
 
 
   4. CAN I SEND MY NEW RULES TO HLBR PROJECT?
 
 Yes! We need new rules. You can send good rules to eriberto@eriberto.pro.br. Your
-rules will be analysed and if relevant to the project, will be added in the next
+rules will be analysed and if relevant to the project, will be added in next
 version of the HLBR project. Please, be selective and don't send imperfect or
 useless rules.
 
