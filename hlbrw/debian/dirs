@@ -1,0 +1,4 @@
+etc/cron.weekly
+usr/bin
+usr/share/man/man1
+var/log
