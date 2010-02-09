@@ -1,3 +1,9 @@
+2010-02-09  Joao Eriberto Mota Filho  <eriberto@eriberto.pro.br>
+  - Version 0.2.3.
+  - Fixed the syntax in iwatch.xml.sample.
+  - Improved the main code.
+  - Removed the iwatch-restart.sh file. It was added to main code.
+
 2010-02-05  Joao Eriberto Mota Filho  <eriberto@eriberto.pro.br>
   - Version 0.2.2.
   - Little adjusts in docs.
