@@ -18,6 +18,8 @@
 
 # Get, test and define variables
 
+VERSION=0.2.4
+
 if [ ! -e "/etc/hlbrw.conf" ]; then
     echo "File /etc/hlbrw.conf doesn't exist.";
     exit 1;
@@ -28,7 +30,6 @@ source /etc/hlbrw.conf
 [ "$HLBRLOG" ] || exit 1
 [ "$TIME" ] || exit 1
 
-VERSION=0.2.3
 ADDR=$(tail -n 1 $HLBRLOG | cut -d" " -f4 | cut -d: -f1)
 DATE=$(date '+%Y%m%d-%T.%N')
 DIRDATE=$(date '+%Y-%m-%d')
@@ -67,9 +68,11 @@ function hlbrw
 	if [ ! -d $LOGPATH/$DIRDATE ]
 	then
 	    mkdir $LOGPATH/$DIRDATE;
+	    chmod 0755 $LOGPATH/$DIRDATE;
+	    echo $(date '+%b %e %T') "DIR: Created directory $LOGPATH/$DIRDATE." >> $LOGPATH/hlbrw.log;
 	fi
 	mv $LOGPATH/$LOG $LOGPATH/$DIRDATE;
-	echo $(date '+%b %e %T') "MOV: $LOG moved." >> $LOGPATH/hlbrw.log;
+	echo $(date '+%b %e %T') "MOV: $LOG moved to $DIRDATE directory." >> $LOGPATH/hlbrw.log;
     fi
 }
 

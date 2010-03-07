@@ -1,3 +1,9 @@
+2010-03-06  Joao Eriberto Mota Filho  <eriberto@eriberto.pro.br>
+  - Version 0.2.4.
+  - Registering, in log, when creating directories.
+  - Changing directory permissions (0755) after create it.
+  - Registering, in log, the destination directory after moves.
+
 2010-02-09  Joao Eriberto Mota Filho  <eriberto@eriberto.pro.br>
   - Version 0.2.3.
   - Fixed the syntax in iwatch.xml.sample.
