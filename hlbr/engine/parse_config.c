@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <pwd.h>
+#include <grp.h>
 #ifdef _SOLARIS_
 #include <strings.h>
 #endif
@@ -343,6 +345,28 @@ int ParseSystem(FILE* fp){
 
 			if (!ParsePidFile(Current))
 				return FALSE;
+
+		} else if (strncasecmp(LineBuff, "User=", 5) == 0) {
+			Current = LineBuff + strlen ("User=");
+			struct passwd *pwd;
+			if ((pwd=getpwnam((const char*)Current)) != NULL) {
+				Globals.Uid = (int) pwd->pw_uid;
+			} else {
+				fprintf(stderr, "I couldn't get the uid of user %s\n", Current);
+				return FALSE;
+			}
+
+		} else if (strncasecmp(LineBuff, "Group=",6 )== 0) {
+			Current = LineBuff + strlen ("Group=");
+			struct group *grp;
+			if ((grp=getgrnam((const char*)Current)) != NULL) {
+				Globals.Gid = (int) grp->gr_gid;
+			} else {
+				fprintf(stderr, "I couldn't get the gid of group %s\n", Current);
+				return FALSE;
+			}
+			
+
 		}else{
 			printf("Warning: Unknown System Option: %s\n",LineBuff);
 		}

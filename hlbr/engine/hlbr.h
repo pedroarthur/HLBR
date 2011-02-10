@@ -326,6 +326,9 @@ typedef struct global_vars {
 	char*			SensorName;
 	int			SensorID;
 
+	int			Gid;
+	int 			Uid;
+
 	char			Done;
 
 	pthread_t*		DThreads;

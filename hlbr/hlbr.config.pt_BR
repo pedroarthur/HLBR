@@ -61,6 +61,8 @@ DecodingThreads=1
 PerformingThreads=1
 AlertHeader=%ac %d/%m/%y %h:%min:%s %sip:%sp->%dip:%dp
 PidFile=/var/run/hlbr.pid
+User=hlbr
+Group=hlbr
 </system>
 
 

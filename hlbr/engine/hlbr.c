@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <pwd.h>
 
 /** @mainpage HLBR Code Documentation
  * This is the documentation for HLBR's code, generated with Doxygen.\n
@@ -359,6 +361,11 @@ int main(int argc, char**argv)
 		return FALSE;
 	}
 
+	if (!DropRootPrivileges()){
+		printf("Error dropping root privileges\n");
+		return FALSE;
+	}	
+
 	/*start up the signal handlers*/
 	signal(SIGINT, HandleSignal);
 	signal(SIGQUIT, HandleSignal);
@@ -442,6 +449,40 @@ int CallShutdownHandlers()
 	return TRUE;
 }
 
+/****************************************
+* Drop privilegies 
+****************************************/
+int DropRootPrivileges() {
+	
+	if (getuid() != 0) 
+		return TRUE;
+
+	if (Globals.Uid == 0) {
+		return FALSE;
+	}
+
+	if (Globals.Gid != 0) {
+		if (setgid(Globals.Gid) != 0) {
+			perror("Privileges dropping error");
+			return FALSE;
+		}
+	} else {
+		struct passwd *pwd;
+		if ((pwd=getpwuid(Globals.Uid)) != NULL) {
+			Globals.Gid = (int) pwd->pw_gid;
+			if (setgid(Globals.Gid) != 0)
+				return FALSE;
+		} else {
+			return FALSE;
+		}	
+	}
+	
+	if (setuid(Globals.Uid) != 0) {
+		perror("Privileges dropping error");
+		return FALSE;
+	} else
+		return TRUE;
+}
 
 #ifdef DEBUG
 #undef DEBUG
