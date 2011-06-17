@@ -58,14 +58,14 @@ void QueueAddDestroyHandler (Queue* q,void (*pfree)(void *p));
 void QueueDestroy (Queue* q);
 
 /* Populating */
-int QueueAddNewNode (Queue* q, void* value);
+int QueueAddData (Queue* q, void* value);
 int QueueAddNode (Queue* q, Node* node);
 
 /* Retrieving */
 void* QueueGetData (Queue* q);
 Node* QueueGetNode (Queue* q);
 
-/* Synchonization */
+/* Synchronization */
 int QueueLock (Queue* q);
 int QueueUnlock (Queue* q);
 
@@ -96,11 +96,11 @@ void StackDestroy (Stack* s);
 int StackPushData (Stack* s, void* data);
 int StackPushNode (Stack* s, Node* node);
 
-/* Poping Data */
+/* Popping Data */
 void* StackPopData (Stack* s);
 Node* StackPopNode (Stack* s);
 
-/* Synchonization */
+/* Synchronization */
 int StackLock (Stack* s);
 int StackUnlock (Stack* s);
 
@@ -109,5 +109,74 @@ int StackWait (Stack* s);
 
 /* Misc */
 int StackGetSize (Stack* s);
+
+/**
+ * Concurrent hash table implementation
+ */
+typedef struct hashNode {
+	void *Data;
+	void *Key;
+
+	time_t CTime;
+
+	struct hashNode *chain;
+} HashNode;
+
+HashNode *HashNodeNew ();
+void HashNodeDestroy(HashNode *n);
+
+typedef struct {
+	HashNode	**Nodes;
+
+	int			NodeCount;
+	int			CurrPos;
+
+	pthread_mutex_t Lock;
+} HashCache;
+
+HashCache *HashCacheNew(int n);
+void HashCacheDestroy(HashCache *c);
+HashNode *HashCacheGet(HashCache *c);
+int HashCachePut(HashCache *c, HashNode *n);
+
+typedef struct {
+	HashNode	**Keys;
+	HashCache	*Cache;
+
+	int Size;
+
+	time_t STime;
+
+	int (*HashFunction)(void *);
+	int (*CompareFunction)(void *, void *);
+
+	void (*DataFree)(void *);
+	void (*KeyFree)(void *);
+
+	/* Concurrency kept vars */
+	enum {
+		FREE, READING, LOCKED, TRANSACTIONING
+	} State;
+
+	int RCount;
+
+	pthread_key_t	 Transactioning;
+
+	pthread_mutex_t *KLocks;
+	pthread_mutex_t  GLock;
+
+	pthread_cond_t   RWaiter;
+	pthread_cond_t   CWaiter;
+} HashTable;
+
+HashTable *HashTableCreate(int size, int (*hashFunction)(void *key),
+							int (*compareFunction)(void *k, void *l));
+void HashTableDestroy(HashTable *h);
+int HashTablePreCache(HashTable *h, int n);
+
+int HashTableHasKey(HashTable *h, void *key);
+void *HashTableInsert(HashTable *h, void *key, void *data);
+void *HashTableRemove(HashTable *h, void *key);
+void *HashTableKeeper(void *v);
 
 #endif /* _HLBR_LIB_H_ */

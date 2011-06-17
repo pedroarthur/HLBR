@@ -573,6 +573,15 @@ int GetScheduledPacket (int InterfaceID) {
 	return PacketSlot;
 }
 
+void SavePacket(int PacketSlot) {
+	Globals.Packets[PacketSlot].SaveCount++;
+}
+
+void UnsavePacket(int PacketSlot) {
+	if (--Globals.Packets[PacketSlot].SaveCount < 1)
+		ReturnEmptyPacket(PacketSlot);
+}
+
 /**
  * Return a packet struct to the pool for reuse.
  */
@@ -584,7 +593,7 @@ void ReturnEmptyPacket(int PacketSlot) {
 	DEBUGPATH;
 
 	if (Globals.Packets[PacketSlot].SaveCount < 1) {
-		p=&Globals.Packets[PacketSlot];
+		p = &Globals.Packets[PacketSlot];
 
 		if  (p->LargePacket){
 			free(p->RawPacket);
@@ -627,7 +636,6 @@ void ReturnEmptyPacket(int PacketSlot) {
 		StackPost (PacketQueue.Idle);
 	} else if (Globals.Packets[PacketSlot].Status == PACKET_STATUS_PROCESSING) {
 		Globals.Packets[PacketSlot].Status = PACKET_STATUS_SAVED;
-
 		StackPushNode(PacketQueue.Saved, StackPopNode(PacketQueue.Processing));
 	}
 

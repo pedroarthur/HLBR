@@ -5,6 +5,7 @@ decode_interface.o \
 decode_ethernet.o \
 decode_ip.o \
 decode_ip_defrag.o \
+decode_ip_defrager.o \
 decode_icmp.o \
 decode_udp.o \
 decode_tcp.o \
