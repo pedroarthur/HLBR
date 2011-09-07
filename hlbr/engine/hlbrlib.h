@@ -179,4 +179,10 @@ void *HashTableInsert(HashTable *h, void *key, void *data);
 void *HashTableRemove(HashTable *h, void *key);
 void *HashTableKeeper(void *v);
 
+/**
+ * Filesystem related stuff
+ */
+
+char *FindLastDirInPath(char *path, const char *dirsep);
+
 #endif /* _HLBR_LIB_H_ */

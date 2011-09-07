@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pwd.h>
@@ -257,6 +258,17 @@ int ParsePidFile (char *fname) {
 		fprintf (stderr, "Pid file found at %s. Please remove it.\n", fname);
 		return FALSE;
 	}
+
+	char *piddir = FindLastDirInPath(fname, "/");
+
+	if( access(piddir, F_OK ) != 0){
+		if(mkdir(piddir, 0700) != 0){
+			fprintf(stderr, "Pid directory creation error\n");
+			free(piddir);
+			return FALSE;
+		}
+	}
+	free(piddir);
 
 	fp = fopen (fname, "a");
 	fprintf (fp, "%d\n", getpid());

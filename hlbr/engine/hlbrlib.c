@@ -892,6 +892,15 @@ void* HashTableKeeper(void *v) {
 	HashTableTransactionEnd(h);
 }
 
+char *FindLastDirInPath(char *path, const char *dirsep)
+{
+	char *path_dup = strdup(path);
+	char *filename = strrchr(path_dup, *dirsep);
+	*filename='\0';
+
+	return path_dup;
+}
+
 #ifdef DEBUG
 #undef DEBUG
 #endif

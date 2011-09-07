@@ -278,7 +278,7 @@ void HandleSignal(int signal)
 				pthread_cancel (Globals.AThreads[i]);
 			}
 
-			if (remove(Globals.PidFilename))
+			if (remove(Globals.PidFilename) != 0)
 				fprintf(stderr, "Could not delete Pid file: %s\n", Globals.PidFilename);
 
 			Globals.Done = TRUE;
@@ -477,6 +477,20 @@ int DropRootPrivileges() {
 		}	
 	}
 	
+	char *piddir = FindLastDirInPath(Globals.PidFilename, "/");
+
+	if(chown(piddir, Globals.Uid, Globals.Gid) != 0){
+		perror("PID diretory privileges dropping error");
+		free(piddir);
+		return FALSE;
+	}
+	free(piddir);
+
+	if(chown(Globals.PidFilename, Globals.Uid, Globals.Gid) != 0){
+		perror("PID file privileges dropping error");
+		return FALSE;
+	}
+
 	if (setuid(Globals.Uid) != 0) {
 		perror("Privileges dropping error");
 		return FALSE;
